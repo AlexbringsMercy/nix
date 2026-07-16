@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+screenshot_dir="${HOME}/Pictures/Screenshots"
+timestamp="$(date '+%Y-%m-%d_%H-%M-%S')"
+target="${screenshot_dir}/Screenshot_${timestamp}.png"
+
+mkdir -p "${screenshot_dir}"
+grim -o eDP-1 - | tee "${target}" | wl-copy --type image/png
+notify-send -a "Screenshot" -i camera-photo-symbolic \
+  "Screenshot captured" "Saved to ${target} and copied to the clipboard"

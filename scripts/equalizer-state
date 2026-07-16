@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-shell"
+preset_root="${XDG_CONFIG_HOME:-$HOME/.config}/easyeffects/output"
+state_file="$state_root/equalizer.json"
+preset_name="aurora_live_eq"
+preset_file="$preset_root/$preset_name.json"
+lock_file="$state_root/equalizer.lock"
+
+mkdir -p "$state_root" "$preset_root"
+exec 9>"$lock_file"
+flock 9
+
+default_state='{"version":1,"bands":[0,0,0,0,0,0,0,0,0,0],"preset":"Flat","updated_at":0}'
+
+validate_state() {
+  jq -e '
+    type == "object"
+    and .version == 1
+    and (.bands | type == "array" and length == 10)
+    and (all(.bands[]; type == "number" and . >= -12 and . <= 12))
+    and (.preset | type == "string" and length > 0 and length < 32)
+    and (.updated_at | type == "number")
+  ' >/dev/null 2>&1
+}
+
+atomic_write() {
+  local destination=$1
+  local payload=$2
+  local directory temporary
+  directory=$(dirname "$destination")
+  temporary=$(mktemp "$directory/.aurora-write.XXXXXX")
+  printf '%s\n' "$payload" > "$temporary"
+  chmod 600 "$temporary"
+  mv -f "$temporary" "$destination"
+}
+
+ensure_state() {
+  if [[ -s "$state_file" ]] && validate_state < "$state_file"; then
+    return
+  fi
+
+  if [[ -e "$state_file" ]]; then
+    mv -f "$state_file" "$state_file.invalid.$(date +%s)"
+  fi
+  atomic_write "$state_file" "$default_state"
+}
+
+build_preset() {
+  local state preset
+  state=$(<"$state_file")
+  preset=$(jq -n --argjson state "$state" '
+    def band($frequency; $gain): {
+      frequency: $frequency,
+      gain: $gain,
+      type: "Bell",
+      mode: "RLC (BT)",
+      mute: false,
+      q: 1.0,
+      solo: false,
+      width: 1.0,
+      slope: "x1"
+    };
+    [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] as $frequencies
+    | reduce range(0; 10) as $index ({};
+        .["band\($index)"] = band($frequencies[$index]; $state.bands[$index])) as $bands
+    | {
+        output: {
+          blocklist: [],
+          plugins_order: ["equalizer#0"],
+          "equalizer#0": {
+            bypass: false,
+            "input-gain": 0.0,
+            "output-gain": 0.0,
+            balance: 0.0,
+            "pitch-left": 0.0,
+            "pitch-right": 0.0,
+            left: $bands,
+            right: $bands,
+            mode: "IIR",
+            "num-bands": 10,
+            "split-channels": false
+          }
+        }
+      }
+  ')
+
+  jq -e '
+    .output.plugins_order == ["equalizer#0"]
+    and .output["equalizer#0"]["num-bands"] == 10
+    and (.output["equalizer#0"].left | keys | length == 10)
+    and (.output["equalizer#0"].right | keys | length == 10)
+    and (all(.output["equalizer#0"].left[];
+      .type == "Bell"
+      and .mode == "RLC (BT)"
+      and .gain >= -12
+      and .gain <= 12))
+  ' >/dev/null <<<"$preset"
+  atomic_write "$preset_file" "$preset"
+}
+
+apply_preset() {
+  build_preset
+  # Do not let a long-lived service-mode process inherit the state lock.
+  (
+    exec 9>&-
+    easyeffects -l "$preset_name" >/dev/null 2>&1
+  ) &
+}
+
+preset_bands() {
+  case "$1" in
+    Flat)    printf '%s' '[0,0,0,0,0,0,0,0,0,0]' ;;
+    Bass)    printf '%s' '[5,7,5,2,1,0,0,0,1,2]' ;;
+    Treble)  printf '%s' '[-2,-1,0,1,2,3,4,5,6,6]' ;;
+    Vocal)   printf '%s' '[-2,-1,1,3,5,5,4,2,1,0]' ;;
+    Pop)     printf '%s' '[2,4,2,0,1,2,4,2,1,2]' ;;
+    Rock)    printf '%s' '[5,4,2,-1,-2,-1,2,4,5,6]' ;;
+    Jazz)    printf '%s' '[3,3,1,1,1,1,2,1,2,3]' ;;
+    Classic) printf '%s' '[0,1,2,2,2,2,1,2,3,4]' ;;
+    *) return 1 ;;
+  esac
+}
+
+ensure_state
+
+command=${1:-get}
+case "$command" in
+  get)
+    ;;
+  preset)
+    name=${2:-}
+    if ! bands=$(preset_bands "$name"); then
+      printf 'equalizer-state: unknown preset: %s\n' "$name" >&2
+      exit 2
+    fi
+    next=$(jq -n \
+      --argjson bands "$bands" \
+      --arg preset "$name" \
+      --argjson now "$(date +%s)" \
+      '{version: 1, bands: $bands, preset: $preset, updated_at: $now}')
+    validate_state <<<"$next"
+    atomic_write "$state_file" "$next"
+    apply_preset
+    ;;
+  set-band)
+    index=${2:-}
+    value=${3:-}
+    case "$index" in
+      0|1|2|3|4|5|6|7|8|9) ;;
+      *) printf 'equalizer-state: band index must be 0-9\n' >&2; exit 2 ;;
+    esac
+    if ! numeric_value=$(jq -n -e --arg value "$value" '
+      ($value | tonumber) as $number
+      | select($number >= -12 and $number <= 12)
+      | (($number * 2 | round) / 2)
+    '); then
+      printf 'equalizer-state: gain must be a number from -12 to 12 dB\n' >&2
+      exit 2
+    fi
+    current=$(<"$state_file")
+    next=$(jq -c \
+      --argjson index "$index" \
+      --argjson value "$numeric_value" \
+      --argjson now "$(date +%s)" \
+      '.bands[$index] = $value | .preset = "Custom" | .updated_at = $now' \
+      <<<"$current")
+    validate_state <<<"$next"
+    atomic_write "$state_file" "$next"
+    apply_preset
+    ;;
+  *)
+    printf 'usage: equalizer-state {get|preset NAME|set-band INDEX GAIN}\n' >&2
+    exit 2
+    ;;
+esac
+
+cat "$state_file"

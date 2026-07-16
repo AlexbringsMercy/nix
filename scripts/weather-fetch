@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cache_root="${XDG_CACHE_HOME:-$HOME/.cache}/aurora-weather"
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/aurora-shell/weather.conf"
+cache_file="$cache_root/forecast.json"
+lock_file="$cache_root/fetch.lock"
+cache_seconds=900
+
+latitude="41.8781"
+longitude="-87.6298"
+timezone="America/Chicago"
+location="Chicago"
+
+if [[ -r "$config_file" ]]; then
+  while IFS='=' read -r key value; do
+    key=${key//[[:space:]]/}
+    value=${value#"${value%%[![:space:]]*}"}
+    value=${value%"${value##*[![:space:]]}"}
+    case "$key" in
+      latitude) latitude=$value ;;
+      longitude) longitude=$value ;;
+      timezone) timezone=$value ;;
+      location) location=$value ;;
+    esac
+  done < "$config_file"
+fi
+
+latitude=${AURORA_WEATHER_LATITUDE:-$latitude}
+longitude=${AURORA_WEATHER_LONGITUDE:-$longitude}
+timezone=${AURORA_WEATHER_TIMEZONE:-$timezone}
+location=${AURORA_WEATHER_LOCATION:-$location}
+
+if ! jq -n -e \
+  --arg latitude "$latitude" \
+  --arg longitude "$longitude" '
+    ($latitude | tonumber) as $lat
+    | ($longitude | tonumber) as $lon
+    | $lat >= -90 and $lat <= 90 and $lon >= -180 and $lon <= 180
+  ' >/dev/null; then
+  printf 'weather-fetch: invalid latitude or longitude\n' >&2
+  exit 2
+fi
+
+mkdir -p "$cache_root"
+exec 9>"$lock_file"
+flock 9
+
+validate_cache() {
+  jq -e '
+    type == "object"
+    and (.fetched_at | type == "number")
+    and (.location | type == "string")
+    and (.timezone | type == "string")
+    and (.current | type == "object" and (.temperature | type == "number"))
+    and (.hourly | type == "array" and length >= 8)
+    and (.daily | type == "array" and length >= 5)
+  ' >/dev/null 2>&1
+}
+
+force=false
+case "${1:-}" in
+  "") ;;
+  --force) force=true ;;
+  *) printf 'usage: weather-fetch [--force]\n' >&2; exit 2 ;;
+esac
+
+now=$(date +%s)
+if [[ "$force" == false && -s "$cache_file" ]] && validate_cache < "$cache_file"; then
+  modified=$(stat -c %Y "$cache_file")
+  if (( now - modified < cache_seconds )); then
+    cat "$cache_file"
+    exit 0
+  fi
+fi
+
+raw_file=$(mktemp "$cache_root/.open-meteo.XXXXXX")
+normalized_file=$(mktemp "$cache_root/.forecast.XXXXXX")
+cleanup() {
+  rm -f "$raw_file" "$normalized_file"
+}
+trap cleanup EXIT
+
+endpoint="https://api.open-meteo.com/v1/forecast"
+if ! curl --fail --silent --show-error \
+  --max-time 12 --retry 2 --retry-delay 1 \
+  --get "$endpoint" \
+  --data-urlencode "latitude=$latitude" \
+  --data-urlencode "longitude=$longitude" \
+  --data-urlencode "timezone=$timezone" \
+  --data-urlencode "temperature_unit=fahrenheit" \
+  --data-urlencode "wind_speed_unit=mph" \
+  --data-urlencode "precipitation_unit=inch" \
+  --data-urlencode "forecast_days=7" \
+  --data-urlencode "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m" \
+  --data-urlencode "hourly=temperature_2m,precipitation_probability,weather_code,is_day" \
+  --data-urlencode "daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset" \
+  --output "$raw_file"; then
+  if [[ -s "$cache_file" ]] && validate_cache < "$cache_file"; then
+    jq '.stale = true' "$cache_file"
+    exit 0
+  fi
+  printf 'weather-fetch: Open-Meteo is unavailable and no cache exists\n' >&2
+  exit 1
+fi
+
+if ! jq -e \
+  --arg location "$location" \
+  --arg timezone "$timezone" \
+  --argjson fetched_at "$now" '
+    . as $root
+    | {
+        location: $location,
+        timezone: $timezone,
+        fetched_at: $fetched_at,
+        stale: false,
+        current: {
+          time: $root.current.time,
+          temperature: $root.current.temperature_2m,
+          apparent_temperature: $root.current.apparent_temperature,
+          humidity: $root.current.relative_humidity_2m,
+          is_day: ($root.current.is_day == 1),
+          precipitation: $root.current.precipitation,
+          weather_code: $root.current.weather_code,
+          wind_speed: $root.current.wind_speed_10m
+        },
+        hourly: ([range(0; ($root.hourly.time | length)) as $index
+          | select($root.hourly.time[$index] >= $root.current.time)
+          | {
+              time: $root.hourly.time[$index],
+              temperature: $root.hourly.temperature_2m[$index],
+              precipitation_probability: $root.hourly.precipitation_probability[$index],
+              weather_code: $root.hourly.weather_code[$index],
+              is_day: ($root.hourly.is_day[$index] == 1)
+            }][0:12]),
+        daily: ([range(0; ($root.daily.time | length)) as $index
+          | {
+              date: $root.daily.time[$index],
+              weather_code: $root.daily.weather_code[$index],
+              high: $root.daily.temperature_2m_max[$index],
+              low: $root.daily.temperature_2m_min[$index],
+              precipitation_probability: $root.daily.precipitation_probability_max[$index],
+              sunrise: $root.daily.sunrise[$index],
+              sunset: $root.daily.sunset[$index]
+            }])
+      }
+    | select(
+        (.current.temperature | type == "number")
+        and (.hourly | length >= 8)
+        and (.daily | length >= 5)
+      )
+  ' "$raw_file" > "$normalized_file"; then
+  if [[ -s "$cache_file" ]] && validate_cache < "$cache_file"; then
+    jq '.stale = true' "$cache_file"
+    exit 0
+  fi
+  printf 'weather-fetch: Open-Meteo returned an invalid forecast\n' >&2
+  exit 1
+fi
+
+validate_cache < "$normalized_file"
+chmod 600 "$normalized_file"
+mv -f "$normalized_file" "$cache_file"
+cat "$cache_file"

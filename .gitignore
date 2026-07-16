@@ -1,0 +1,19 @@
+# Machine-local/proprietary firmware
+firmware/
+**/firmware/brcm/
+*.bin
+*.ptb
+*clm_blob*
+*txcap_blob*
+
+# Local visual assets and generated state
+/assets/wallpapers/
+.direnv/
+result
+result-*
+*.qcow2
+
+# Editor and generated files
+*~
+*.swp
+.DS_Store

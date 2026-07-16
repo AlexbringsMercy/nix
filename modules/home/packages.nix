@@ -1,0 +1,30 @@
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [
+    awww
+    bluez
+    brightnessctl
+    cava
+    dunst
+    easyeffects
+    grim
+    hypridle
+    hyprlock
+    libnotify
+    matugen
+    mission-center
+    networkmanagerapplet
+    playerctl
+    power-profiles-daemon
+    pwvucontrol
+    quickshell
+    rofi
+    slurp
+    swayosd
+    waybar
+    waypaper
+    wireplumber
+    wl-clipboard
+    wlogout
+  ];
+}

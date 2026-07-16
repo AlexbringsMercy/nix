@@ -1,0 +1,178 @@
+configuration {
+    modi:                       "drun,run,window";
+    show-icons:                 true;
+    icon-theme:                 "Adwaita";
+    display-drun:               "Applications";
+    display-run:                "Command";
+    display-window:             "Windows";
+    drun-display-format:        "{name}";
+    matching:                   "fuzzy";
+    sorting-method:             "fzf";
+    sort:                       true;
+    case-sensitive:             false;
+    cycle:                      true;
+    click-to-exit:              true;
+    hover-select:               true;
+    me-select-entry:            "MouseMiddle";
+    me-accept-entry:            "MousePrimary";
+    kb-cancel:                  "Escape";
+    font:                       "Inter 11";
+    terminal:                   "kitty";
+    run-command:                "sh -c '{cmd}'";
+}
+
+@import "/home/alex/.cache/aurora-theme/rofi.rasi"
+
+* {
+    background:         @aurora-background;
+    background-raised:  @aurora-panel;
+    background-hover:   @aurora-surface-hover;
+    background-active:  @aurora-surface;
+    border-color:       @aurora-outline;
+    foreground:         @aurora-text;
+    foreground-muted:   @aurora-text-muted;
+    purple:             @aurora-tertiary;
+    cyan:               @aurora-primary;
+    teal:               @aurora-secondary;
+    urgent:             @aurora-error;
+
+    background-color:   transparent;
+    text-color:         @foreground;
+    margin:             0;
+    padding:            0;
+    spacing:            0;
+}
+
+window {
+    transparency:       "real";
+    location:           center;
+    anchor:             center;
+    width:              46%;
+    border:             1px;
+    border-color:       @border-color;
+    border-radius:      10px;
+    background-color:   @background;
+}
+
+mainbox {
+    padding:            18px;
+    spacing:            14px;
+    background-color:   transparent;
+}
+
+inputbar {
+    padding:            12px 14px;
+    spacing:            10px;
+    border:             1px;
+    border-color:       #54d7ff52;
+    border-radius:      8px;
+    background-color:   @background-raised;
+    children:           [ prompt, entry, case-indicator ];
+}
+
+prompt {
+    text-color:         @teal;
+    font:               "FiraCode Nerd Font 12";
+}
+
+prompt drun {
+    str:                "󰀻";
+}
+
+entry {
+    placeholder:        "Search applications…";
+    placeholder-color:  @foreground-muted;
+    text-color:         @foreground;
+    cursor:             text;
+}
+
+case-indicator {
+    text-color:         @foreground-muted;
+}
+
+message {
+    padding:            10px 12px;
+    border-radius:      8px;
+    background-color:   @background-raised;
+}
+
+textbox {
+    text-color:         @foreground-muted;
+}
+
+listview {
+    lines:              9;
+    columns:            1;
+    fixed-height:       false;
+    fixed-columns:      true;
+    cycle:              true;
+    scrollbar:          true;
+    border-radius:      8px;
+    background-color:   transparent;
+}
+
+scrollbar {
+    width:              4px;
+    margin:             4px 0 4px 8px;
+    border-radius:      2px;
+    handle-color:       @purple;
+}
+
+element {
+    padding:            10px 12px;
+    spacing:            12px;
+    border-radius:      8px;
+    background-color:   transparent;
+    cursor:             pointer;
+}
+
+element normal.normal,
+element alternate.normal {
+    text-color:         @foreground;
+}
+
+element selected.normal {
+    background-color:   @background-active;
+    text-color:         @cyan;
+    border:             1px;
+    border-color:       #54d7ff42;
+}
+
+element normal.urgent,
+element selected.urgent {
+    text-color:         @urgent;
+}
+
+element normal.active,
+element selected.active {
+    text-color:         @teal;
+}
+
+element-icon {
+    size:               26px;
+    background-color:   transparent;
+}
+
+element-text {
+    vertical-align:     0.5;
+    background-color:   transparent;
+    text-color:         inherit;
+}
+
+mode-switcher {
+    spacing:            8px;
+    background-color:   transparent;
+}
+
+button {
+    padding:            8px 12px;
+    border-radius:      8px;
+    text-color:         @foreground-muted;
+    background-color:   @background-raised;
+    cursor:             pointer;
+}
+
+button selected {
+    text-color:         #030308ff;
+    background-color:   @teal;
+}

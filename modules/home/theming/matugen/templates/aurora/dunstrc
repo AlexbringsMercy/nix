@@ -1,0 +1,47 @@
+[global]
+    monitor = 0
+    follow = mouse
+    width = 380
+    height = 620
+    origin = top-right
+    offset = 12x54
+    notification_limit = 6
+    gap_size = 8
+    padding = 14
+    horizontal_padding = 14
+    frame_width = 1
+    frame_color = "{{colors.primary.default.hex}}"
+    separator_height = 1
+    separator_color = frame
+    corner_radius = 10
+    transparency = 10
+    font = Inter 11
+    markup = full
+    format = "<b>%s</b>\n%b"
+    alignment = left
+    vertical_alignment = center
+    icon_position = left
+    min_icon_size = 36
+    max_icon_size = 64
+    enable_recursive_icon_lookup = true
+    mouse_left_click = do_action, close_current
+    mouse_middle_click = close_current
+    mouse_right_click = close_all
+
+[urgency_low]
+    background = "#0b0e16"
+    foreground = "{{colors.on_surface_variant.default.hex}}"
+    frame_color = "#314052"
+    timeout = 5
+
+[urgency_normal]
+    background = "#0b0e16"
+    foreground = "{{colors.on_surface.default.hex}}"
+    frame_color = "{{colors.primary.default.hex}}"
+    timeout = 7
+
+[urgency_critical]
+    background = "#15101a"
+    foreground = "{{colors.on_surface.default.hex}}"
+    frame_color = "{{colors.error.default.hex}}"
+    timeout = 0

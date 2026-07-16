@@ -1,0 +1,46 @@
+[config]
+version_check = false
+caching = true
+fallback_color = "#04d1f9"
+prefer = "closest-to-fallback"
+contrast = 0.08
+source_color_index = 0
+
+[config.custom_colors]
+aurora_purple = { color = "#a48cf2", blend = true }
+aurora_teal = { color = "#04d1f9", blend = true }
+aurora_seafoam = { color = "#37f499", blend = true }
+
+# Output paths deliberately begin at / so apply-wallpaper can use Matugen's
+# --prefix option to render into a cache-local staging directory first.
+[templates.quickshell]
+input_path = "./templates/aurora/quickshell.json"
+output_path = "/quickshell.json"
+
+[templates.waybar]
+input_path = "./templates/aurora/waybar.css"
+output_path = "/waybar.css"
+
+[templates.kitty]
+input_path = "./templates/aurora/kitty.conf"
+output_path = "/kitty.conf"
+
+[templates.rofi]
+input_path = "./templates/aurora/rofi.rasi"
+output_path = "/rofi.rasi"
+
+[templates.hyprland]
+input_path = "./templates/aurora/hyprland.lua"
+output_path = "/hyprland.lua"
+
+[templates.hyprlock]
+input_path = "./templates/aurora/hyprlock.conf"
+output_path = "/hyprlock.conf"
+
+[templates.gtk]
+input_path = "./templates/aurora/gtk.css"
+output_path = "/gtk.css"
+
+[templates.dunst]
+input_path = "./templates/aurora/dunstrc"
+output_path = "/dunstrc"

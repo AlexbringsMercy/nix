@@ -1,0 +1,19 @@
+{
+  "background": "#05060b",
+  "panel": "#0b0e16",
+  "panelRaised": "#101522",
+  "surface": "#151b2a",
+  "surfaceHover": "#1c2538",
+  "outline": "#314052",
+  "outlineStrong": "{{colors.primary.default.hex}}",
+  "primary": "{{colors.primary.default.hex}}",
+  "secondary": "{{colors.secondary.default.hex}}",
+  "tertiary": "{{colors.tertiary.default.hex}}",
+  "success": "{{colors.secondary.default.hex}}",
+  "warning": "#e6c56e",
+  "error": "{{colors.error.default.hex}}",
+  "text": "{{colors.on_surface.default.hex}}",
+  "textMuted": "{{colors.on_surface_variant.default.hex}}",
+  "textDim": "{{colors.outline.default.hex}}",
+  "onAccent": "#05060b"
+}

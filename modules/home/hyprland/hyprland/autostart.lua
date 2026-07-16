@@ -1,0 +1,19 @@
+hl.on("hyprland.start", function()
+    -- Keep the user-service lifecycle tied to this compositor session. The
+    -- ordered command prevents graphical services from racing the Wayland and
+    -- desktop environment import.
+    local session_environment = "WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE"
+    hl.exec_cmd("dbus-update-activation-environment --systemd " .. session_environment
+        .. " && systemctl --user import-environment " .. session_environment
+        .. " && systemctl --user start hyprland-session.target")
+
+    hl.exec_cmd("nm-applet --indicator")
+    hl.exec_cmd("blueman-applet")
+    hl.exec_cmd("hyprctl setcursor Adwaita 24")
+end)
+
+hl.on("hyprland.shutdown", function()
+    -- Raw start-hyprland does not manage graphical-session.target for us.
+    -- Stopping it here gives every PartOf= service a clean logout boundary.
+    hl.exec_cmd("systemctl --user stop hyprland-session.target")
+end)

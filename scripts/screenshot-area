@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+screenshot_dir="${HOME}/Pictures/Screenshots"
+timestamp="$(date '+%Y-%m-%d_%H-%M-%S')"
+target="${screenshot_dir}/Screenshot_${timestamp}.png"
+
+mkdir -p "${screenshot_dir}"
+
+primary="#54d7ff"
+tertiary="#9b6dff"
+palette="${XDG_CACHE_HOME:-$HOME/.cache}/aurora-theme/quickshell.json"
+if [[ -r "$palette" ]] && jq -e '.primary and .tertiary' "$palette" >/dev/null 2>&1; then
+  primary=$(jq -r '.primary' "$palette")
+  tertiary=$(jq -r '.tertiary' "$palette")
+fi
+
+selection="$(slurp -d -b '#030308cc' -c "${primary}ff" -s "${tertiary}55" -w 2)" || exit 0
+[[ -n "${selection}" ]] || exit 0
+
+grim -g "${selection}" - | tee "${target}" | wl-copy --type image/png
+notify-send -a "Screenshot" -i camera-photo-symbolic \
+  "Screenshot captured" "Saved to ${target} and copied to the clipboard"
