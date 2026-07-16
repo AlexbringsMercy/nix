@@ -42,8 +42,14 @@ out=$(nix build --no-link --print-out-paths \
   --override-input macbook-config path:/home/alex/nix \
   --override-input firmware path:/etc/nixos/firmware \
   --max-jobs 2 --cores 2)
+sudo nix-env --profile /nix/var/nix/profiles/system --set "$out"
 sudo "$out/bin/switch-to-configuration" boot
 ```
+
+Setting the system profile is what creates the new numbered generation.
+`switch-to-configuration boot` then writes that generation's systemd-boot
+entry; invoking it without advancing the profile only rewrites the current
+generation's entry.
 
 Reboot normally to test the new generation. Older generations remain selectable
 from systemd-boot. Do not run standalone `home-manager switch`; Home Manager is
