@@ -106,23 +106,23 @@
   "custom/window-float": {
     "format": "󰉈",
     "tooltip-format": "Float / tile active window\nRight click: pin floating window",
-    "on-click": "hyprctl dispatch togglefloating",
-    "on-click-right": "hyprctl dispatch pin"
+    "on-click": "hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'",
+    "on-click-right": "hyprctl dispatch 'hl.dsp.window.pin({ action = \"toggle\" })'"
   },
   "custom/window-maximize": {
     "format": "󰊓",
     "tooltip-format": "Maximize / restore active window",
-    "on-click": "hyprctl dispatch fullscreen 1"
+    "on-click": "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })'"
   },
   "custom/window-fullscreen": {
     "format": "󰊔",
     "tooltip-format": "Full screen / restore active window",
-    "on-click": "hyprctl dispatch fullscreen 0"
+    "on-click": "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"fullscreen\", action = \"toggle\" })'"
   },
   "custom/window-close": {
     "format": "󰅖",
     "tooltip-format": "Close active window",
-    "on-click": "hyprctl dispatch killactive"
+    "on-click": "hyprctl dispatch 'hl.dsp.window.close()'"
   },
 
   "cpu": {

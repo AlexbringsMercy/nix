@@ -104,3 +104,21 @@
 - Built the firmware-backed NixOS closure with linux-t2 6.18.35, all 163 local
   Broadcom firmware files, QuickShell 0.3.0, and `nix-ld` 2.0.6 present. No NixOS
   or Home Manager generation has been activated on the live desktop.
+
+## 2026-07-16 — native Hyprland IPC cutover correction
+
+- Installed the first validated closure as systemd-boot generation 8 without
+  switching the running generation 7 desktop. The active session and its Kitty
+  and Chrome processes remained untouched.
+- The real installer-window launch exposed a final Hyprland 0.55 boundary: CLI
+  `dispatch` calls are Lua expressions even though legacy dispatcher strings can
+  survive static JSON and Nix validation. Audited every `hyprctl` invocation and
+  converted Waybar float, pin, maximize, fullscreen, and close actions plus all
+  Hypridle DPMS actions to native `hl.dsp.*` expressions.
+- Confirmed every replacement against the pinned Hyprland dispatcher API and
+  exercised the exact constructors through compositor IPC using a deliberately
+  nonexistent window selector; all parsed and returned success without changing
+  a live window. The display-enable form was also checked safely while the panel
+  was already awake.
+- Generation 8 remains a valid recovery entry, but it is superseded for the first
+  reboot by the corrected generation built and installed after this audit.
