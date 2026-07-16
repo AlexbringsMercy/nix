@@ -1,5 +1,10 @@
 # Execution log
 
+> **Current handoff:** the authoritative post-reboot state is recorded in
+> “2026-07-16 — full implementation and handoff report” at the end of this
+> file. Earlier statements that no live activation had occurred are historical
+> and are superseded by that report.
+
 ## 2026-07-15 — migration started
 
 - Cloned remote commit `4974921ba3d7d5602b3b2aa2513955f7ec0f770f`.
@@ -122,3 +127,648 @@
   was already awake.
 - Generation 8 remains a valid recovery entry, but it is superseded for the first
   reboot by the corrected generation built and installed after this audit.
+
+## 2026-07-16 — full implementation and handoff report
+
+This section is the durable current-state report for a proceeding Codex chat. It
+records the implemented design, deployment history, verified live state,
+failures, recovery points, and unfinished acceptance work. Read it together with
+`BUILD_PLAN.md` for design intent and `SOURCES.md` for recorded community
+provenance. When an older section conflicts with this one, this section wins.
+
+### Executive state
+
+| Item | State at 2026-07-16 03:15 CDT |
+|---|---|
+| Host / user | `macbook` / `alex` |
+| Repository | `/home/alex/nix` |
+| Branch | `codex/macbook-desktop` |
+| Implementation commits | `ec87817`, `f32e320`, `c566923`, `25d26e5` |
+| Remote state before this report | Local feature branch four commits ahead of locally recorded `origin/main`; not pushed and no upstream branch |
+| Running system | Generation 9, `/nix/store/qb1wjwmh9pi0llyazp5hvaad4cz55cd5-nixos-system-macbook-26.11.20260616.567a49d` |
+| System profile / next boot | Generation 10, `/nix/store/9lwy876aicmfpcy65q3g499fah2yg9gv-nixos-system-macbook-26.11.20260616.567a49d` |
+| Live Home Manager | `/nix/store/kyl34kvnyja47jrc9fry53w25dq65kaa-home-manager-generation` |
+| Kernel | `linux-t2 6.18.35` |
+| Desktop | Hyprland 0.55.4 native Lua, Waybar 0.15.0, QuickShell 0.3.0 |
+| Display | 2560x1600 at 60.001 Hz, 1.5 scale, 1707x1067 logical |
+| Default wallpaper | `violet-nokstella-stars.jpeg` |
+| System/user failed units | None at audit time |
+| Main status | Implementation deployed; live functional acceptance is incomplete |
+
+Generation 10 is already the systemd-boot default, but the machine has not
+rebooted since it was installed. Therefore `/run/current-system` correctly still
+points to Generation 9. Native Lua evaluation and a renderer reload applied the
+Retina fix first; two direct Home Manager activation-package runs then persisted
+it in the managed live configuration. Reboot is not needed to keep using the
+current session. A coordinated reboot is still required to prove Generation 10
+boots, activates its integrated Home Manager service correctly, and removes the
+temporary Generation 9 plus standalone-Home-Manager split.
+
+### User-approved architecture and design decisions
+
+- QuickShell is present from day one. SwayNC was not installed. Dunst is a small
+  permanent failure fallback and remains inactive while QuickShell owns
+  `org.freedesktop.Notifications`.
+- Waybar remains the permanent glass taskbar and the primary click surface.
+  QuickShell supplies independent dropdown `PanelWindow` surfaces for Wi-Fi,
+  Bluetooth, volume, power, notifications, music/EQ, and calendar/weather.
+- The build deliberately rejects ilyamiro's single morphing hub. Different
+  widgets do not morph into one another; individual panels may animate and
+  progressively disclose their own contents.
+- Community code and interaction patterns were inspected and adapted directly,
+  including unlicensed repositories when technically useful. `SOURCES.md`
+  records origins and revisions.
+- Every phase is additive. No temporary SwayNC/control-center layer was built to
+  be removed later.
+- The visual direction is dark aurora glass: true and near blacks, deep blue and
+  purple, teal/seafoam and dark green, wallpaper-derived accent light, smooth
+  gradient bleed, translucency, blur, moderate rounding, and Raycast-like
+  restraint. It is not a flat corporate-navy theme.
+- Basic operations have pointer paths. Keyboard shortcuts are accelerators, not
+  the only way to launch apps, manage windows, change system state, or reach
+  controls.
+- The MacBook exposes only workspaces 1 and 2. The configuration is for the
+  internal Retina panel only; the future Alienware/dual-monitor port is a
+  separate project.
+
+### Repository and machine-local layout
+
+- Public configuration repository: `/home/alex/nix`.
+- Machine-local flake wrapper: `/home/alex/.config/nixos-local`. It injects the
+  proprietary firmware tree as a non-flake input.
+- Proprietary Apple/Broadcom firmware source:
+  `/etc/nixos/firmware/brcm`, 163 files. It is not in Git.
+- Personal wallpapers:
+  `/home/alex/Pictures/Wallpapers/aurora-collection`, twelve curated copies from
+  Alex's existing Downloads. The originals were not changed, and no wallpaper
+  binary is tracked by Git.
+- Pre-migration backup:
+  `/home/alex/.local/state/codex-backups/macbook-desktop-20260715-234753`.
+  It contains the old `/etc/nixos` configuration and the prior Hyprland,
+  Waybar, Kitty, Rofi, and Fish files.
+- The original channel-style `/etc/nixos` tree remains available as a recovery
+  path. Do not delete it yet.
+- Generated theme state is under `~/.cache/aurora-theme`; EQ state is under
+  `~/.local/state/aurora-shell`; screenshots are under
+  `~/Pictures/Screenshots`.
+- Legacy inactive Hyprland files still exist at
+  `~/.config/hypr/hyprland.conf` and
+  `~/.config/hypr/hyprland.lua.hm-before-aurora`. The active entry point is the
+  Home Manager symlink `~/.config/hypr/hyprland.lua`.
+
+### NixOS and Home Manager platform work
+
+- Replaced the old monolithic repository configuration with a pinned flake and
+  module graph. `flake.nix` pins:
+  - nixpkgs `567a49d1913ce81ac6e9582e3553dd90a955875f`;
+  - nixos-hardware `fccfa9031a85b78a437f2f153c1f6449f3bc3185`;
+  - Home Manager `165228b0efefc3e635e5174020c40ea64271dc25`.
+- `lib.mkMacbook` supports a portable evaluation without local firmware and the
+  actual machine-local wrapper build with firmware. The portable evaluation
+  warns rather than pretending it contains the MacBook firmware.
+- Home Manager is integrated into NixOS with `useGlobalPkgs` and
+  `useUserPackages`. `backupFileExtension = "hm-before-aurora"` protects
+  colliding user files.
+- Preserved all critical invariants: Apple T2 nixos-hardware module,
+  systemd-boot, no EFI-variable writes, macOS dual boot, local Broadcom
+  firmware, `programs.nix-ld.enable = true`, `allowUnfree = true`, hostname
+  `macbook`, user `alex`, Fish, NetworkManager, and Node.js 22.
+- Added greetd auto-login through `start-hyprland`, PipeWire/Pulse compatibility,
+  Bluetooth/Blueman, UPower, power-profiles-daemon, polkit, GNOME keyring,
+  udisks/GVFS/tumbler, Hyprland and GTK portals, fonts, Chrome, Kitty, Thunar,
+  zram, and laptop suspend policy.
+- Chrome is the default HTTP/HTTPS browser and Thunar is the default directory
+  handler. Chrome uses native Wayland through the system session variables.
+- `~/.npm-global/bin` remains on the Home Manager session path. Live audit
+  confirmed Codex CLI 0.144.4 and Claude Code 2.1.211 launch.
+
+Important files:
+
+- `flake.nix`: pinned system and Home Manager outputs.
+- `hosts/macbook/`: host and hardware composition.
+- `modules/nixos/base.nix`: boot, user, Nix, networking, and integrated HM.
+- `modules/nixos/t2-firmware.nix`: machine-local firmware derivation.
+- `modules/nixos/desktop.nix`: compositor and desktop services.
+- `modules/nixos/laptop-power.nix`: zram and suspend behavior.
+- `home/alex/default.nix`: Home Manager composition.
+- `checks/preflight.sh`: portable evaluation plus firmware-backed closure gate.
+
+### Hyprland implementation
+
+- Hyprland 0.55 is configured exclusively through native Lua. The root file is
+  `modules/home/hyprland/hyprland.lua`; modules under
+  `modules/home/hyprland/hyprland/` cover environment, monitor/general,
+  animation, input, window rules, keybindings, and autostart.
+- Dwindle tiling is the default. Current geometry uses 5 px inner gaps, 8 px
+  outer gaps, 2 px animated accent borders, 10 px rounding, snapping,
+  border/corner resizing, and mouse move/resize fallbacks.
+- Window open/close/move, workspace slide, fade, border, layer, and manual resize
+  animations use coordinated curves adapted from the reference builds.
+- The touchpad enables natural scrolling, tap-to-click, clickfinger right click,
+  `disable_while_typing`, workspace swipes, and Apple-appropriate sensitivity.
+- Only workspaces 1 and 2 are exposed. Three-finger horizontal swipe changes
+  between them.
+- Function-row volume, mute, brightness, keyboard-backlight, and media bindings
+  are configured. Speaker volume uses `wpctl` and the QuickShell OSD; SwayOSD is
+  retained for display brightness and microphone mute.
+- Screenshots use Grim/Slurp and put PNG data on the clipboard as well as in
+  `~/Pictures/Screenshots`.
+- The lock key, mouse move/resize, float, maximize, fullscreen, close, workspace,
+  application, screenshot, and power-panel bindings are documented in
+  `docs/controls.md` and the operator guide.
+
+#### Hyprland 0.55 IPC rule
+
+Do not use legacy runtime dispatcher strings or `hyprctl keyword`. The Lua
+parser rejects dynamic legacy keywords with “keyword can't work with non-legacy
+parsers. Use eval.” Use native Lua forms:
+
+```sh
+hyprctl eval 'hl.config({ debug = { disable_scale_checks = true } })'
+hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" })'
+hyprctl dispatch 'hl.dsp.window.close()'
+hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
+```
+
+Static JSON, Nix, and even config parsing did not catch the original legacy
+Waybar/Hypridle dispatch strings. Any new runtime action must be exercised over
+the real compositor IPC before it is considered verified.
+
+### Waybar implementation
+
+Waybar is split visually into three glass groups across the top:
+
+- Left: Apps, pinned Chrome/Kitty/Thunar, and running tasks.
+- Center: workspaces 1/2, active title, float, maximize, fullscreen, and close.
+- Right: CPU, memory, media transport/title, volume, Wi-Fi, Bluetooth, battery,
+  clock/date, notification bell, tray, and settings-style status actions.
+
+The app launcher and every core status area has a pointer action. QuickShell
+panel calls use the stable IPC form `qs -c aurora-shell ipc call panels toggle
+NAME`. Waybar waits up to five seconds for QuickShell IPC readiness at startup.
+The Hyprland instance signature is imported into the systemd user environment so
+systemd-launched bar actions can reach the compositor.
+
+Intentional destructive actions:
+
+- Center-bar X closes the currently focused window.
+- Middle-clicking a running task closes that task immediately.
+- On this touchpad, a three-finger tap is a middle click.
+
+Opening a new app should only retile existing windows. Tiling itself is not a
+close operation.
+
+### QuickShell implementation
+
+One supervised `aurora-shell` QuickShell 0.3 process owns independent surfaces:
+
+- Wi-Fi: current connection, signal, address, list/scan, connect, password input,
+  and advanced editor handoff.
+- Bluetooth: adapter state, scan, paired/nearby device list, connect/disconnect,
+  and Blueman handoff.
+- Volume: output state, slider, mute, and advanced PipeWire mixer handoff.
+- Power: battery, brightness, power profile, lock/sleep/reboot/shutdown holds,
+  wallpaper picker, and pointer-accessible screenshots.
+- Notifications: freedesktop server, toasts, replacement, timeouts, actions,
+  inline replies, history, unread state, clear, and DND.
+- Music/EQ: MPRIS player selection and metadata, rotating album art, transport,
+  seek, on-demand real Cava waveform, ten EQ bands, and Flat/Bass/Treble/Vocal/
+  Pop/Rock/Jazz/Classic presets.
+- Calendar/weather: clock with seconds, month navigation/date selection,
+  current conditions, hourly data, five-day forecast, and offline cache state.
+
+`PanelCoordinator` enforces one open dropdown at a time. `PanelHost` provides
+placement, staged opacity/position/scale animation, outside-click dismissal,
+Escape dismissal, and the common glass surface. Expensive discovery and polling
+are lazy: Wi-Fi/Bluetooth scan only while needed, Cava runs only while the music
+panel is visible and playing, and weather fetches on panel demand/refresh.
+
+The notification daemon fallback is deliberately not a bridge. Dunst is an
+inactive failure unit that starts only if the QuickShell service fails, avoiding
+two owners of the notification D-Bus name.
+
+### Theming, wallpapers, and visual pipeline
+
+- Alex supplied all active wallpaper files. Twelve palette-diverse copies were
+  selected from `~/Downloads`: red, orange, gold, olive, green, seafoam, cyan,
+  blue, violet, purple, neutral dark, and neutral light. Exact filenames,
+  original mappings, expected Matugen primaries, and SHA-256 hashes are in
+  `docs/wallpapers.md`.
+- Waypaper is the mouse-driven browser. Its post-command calls
+  `apply-wallpaper`.
+- `apply-wallpaper` takes a lock, renders Matugen 4.0 dark `scheme-content`,
+  validates every generated fragment, installs them atomically, stores the
+  selected path, and transitions the background through awww 0.12.1.
+- Generated consumers are QuickShell, Waybar, Kitty, Rofi, Hyprland, Hyprlock,
+  GTK, Dunst fallback, SwayOSD, and screenshot selection styling.
+- Stable near-black surface roles preserve the dark frosted-glass foundation;
+  dominant source colors drive semantic primary/secondary/tertiary accents.
+- Matugen source index 0 was selected after a real palette matrix. Source index
+  1 washed strong red/green images toward gray/lilac.
+- A normal wallpaper change reloads Hyprland and Waybar presentation and may
+  refresh already-active lightweight OSD/fallback services. `--theme-only`
+  returns before touching wallpaper or live client services.
+- Never send Kitty `SIGUSR1`: it terminates this Kitty 0.47.4 build. Existing
+  Kitty windows intentionally keep the palette they started with; new Kitty
+  windows read the latest generated include.
+- The initial and current wallpaper is
+  `~/Pictures/Wallpapers/aurora-collection/violet-nokstella-stars.jpeg`.
+
+### Kitty, Rofi, lock, idle, and helper workflows
+
+- Kitty uses FiraCode Nerd Font, dark generated colors, 0.88 opacity, Hyprland
+  blur, 10,000 lines of scrollback, tabs, and `copy_or_interrupt` so Ctrl+C copies
+  selected text but interrupts when nothing is selected. Ctrl+V always pastes.
+- Rofi is a generated dark-glass application launcher with icons,
+  search-as-you-type, pointer launch, Escape dismissal, Apps-button access, and
+  bare-Super/Super+D access.
+- Hyprlock uses the current wallpaper and Matugen fragment with blur, vignette,
+  large clock/date, avatar/user, password field, battery, and network status.
+- Hypridle stages dim, lock, display power-off, and suspend. Lock/suspend/lid
+  behavior still requires deliberate physical acceptance testing.
+- `weather-fetch` uses the Open-Meteo HTTPS endpoint and a 900-second XDG cache.
+  It returns cached data marked stale when retrieval fails.
+- `equalizer-state` validates state, locks updates, generates a ten-band modern
+  EasyEffects `equalizer#0` preset, and applies it asynchronously.
+- `screenshot-area` waits 300 ms after the power panel dismisses so the panel is
+  not captured; both screenshot helpers save and copy image/png.
+
+### Community source integration
+
+`SOURCES.md` is the canonical implemented-source ledger. Some entries retain an
+abbreviated planning revision or repository name instead of a full URL; do not
+claim stronger provenance precision than the file records. The important
+combinations are:
+
+- end-4/dots-hyprland: native Lua organization and motion language.
+- LinuxBeginnings/Hyprland-Dots: Waybar glass layout and styling patterns.
+- Frost-Phoenix/nixos-config: Nix/Home Manager wiring patterns.
+- newmanls/rofi-themes-collection: launcher structure.
+- cxOrz/dotfiles-hyprland: control-center cards, notifications, power behavior,
+  volume OSD, shelf interaction grammar, and QuickShell control patterns.
+- ilyamiro/nixos-configuration: music/EQ composition, coordinated QML animation,
+  palette binding, and calendar/weather presentation. Its hub architecture and
+  yellow-green palette were not copied.
+- QuickShell upstream/examples: native notification, networking, BlueZ,
+  PipeWire, UPower, focus-grab, lazy-loader, and typed IPC contracts.
+- DankMaterialShell, Caelestia, iNiR, and Noctalia: focused lifecycle, popup,
+  glass, and palette references rather than wholesale installations.
+- Matugen, awww, Waypaper, EasyEffects, Cava, and Open-Meteo supply the permanent
+  theme/media/weather backends.
+
+No referenced shell was installed wholesale. The implementation adapts pieces
+to the independent-panel architecture and local T2 constraints.
+
+### Build and verification record
+
+Static and isolated validation completed before activation:
+
+- Nix parse, nixfmt, flake output evaluation, and Home Manager builds.
+- Hyprland 0.55 native-Lua `--verify-config`.
+- JSON, Rofi, Bash syntax, ShellCheck, and focused QML lint.
+- Generated systemd user-unit inspection.
+- Real Matugen renders across all twelve local wallpapers.
+- QuickShell live Wayland smoke loading every surface and exercising typed IPC,
+  panel exclusion, outside/Escape dismissal, notification replacement/actions/
+  DND, and service initialization.
+- Real Cava PipeWire config validation.
+- EasyEffects 8.2.4 accepted and loaded the generated `equalizer#0` preset during
+  the isolated pre-cutover test.
+- Open-Meteo returned 12 hourly and 7 daily entries; cached response took 22 ms;
+  simulated network failure returned the last valid data marked stale.
+- `./checks/preflight.sh` repeatedly evaluated the public flake and built the
+  firmware-backed system with conservative concurrency.
+- The final preflight for Generation 10 produced
+  `/nix/store/9lwy876aicmfpcy65q3g499fah2yg9gv-nixos-system-macbook-26.11.20260616.567a49d`.
+- Its closure contains linux-t2 6.18.35, the local Apple/Broadcom firmware
+  derivation, QuickShell 0.3.0, and nix-ld 2.0.6. The source firmware tree has
+  163 files and the runtime combined firmware directory contains the required
+  Apple BCM4377 data.
+- Git gates reject tracked firmware files and tracked wallpaper binaries.
+
+Post-reboot/live verification completed:
+
+- Auto-login reached Hyprland under user `alex`.
+- NetworkManager, Bluetooth, UPower, power-profiles-daemon, greetd, PipeWire,
+  WirePlumber, and desktop portal/keyring/polkit services are present.
+- `aurora-shell`, `aurora-wallpaper`, Waybar, Hypridle, SwayOSD, EasyEffects,
+  PipeWire, PipeWire Pulse, and WirePlumber are active.
+- `aurora-wallpaper-init` completed successfully; the Dunst fallback is inactive
+  as intended.
+- No failed system or user units were present at the handoff audit.
+- Hyprland reports no config errors.
+- Loaded hardware modules include `apple_bce`, `applesmc`, `hid_appletb_bl`,
+  `hid_apple`, `hci_bcm4377`, `brcmfmac`, and `i915`. The boot journal records
+  successful `aaudio` initialization; `/proc/asound/cards` exposes
+  `AppleT2x2 / Apple T2 Audio`, and PipeWire exposes the T2 speaker/headphone and
+  built-in/headset microphone nodes even though `aaudio` is not shown as a
+  separate `lsmod` entry.
+- Wi-Fi is operational; Bluetooth is powered; zram is active; current power
+  profile was Balanced.
+- Codex, Claude, Chrome, Waybar, QuickShell, awww, Matugen, Kitty, and Node
+  versions were confirmed from the live environment.
+
+Expected nonfatal log noise observed during the live audit:
+
+- QuickShell/playerctld warnings when no MPRIS player is active.
+- Waybar tray items without an icon name or pixmap.
+- Mission Center cannot report Intel GPU utilization and sometimes refuses its
+  auxiliary socket.
+- SwayOSD waits for an unavailable libinput backend but brightness OSD remains
+  service-managed.
+- PipeWire Pulse priority/peer-credential warnings and some T2 audio pointer
+  noise.
+- Duplicate NetworkManager-initrd bus-name and unused wired-DHCP attempts. Wi-Fi
+  remains functional; these are later cleanup candidates rather than current
+  blockers.
+
+### Deployment and generation timeline
+
+1. Cloned remote base `4974921` and created `codex/macbook-desktop`.
+2. Backed up the live configuration before any activation.
+3. Implemented and committed the complete Aurora desktop as `ec87817`.
+4. Built the complete firmware-backed closure without changing the live
+   Generation 7 desktop.
+5. Installed Generation 8 as a boot-only entry. A real installer-window launch
+   then exposed the Hyprland 0.55 legacy-dispatch incompatibility.
+6. Replaced all affected Waybar and Hypridle runtime actions with `hl.dsp.*`
+   native expressions and committed `f32e320`.
+7. Built and installed corrected Generation 9, then rebooted into it.
+8. The first reboot preserved T2 boot, Wi-Fi, the internal panel, auto-login,
+   Home Manager, and the desktop services. The desktop initially showed gray
+   right and bottom bands.
+9. Live geometry proved the physical output and screenshot were 2560x1600 but
+   all layer surfaces were only 1600x1000 at a reported scale of 1.5. That
+   rendered 2400x1500 and left exactly 160 physical pixels on the right and 100
+   on the bottom. A raw Grim compositor capture proved it was not wallpaper
+   cropping or physical underscan.
+10. The old working config had `debug.disable_scale_checks = true`; the new
+    config had omitted it. Hyprland's clean-divisor validation produced logical
+    geometry equivalent to 1.6 while still reporting/rendering the surface at
+    1.5.
+11. Tested the correction live through native Lua eval, then forced monitor-rule
+    recomputation with `hl.dsp.force_renderer_reload()`. awww changed to
+    1707x1067 and Waybar to 1691x40 without logging out or closing apps. A second
+    raw compositor capture showed complete edge coverage.
+12. Added the persistent setting in
+    `modules/home/hyprland/hyprland/general.lua` and committed `c566923`.
+13. Ran two direct Home Manager activation packages: the first persisted the
+    dirty-source build of the fix at 02:51, and the second installed the final
+    committed-source Home Manager generation at 02:54. The second is current
+    generation 2, and both file trees contain the scaling correction.
+14. Built the complete corrected system closure and installed it as Generation
+    10, the current systemd-boot default.
+15. Discovered that `switch-to-configuration boot` alone does not advance the
+    numbered system profile. The correct sequence sets
+    `/nix/var/nix/profiles/system` first and then writes the boot entry. Corrected
+    `README.md` in commit `25d26e5`.
+
+Correct boot-only installation sequence for Alex's default Fish shell:
+
+```fish
+set out (nix build --no-link --print-out-paths \
+  path:/home/alex/.config/nixos-local#nixosConfigurations.macbook.config.system.build.toplevel \
+  --override-input macbook-config path:/home/alex/nix \
+  --override-input firmware path:/etc/nixos/firmware \
+  --max-jobs 2 --cores 2)
+sudo nix-env --profile /nix/var/nix/profiles/system --set "$out"
+sudo "$out/bin/switch-to-configuration" boot
+```
+
+Keep the store path in a quoted variable or on one physical shell line. An
+earlier pasted command was split at the version suffix, causing Fish to treat
+the second half as a separate command.
+
+Routine updates should use the integrated NixOS/Home Manager path. Do not use a
+standalone `home-manager switch` as the normal deployment workflow. The two
+direct activation-package runs were used only to persist the emergency display
+fix in the already-booted Generation 9 session; Generation 10 integrates the
+final matching Home Manager output.
+
+### Retina scaling failure: final technical record
+
+Broken state:
+
+```text
+physical output           2560x1600
+configured/reported scale 1.5
+client/layer geometry     1600x1000
+rendered coverage         2400x1500
+uncovered area            160 px right, 100 px bottom
+```
+
+Persistent fix:
+
+```lua
+hl.config({
+    debug = {
+        disable_scale_checks = true
+    },
+    -- existing settings
+})
+```
+
+Verified fixed state:
+
+```text
+Hyprland monitor          2560x1600 @ 60.001, scale 1.50
+awww background layer    0,0 1707x1067
+Waybar layer             8,6 1691x40
+debug scale check        true, explicitly set
+Hyprland config errors   none
+right/bottom bands       absent in raw 2560x1600 compositor capture
+```
+
+Do not change the scale to 1.6 merely to get an integer divisor unless the user
+asks for a larger UI. The requested and now working design target is 1.5.
+
+### Operator documentation and controls
+
+The full operator guide and interactive checklist were created outside the Git
+repo so they did not perturb the validated closure:
+
+- Markdown: `/home/alex/AURORA_OPERATOR_GUIDE.md`.
+- Interactive HTML: `/home/alex/.local/share/aurora-operator-guide/index.html`.
+- Artwork: `/home/alex/.local/share/aurora-operator-guide/aurora-guide.svg`.
+- Launcher entry:
+  `/home/alex/.local/share/applications/aurora-operator-guide.desktop`.
+
+These files are machine-local and unversioned. They were created after the
+pre-migration backup, so that backup does not contain them.
+
+The interactive guide stores approximately fifty checkbox states plus notes and
+can copy an acceptance report. Its desktop entry and JavaScript syntax were
+validated; Chrome rendered it successfully at the target logical resolution.
+
+Documentation caveat: the operator guide was generated before the Retina fix
+and identifies Generation 9 and its store path as the expected boot. Generation
+10 is now the correct default/target. The controls remain accurate, but update
+the generation label/path before using its exact closure assertion after the
+next reboot.
+
+Useful controls during testing:
+
+- Command is Linux Super.
+- Command+Shift+F toggles true fullscreen.
+- Command+F toggles maximized state.
+- Command+Space toggles float/tile.
+- Command+left-drag moves; Command+right-drag resizes.
+- Command+L locks.
+- The center-bar X closes the focused window.
+- A task-button middle click closes that task.
+
+### Confirmed unresolved issues and priority order
+
+#### P0 — detach applications launched from Waybar
+
+Waybar currently launches Kitty, Chrome, Thunar, Mission Center, and related GUI
+tools directly. A Kitty launched from the pinned Terminal icon was observed as a
+child of `waybar.service`, whose `KillMode=control-group`. A future Waybar
+service stop/restart/failure can therefore kill applications launched from the
+bar. A normal Waybar CSS reload does not kill them.
+
+Two Home Manager activations were also temporally associated with the initiating
+Kitty scopes ending:
+
+- `kitty-9151-0.scope` started at 02:42:09; `sd-switch` reloaded user systemd
+  from that scope at 02:51:54; the scope ended at 02:51:56.
+- `kitty-14385-0.scope` started at 02:52:12; a second `sd-switch` reload came
+  from it at 02:54:29; the scope ended at 02:54:30.
+
+A later Kitty scope ended without an `sd-switch` or Waybar service restart while
+the user was testing window controls. The journal does not prove that later
+cause; center X and task middle-click are plausible explicit paths but must not
+be asserted as fact.
+
+Next implementation should route every Waybar application launch through a
+compositor-native exec path or a transient user service/scope that is not a
+member of `waybar.service`. Then deliberately restart Waybar and verify Chrome,
+Kitty, Thunar, and Mission Center survive before investigating any remaining
+unexpected close report.
+
+Relevant files:
+
+- `modules/home/waybar/config.json`: direct `on-click` commands.
+- `modules/home/waybar/default.nix`: service and environment.
+
+Until fixed, do not restart `waybar.service` while important apps launched from
+the bar are open. Launching a terminal through the Hyprland shortcut
+Command+Enter is safer for maintenance.
+
+#### P1 — update the EasyEffects preset location
+
+`scripts/equalizer-state` currently writes
+`~/.config/easyeffects/output/aurora_live_eq.json`. EasyEffects 8.2.4 treats
+that as an old preset directory and migrates it to
+`~/.local/share/easyeffects/output` every time the EQ is applied. Live logs at
+02:46:17 and 02:46:18 show the copy/migration, and two output directories were
+moved into `~/.local/share/Trash/files`.
+
+The preset loads, so this did not invalidate the isolated functionality test,
+but repeated migration is incorrect. Change `preset_root` to:
+
+```sh
+${XDG_DATA_HOME:-$HOME/.local/share}/easyeffects/output
+```
+
+Then verify preset listing, loading, last-loaded state, live band changes, and
+that no additional Trash entries or migration logs appear.
+
+#### P2 — finish physical acceptance
+
+Automated and isolated checks are extensive, but the user has not completed and
+returned the full operator-guide checklist. Remaining deliberate tests include:
+
+- palm rejection/`disable_while_typing`, two-finger right click, and
+  three-finger workspace swipe;
+- pointer border/corner resizing, floating move/resize, pin, maximize,
+  fullscreen/restore, and close on disposable windows;
+- function-row volume/mute, display brightness, keyboard-backlight, and media;
+- Wi-Fi scan/connect UI without disrupting the active connection;
+- Bluetooth scan and real-device pairing;
+- notification replacement, action, history, DND, and timeout behavior;
+- real MPRIS metadata/seek/transport, Cava, and audible EQ behavior;
+- calendar/weather refresh and cached offline behavior;
+- red, green, cyan, neutral-light, and preferred wallpaper palette changes
+  across Waybar, QuickShell, Rofi, new Kitty, Hyprland borders, and lock;
+- region/full screenshot file and clipboard behavior;
+- Hyprlock unlock, idle sequence, lid suspend/resume, and Wi-Fi/audio/panel
+  recovery;
+- battery and power-profile behavior.
+
+Do not perform reboot, suspend, shutdown, Wi-Fi disconnect, or destructive power
+testing while a future Codex session is operating in the only important
+terminal unless the user coordinates it explicitly.
+
+#### P3 — optional cleanup and future work
+
+- Update the operator guide's Generation 9 closure assertion to whichever
+  corrected generation is installed as the default after P0/P1. If acceptance
+  happens before those fixes, the immediate target is Generation 10.
+- Investigate duplicate NetworkManager-initrd bus-name noise and unused wired
+  DHCP attempts only after Wi-Fi acceptance is complete.
+- Add Spotify only if requested. It is not installed. The pinned Nixpkgs exposes
+  `spotify` version `1.2.86.502.g8cd7fb22`; `allowUnfree = true` already permits
+  it. The declarative location is `modules/home/packages.nix`, and its MPRIS
+  interface should feed the existing media panel.
+- The Alienware/NVIDIA/dual-monitor port remains a separate Phase 4 project.
+
+### Recovery and rollback
+
+- Generation 7 is the deliberate pre-Aurora boot fallback.
+- Generation 8 is an Aurora build before the native IPC correction; retain it
+  for history but prefer Generation 7 for pre-cutover recovery.
+- Generation 9 is the currently booted native-IPC build but does not contain the
+  Retina fix in its integrated Home Manager service. The current session is fixed
+  only because the corrected Home Manager generation was activated separately.
+- Generation 10 is the desired corrected boot default.
+- Standalone Home Manager generations are visible with
+  `nix-env --profile ~/.local/state/nix/profiles/home-manager --list-generations`.
+  Generation 1 is `/nix/store/g8067nmlc1dm7al3drdlvn9p687zk6jj-home-manager-generation`;
+  generation 2 is the current committed build. Both contain the Retina fix, so
+  switching from 2 to 1 is only a narrow activation rollback, not a pre-Aurora
+  restore. See `docs/recovery.md` for the guarded command and use the timestamped
+  backup for a true pre-Aurora user-configuration restore.
+- At systemd-boot, select an older generation with the arrow keys. Holding Option
+  at power-on opens Apple's macOS/NixOS picker.
+- Symlink-safe dotfile restore and channel rebuild commands are in
+  `docs/recovery.md`. Do not copy over Home Manager symlinks in place.
+- The full backup path is
+  `/home/alex/.local/state/codex-backups/macbook-desktop-20260715-234753`.
+- The previous `/etc/nixos` configuration remains intact.
+- Never add `/etc/nixos/firmware`, wallpaper images, credentials, or generated
+  caches to Git.
+
+### Instructions for the next chat
+
+1. Read `BUILD_PLAN.md`, this final report section, `SOURCES.md`, and
+   `docs/recovery.md` before changing the machine.
+2. Re-audit Git, `/run/current-system`, the system profile, boot default,
+   Home Manager profile, failed units, Hyprland geometry, and current app
+   cgroups; do not assume the user has rebooted since this report.
+3. Preserve all T2, firmware, `nix-ld`, unfree-package, user, boot, and dual-boot
+   invariants.
+4. Fix Waybar application launch isolation first, then the EasyEffects preset
+   path. Test each in isolation and run the full preflight before installation.
+5. Avoid live service restarts that can kill the user's active terminal until
+   launch isolation is fixed. Use Command+Enter for a maintenance Kitty rather
+   than the pinned Waybar Terminal button.
+6. Use Hyprland native Lua eval/dispatch only. Do not revive legacy
+   `hyprland.conf` or `hyprctl keyword` workflows.
+7. Keep Home Manager integrated with NixOS for routine activation. Remember that
+   setting the system profile is required to create a numbered boot generation.
+8. After the two priority fixes, update the operator guide to the newly
+   installed/default generation and coordinate the remaining acceptance
+   checklist with Alex.
+9. Do not push, merge, rebase, update flake inputs, remove old generations,
+   delete backups, or touch the macOS partition without explicit user approval.
+
+### Definition of the present stopping point
+
+The requested MacBook desktop implementation is materially complete and running:
+the T2 machine boots, Generation 10 is installed, the live Retina geometry is
+correct, the glass Waybar and independent QuickShell panels are active, the
+wallpaper-adaptive theme pipeline is in place, and the complete source and
+recovery history is local. It is not yet reasonable to call the project fully
+accepted because two lifecycle defects need correction and the physical
+operator checklist has not been completed.

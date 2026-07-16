@@ -1,6 +1,6 @@
 # MacBook NixOS + Hyprland Build Plan
 
-Document status: implementation complete; boot activation and acceptance pending
+Document status: implementation deployed; Generation 10 default; acceptance and two lifecycle fixes pending
 Machine: `macbook` — 2020 Intel/T2 MacBook Air
 User: `alex`
 Created: 2026-07-15
@@ -1208,10 +1208,20 @@ At this revision:
   Downloads collection and kept outside Git.
 - Full T2 system closure: builds successfully with linux-t2 6.18.35, 163 local
   Broadcom firmware files, QuickShell, and `nix-ld` present.
-- Live system/Home Manager activation: intentionally not performed; the current
-  terminal and desktop remain on the known-good generation.
+- First reboot and live Home Manager activation: performed. Generation 9 is the
+  currently booted system; corrected Generation 10 is installed as the next-boot
+  default, and the matching Home Manager configuration is already live.
+- Retina scaling correction: complete and live at 2560x1600, scale 1.5,
+  1707x1067 logical. The right/bottom dead bands were fixed by restoring
+  `debug.disable_scale_checks = true`.
+- Remaining implementation defects: detach Waybar-launched apps from the
+  Waybar service cgroup and move generated EasyEffects presets from the legacy
+  config path to the XDG data path. See the final section of `EXECUTION_LOG.md`.
+- Physical/operator acceptance: in progress; the complete checklist has not yet
+  been returned.
 - Phase 4 Alienware port: future separate project.
 
-The next action is the deliberate boot-only installation of the validated
-generation, followed by reboot and physical acceptance testing. Do not use a
-live `switch` for the first cutover.
+The next actions are the two isolated lifecycle fixes recorded in
+`EXECUTION_LOG.md`, a full preflight and corrected boot-generation install, then
+coordinated physical acceptance. Do not restart Waybar while important apps
+launched from it are open until launch isolation has been fixed.

@@ -39,6 +39,36 @@ been verified.
 sudo nixos-rebuild switch -I nixos-config=/etc/nixos/configuration.nix
 ```
 
+## Roll back the standalone Home Manager profile
+
+The Retina repair temporarily used direct activation packages while Generation
+9 was already running. The current profile is Home Manager generation 2; both
+generation 1 and 2 contain the Retina fix. This is therefore a narrow activation
+rollback, not a return to the pre-Aurora desktop.
+
+Save all work first and open the maintenance terminal with Command+Enter, not
+the Waybar Terminal button. Until Waybar application launch isolation is fixed,
+do not restart Waybar while important apps launched from it are open.
+
+Inspect the profile without changing it:
+
+```fish
+nix-env --profile ~/.local/state/nix/profiles/home-manager --list-generations
+```
+
+Only when specifically directed to return from generation 2 to generation 1:
+
+```fish
+nix-env --profile ~/.local/state/nix/profiles/home-manager --switch-generation 1
+~/.local/state/nix/profiles/home-manager/activate
+```
+
+Both observed direct activations were followed within seconds by the initiating
+Kitty scope ending, although the journal does not prove causality. Treat this as
+potentially disruptive: do not run it from the only terminal containing unsaved
+work. For a true pre-Aurora restore, use the timestamped user-configuration
+backup procedure above and an older NixOS generation.
+
 ## Boot an older generation
 
 Choose an earlier NixOS generation from the systemd-boot menu at startup.

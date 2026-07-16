@@ -33,11 +33,11 @@ The preflight evaluates the public flake, builds the firmware-backed system with
 conservative concurrency, and verifies the T2 kernel, local firmware,
 QuickShell, and `nix-ld` are all present in the closure.
 
-For the first cutover, install the exact validated closure as a **boot**
-generation rather than switching underneath the active terminal:
+To install an exact validated closure as a **boot** generation without switching
+underneath the active terminal:
 
-```sh
-out=$(nix build --no-link --print-out-paths \
+```fish
+set out (nix build --no-link --print-out-paths \
   path:/home/alex/.config/nixos-local#nixosConfigurations.macbook.config.system.build.toplevel \
   --override-input macbook-config path:/home/alex/nix \
   --override-input firmware path:/etc/nixos/firmware \
@@ -63,5 +63,5 @@ first activation.
 - `docs/wallpapers.md` — local collection and adaptive-color pipeline
 - `docs/recovery.md` — symlink-safe dotfile restore and generation rollback
 - `docs/updating.md` — controlled input updates after acceptance
-- `SOURCES.md` — exact community provenance and adaptations
+- `SOURCES.md` — recorded community provenance and adaptations
 - `EXECUTION_LOG.md` — implementation and validation record
