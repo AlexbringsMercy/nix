@@ -8,6 +8,13 @@ hl.monitor({
 })
 
 hl.config({
+    -- 2560x1600 at 1.5 produces fractional logical dimensions.  Without this,
+    -- Hyprland 0.55 validates against a clean divisor and lays surfaces out as
+    -- 1600x1000 while still rendering at 1.5, leaving right/bottom dead bands.
+    debug = {
+        disable_scale_checks = true
+    },
+
     general = {
         layout = "dwindle",
         gaps_in = 5,
