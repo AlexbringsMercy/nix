@@ -3,7 +3,7 @@
   imports =
     [
       ./hardware-configuration.nix
-      "${builtins.fetchTarball "https://github.com/NixOS/nixos-hardware/archive/main.tar.gz"}/apple/t2"
+      "${builtins.fetchTarball "https://github.com/NixOS/nixos-hardware/archive/master.tar.gz"}/apple/t2"
     ];
 
   boot.loader.systemd-boot.enable = true;
@@ -15,15 +15,43 @@
 
   time.timeZone = "America/Chicago";
 
+  nixpkgs.config.allowUnfree = true;
+
   users.users.alex = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "input" ];
   };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Graphical environment
+  programs.hyprland.enable = true;
+
+  # Auto-login to Hyprland
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.hyprland}/bin/Hyprland";
+        user = "alex";
+      };
+    };
+  };
+
+  # Fonts
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-emoji
+    fira-code
+    fira-code-nerdfont
+  ];
+
   environment.systemPackages = with pkgs; [
-    git nano curl wget kitty
+    git nano curl wget
+    kitty google-chrome
+    nodejs_22 fish
+    waybar rofi-wayland
+    wl-clipboard grim slurp
   ];
 
   hardware.firmware = [
@@ -37,7 +65,15 @@
     })
   ];
 
+  # Audio
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+  };
+
   services.openssh.enable = true;
+  programs.nix-ld.enable = true;
 
   system.stateVersion = "26.11";
 }
