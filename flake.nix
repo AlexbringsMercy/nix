@@ -69,8 +69,10 @@
         modules = [ ./home/alex ];
       };
 
-      packages.${system}.home-activation = self.homeConfigurations.alex.activationPackage;
-      packages.${system}.aurora-shell = inputs.aurora-shell.packages.${system}.caelestia-shell;
+      packages.${system} = {
+        home-activation = self.homeConfigurations.alex.activationPackage;
+        aurora-shell = inputs.aurora-shell.packages.${system}.caelestia-shell;
+      };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
     };
