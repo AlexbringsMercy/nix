@@ -24,7 +24,22 @@
 
   programs.aurora-shell.enable = true; # Aurora: make the vendored chassis Alex's active declared shell.
   programs.aurora-shell.cli.enable = true; # Aurora: retain the internal caelestia CLI alongside the shell package.
-  programs.aurora-shell.settings = { }; # Aurora: use baked settings while keeping X-Restart-Triggers inert at v1.
+  # Aurora: relax caelestia's aggressive idle defaults (operator, 2026-07-21). Stock
+  # is lock@180s / dpms@300s / suspendThenHibernate@600s — the 3-min lock nuisance,
+  # and auto-suspend is unsafe on this T2 until the Stage 7 suspend gate. Lock at
+  # 20 min, DPMS at 25 min, no auto-suspend. (This is the sole shell.json key at v1.)
+  programs.aurora-shell.settings = {
+    general.idle.timeouts = [
+      {
+        timeout = 1200;
+        idleAction = "lock";
+      }
+      {
+        timeout = 1500;
+        idleAction = "dpms off";
+      }
+    ];
+  };
 
   home.activation.createDesktopDirectories = ''
     run mkdir -p "$HOME/Pictures/Screenshots" "$HOME/Pictures/Wallpapers"

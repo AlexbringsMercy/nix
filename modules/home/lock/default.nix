@@ -186,18 +186,20 @@ in
         after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'";
         inhibit_sleep = 3;
       };
+      # Aurora: idle timers relaxed 2026-07-21 (operator) — the 5-min dim + 10-min
+      # lock were too aggressive. Dim 10 min, lock 20 min, DPMS shortly after.
       listener = [
         {
-          timeout = 300;
+          timeout = 600;
           on-timeout = "brightnessctl -s set 20%";
           on-resume = "brightnessctl -r";
         }
         {
-          timeout = 600;
+          timeout = 1200;
           on-timeout = "loginctl lock-session";
         }
         {
-          timeout = 660;
+          timeout = 1260;
           on-timeout = "hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'";
           on-resume = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'";
         }
