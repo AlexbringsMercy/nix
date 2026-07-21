@@ -1,24 +1,23 @@
 -- Aurora: load hyprbars from its ABI-matched Nix store output before configuring it.
 hl.plugin.load("@HYPRBARS_PLUGIN@")
 
--- The minimize BEHAVIOR is OnlyLyan/omarchy-desktop-shell's real window-minimize
--- script (see scripts/window-minimize). The button VISUALS are ours: clean modern
--- monochrome controls on the dark bar (operator direction 2026-07-21 — NOT the
--- plan's "red/yellow/green" traffic-lights, NOT a literal Windows/macOS copy).
--- These are interim §3.1 literals; Stage 4 templates colours from the live scheme,
--- and hover states (Win11-style close-hover-red) come with it.
+-- Button VISUALS are ours: clean modern monochrome controls on the dark bar (NOT
+-- traffic-lights, NOT a Windows/macOS copy). Actions use Hyprland 0.55 NATIVE-LUA
+-- dispatch forms — the legacy `hyprctl dispatch killactive`/`fullscreen 1` strings
+-- the 0.55 Lua parser rejects at runtime (verified live 2026-07-21). Interim §3.1
+-- literals; Stage 4 templates colours + hover states from the live scheme.
 hl.config({
     plugin = {
         hyprbars = {
-            bar_height = 28,
+            bar_height = 30,
             bar_padding = 10,
-            bar_button_padding = 8,
-            bar_text_size = 11,
+            bar_button_padding = 10,
+            bar_text_size = 12,
             bar_text_font = "FiraCode Nerd Font",
             bar_text_align = "left",
             bar_part_of_window = true,
             bar_precedence_over_border = true,
-            on_double_click = "hyprctl dispatch fullscreen 1", -- Aurora: §6.2 double-click-to-maximize.
+            on_double_click = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })'", -- Aurora: 0.55 lua form (double-click maximize).
             bar_color = "rgb(0a0e1a)", -- Aurora: interim §3.1 glass; Stage 4 templates it.
             col = {
                 text = "rgb(e6edf7)" -- Aurora: interim §3.1 onSurface; Stage 4 templates it.
@@ -27,27 +26,27 @@ hl.config({
     }
 })
 
--- Monochrome glyph-only buttons (transparent bg = no coloured dot). add_button is
--- right-to-left, so first add = rightmost: close, maximize, minimize -> on screen
--- left-to-right that reads minimize | maximize | close (the modern-Windows order).
-hl.plugin.hyprbars.add_button({
-    bg_color = "rgba(00000000)", -- Aurora: no dot — the glyph sits directly on the bar.
-    fg_color = "rgb(e6edf7)",
-    size = 14,
-    icon = "󰖭", -- Aurora: window-close (MDI); gate-verify it renders in FiraCode NF, swap if tofu.
-    action = "hyprctl dispatch killactive"
-})
+-- Monochrome glyph-only buttons (transparent bg = no coloured dot), size bumped
+-- from 14 (too tiny). add_button is right-to-left: first add = rightmost, so
+-- close, maximize, minimize -> on screen: minimize | maximize | close.
 hl.plugin.hyprbars.add_button({
     bg_color = "rgba(00000000)",
-    fg_color = "rgb(aab6c8)", -- Aurora: onSurfaceMuted — quieter than close.
-    size = 14,
-    icon = "󰖯", -- Aurora: window-maximize/restore (MDI).
-    action = "hyprctl dispatch fullscreen 1"
+    fg_color = "rgb(e6edf7)",
+    size = 20, -- Aurora: was 14 — operator said tiny.
+    icon = "󰖭",
+    action = "hyprctl dispatch 'hl.dsp.window.close()'" -- Aurora: 0.55 lua close (legacy killactive is rejected).
 })
 hl.plugin.hyprbars.add_button({
     bg_color = "rgba(00000000)",
     fg_color = "rgb(aab6c8)",
-    size = 14,
-    icon = "󰖰", -- Aurora: window-minimize (MDI); action is the vendored omarchy script.
-    action = "window-minimize"
+    size = 20,
+    icon = "󰖯",
+    action = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })'" -- Aurora: 0.55 lua maximize toggle.
+})
+hl.plugin.hyprbars.add_button({
+    bg_color = "rgba(00000000)",
+    fg_color = "rgb(aab6c8)",
+    size = 20,
+    icon = "󰖰",
+    action = "window-minimize" -- Aurora: the vendored omarchy script (its internals now use 0.55 lua dispatch).
 })

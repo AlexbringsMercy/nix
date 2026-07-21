@@ -40,17 +40,10 @@ for i, direction in ipairs({"left", "right", "up", "down"}) do
     })
 end
 
-local function snap_window(size, position) -- Aurora: route percentage geometry through the legacy pixel dispatchers required by 0.55.
-    hl.dispatch(hl.dsp.window.float({ action = "enable" })) -- Aurora: percentage snaps operate on a floating window rectangle.
-    hl.dispatch(hl.dsp.exec_cmd('hyprctl dispatch resizewindowpixel "exact ' .. size .. ',activewindow"')) -- Aurora: the native Lua resize dispatcher accepts pixels only.
-    hl.dispatch(hl.dsp.exec_cmd('hyprctl dispatch movewindowpixel "exact ' .. position .. ',activewindow"')) -- Aurora: anchor the resized window to the selected monitor half.
-end -- Aurora: keep the snap binds on one verified dispatcher path.
-
--- Aurora: Windows-style snap on bare Super+arrows (operator 2026-07-21): Left/Right
--- halves, Up maximize, Down minimize — matching Windows muscle memory. Keyboard
--- tile-focus is dropped in favor of this; pointer focus is follow_mouse (input.lua).
-hl.bind("SUPER + Left", function() snap_window("50% 100%", "0 0") end, { description = "Window: Snap left half" })
-hl.bind("SUPER + Right", function() snap_window("50% 100%", "50% 0") end, { description = "Window: Snap right half" })
+-- Aurora: Super+Up maximize / Super+Down minimize (Windows-style, native 0.55 lua).
+-- Half-snap on Super+Left/Right is DEFERRED until the 0.55 exact-resize lua form is
+-- verified live — a broken snap is worse than none (operator 2026-07-21). The old
+-- Super+Ctrl snap used legacy `resizewindowpixel` strings the 0.55 parser rejects.
 hl.bind("SUPER + Up", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }), { description = "Window: Maximize" })
 hl.bind("SUPER + Down", hl.dsp.exec_cmd("window-minimize"), { description = "Window: Minimize" })
 

@@ -60,7 +60,8 @@ case "${1:-minimize}" in
     fi
     printf '%s %s %s\n' "$addr" "$wsid" "$mon" >> "$STORE"
     # special proprio desta janela: "special:min-<addr-sem-0x>"
-    hyprctl dispatch movetoworkspacesilent "${PREFIX}-${addr#0x},address:$addr" >/dev/null 2>&1
+    # Aurora: 0.55 native-lua form of movetoworkspacesilent (legacy string is rejected at runtime).
+    hyprctl dispatch "hl.dsp.window.move({ window = \"address:$addr\", workspace = \"${PREFIX}-${addr#0x}\", follow = false })" >/dev/null 2>&1
     ;;
 
   restore)
@@ -90,7 +91,8 @@ case "${1:-minimize}" in
     case "$ws" in ""|-*|0) ws="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id')" ;; esac
     case "$ws" in ""|-*|0) ws=1 ;; esac
     # mover pro ws de origem ja restaura no monitor certo (o ws pertence ao monitor)
-    hyprctl dispatch movetoworkspacesilent "${ws},address:$addr" >/dev/null 2>&1
-    hyprctl dispatch focuswindow "address:$addr" >/dev/null 2>&1
+    # Aurora: 0.55 native-lua forms of movetoworkspacesilent + focuswindow.
+    hyprctl dispatch "hl.dsp.window.move({ window = \"address:$addr\", workspace = \"${ws}\", follow = false })" >/dev/null 2>&1
+    hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })" >/dev/null 2>&1
     ;;
 esac
