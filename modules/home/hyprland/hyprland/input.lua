@@ -3,7 +3,8 @@ hl.config({
         kb_layout = "us",
         repeat_delay = 300,
         repeat_rate = 35,
-        follow_mouse = 1,
+        follow_mouse = 0, -- Aurora: require a click so pointer travel cannot retarget window actions.
+        focus_on_close = 2, -- Aurora: return focus to the most-recent window after a close.
         sensitivity = 0.05,
         accel_profile = "adaptive",
         touchpad = {

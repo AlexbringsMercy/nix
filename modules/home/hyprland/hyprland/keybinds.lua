@@ -24,6 +24,7 @@ hl.bind("SUPER + Q", hl.dsp.window.close(), { description = "Window: Close" })
 hl.bind("ALT + F4", hl.dsp.window.close(), { description = "Window: Close (Windows convention)" })
 hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }), { description = "Window: Maximize" })
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { description = "Window: Fullscreen" })
+hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("window-minimize restore"), { description = "Window: Restore last minimized" }) -- Aurora: expose the omarchy LIFO restore path until taskbar restore lands.
 hl.bind("SUPER + Space", hl.dsp.window.float({ action = "toggle" }), { description = "Window: Float or tile" })
 hl.bind("SUPER + J", hl.dsp.layout("togglesplit"), { description = "Window: Toggle split" })
 hl.bind("SUPER + L", hl.dsp.exec_cmd("hyprlock"), { description = "Session: Lock" })
@@ -41,7 +42,24 @@ for i, direction in ipairs({"left", "right", "up", "down"}) do
     })
 end
 
-for workspace = 1, 2 do
+local function snap_window(size, position) -- Aurora: route percentage geometry through the legacy pixel dispatchers required by 0.55.
+    hl.dispatch(hl.dsp.window.float({ action = "enable" })) -- Aurora: percentage snaps operate on a floating window rectangle.
+    hl.dispatch(hl.dsp.exec_cmd('hyprctl dispatch resizewindowpixel "exact ' .. size .. ',activewindow"')) -- Aurora: the native Lua resize dispatcher accepts pixels only.
+    hl.dispatch(hl.dsp.exec_cmd('hyprctl dispatch movewindowpixel "exact ' .. position .. ',activewindow"')) -- Aurora: anchor the resized window to the selected monitor half.
+end -- Aurora: keep the four half-snap binds on one verified dispatcher path.
+
+for _, snap in ipairs({ -- Aurora: map Ctrl+arrows to left, right, top, and bottom halves.
+    { key = "Left", size = "50% 100%", position = "0 0" }, -- Aurora: left half.
+    { key = "Right", size = "50% 100%", position = "50% 0" }, -- Aurora: right half.
+    { key = "Up", size = "100% 50%", position = "0 0" }, -- Aurora: top half.
+    { key = "Down", size = "100% 50%", position = "0 50%" } -- Aurora: bottom half.
+}) do -- Aurora: generate the four equivalent bindings without duplicating dispatcher glue.
+    hl.bind("SUPER + CTRL + " .. snap.key, function() -- Aurora: reserve Super+Ctrl+arrows for half-snaps.
+        snap_window(snap.size, snap.position) -- Aurora: apply the selected exact percentage geometry.
+    end, { description = "Window: Snap " .. string.lower(snap.key) }) -- Aurora: keep each snap discoverable in bind metadata.
+end -- Aurora: finish the half-snap binding table.
+
+for workspace = 1, 5 do -- Aurora: expose the five persistent daily workspaces.
     hl.bind("SUPER + " .. workspace, hl.dsp.focus({ workspace = workspace }), {
         description = "Workspace: Focus " .. workspace
     })

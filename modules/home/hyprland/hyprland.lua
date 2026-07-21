@@ -1,6 +1,7 @@
 -- Aurora desktop: Hyprland 0.55 native Lua configuration.
 -- Order is intentional: environment and core settings precede consumers.
 require("hyprland.env")
+require("hyprbars") -- Aurora: load and configure the matched titlebar plugin before window rules.
 require("hyprland.general")
 require("hyprland.animations")
 require("hyprland.input")

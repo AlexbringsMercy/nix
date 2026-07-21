@@ -91,6 +91,7 @@ hl.config({
         force_default_wallpaper = 0,
         vrr = 0,
         focus_on_activate = true,
+        close_special_on_empty = true, -- Aurora: remove each per-window minimize workspace after restore.
         mouse_move_enables_dpms = true,
         key_press_enables_dpms = true,
         animate_manual_resizes = true,

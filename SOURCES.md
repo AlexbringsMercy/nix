@@ -9,6 +9,7 @@ signal for this personal installation.
 | Component | Upstream repo | Upstream path | Vendored path | Local delta |
 |---|---|---|---|---|
 | aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim; aurora scheme defaults (ladder pinned, dark default, accent families); Stage 1C cutover — HM module renamed to `programs.aurora-shell` + unit `aurora-shell` (§2.2 hardening, `KillMode=process`), dunst fallback keeper carried with a static `assets/fallback-dunstrc`, write-if-absent `assets/aurora-scheme.json` state seed. <!-- # Aurora: Stage 1B/1C local delta. --> |
+| window-minimize | `github.com/OnlyLyan/omarchy-desktop-shell` | `05-hyprbars-titlebar/files/window-minimize` | `scripts/window-minimize` | Vendored **verbatim** (upstream now cloned to `repos/omarchy-desktop-shell`); only an attribution header added — runtime deps come from the `writeShellApplication` wrapper. The same repo's `hyprbars.conf` traffic-light button values (red/yellow/green ✗/⌄/◇) are used in `modules/home/hyprland/hyprbars.lua.in`, translated to the native-Lua `hl.plugin.hyprbars.add_button` API. (Stage 2A) |
 
 The chassis was vendored from the on-disk snapshot audited by the research corpus. The upstream remote `github.com/caelestia-dots/shell` is recorded for future diffs. A history graft was deliberately not performed so the audited bytes stay exact (PM decision, 2026-07-21).
 
