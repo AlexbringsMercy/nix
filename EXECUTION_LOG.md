@@ -977,3 +977,31 @@ Stage 0 leftovers deferred to this gate (TV-from-couch reachability, Xbox
 controller pairing). Gate checklist: shell runs supervised; launcher /
 dashboard / notifications / OSD / session / utilities / Nexus all open; IPC
 works; nothing dies on `systemctl --user restart aurora-shell`.
+
+### Stage 1 gate — RAN 2026-07-21 (Alex live)
+
+- **Deployed:** gen 18 (boot-only + armed-resume reboot), then gen 19 (Plex
+  removed via a live **detached** switch — no second reboot). Cutover HEALTHY:
+  shell supervised + active, 0 failed units, 0 hyprland configerrors, seed
+  `scheme.json` = aurora/dark, `KillMode=process` proven (the shell restarted
+  mid-session and the agent terminal survived — the Waybar-cgroup P0 class is dead).
+- **Operator fixes landed the same session:** Plex removed (`d87090e`) — a
+  channel-era leftover mistakenly ported in Stage 0, unused, burning compute and
+  blocking reboots at service-stop (TV firewall MAC rule kept, Moonfin untouched);
+  `aurora-resume-agent` now launches `--dangerously-skip-permissions`; duplicate
+  `nm-applet`/`blueman-applet` tray applets retired from `autostart.lua` (killed
+  live + permanent) — the shell owns network/BT natively, and they were the
+  duplicate wifi/bt icons + the stuck-"connecting" rail spinner.
+- **Gate findings → staged (ISSUE_LOG §20–28):** the cutover works; the polish
+  and features Alex surfaced belong to later stages and are NOT Stage-1 defects.
+  Palette completeness + quality → **Stage 4** (Raycast quality bar, accents are
+  wallpaper-derived and "aurora" is one mode — memory `aurora-palette-direction`;
+  13 of 54 m3 roles were unpinned → warm-Material clash, §20). Double brightness
+  OSD (SwayOSD still live), launcher keybind, brightness → **Stage 2** keymap
+  (coupled — brightness keys must rebind off swayosd onto the shell OSD). Top bar
+  + wifi/bt placement → **Stage 3**. Wallpaper + real glass → **Stage 4**. Lock
+  polish → **Stage 7**. T2 RTC boot-clock skew broke the resume's first API
+  connect (§28) — investigate for the Stage 7 boot chain.
+- **NEXT: Stage 2 — the window model + keymap.** Sweeps SwayOSD retire +
+  brightness/volume-key ownership, Cmd+Space→launcher, detached-launch, hyprbars +
+  minimize + focus policy + input tuning, and retests the §5 input/window bug list.

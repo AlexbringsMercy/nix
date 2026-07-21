@@ -7,8 +7,10 @@ hl.on("hyprland.start", function()
         .. " && systemctl --user import-environment " .. session_environment
         .. " && systemctl --user start hyprland-session.target")
 
-    hl.exec_cmd("nm-applet --indicator")
-    hl.exec_cmd("blueman-applet")
+    -- Aurora: nm-applet + blueman-applet retired at the Stage 1 gate — the shell
+    -- owns network/bluetooth status+popouts natively (bar/components/StatusIcons.qml),
+    -- so these legacy tray applets were duplicate wifi/bt icons and drove a stuck
+    -- "connecting" spinner. Nmcli/BlueZ daemons are unaffected.
     hl.exec_cmd("hyprctl setcursor Adwaita 24")
 
     -- Build-period only (removed at Stage 10 with build-harness.nix): a

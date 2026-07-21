@@ -946,3 +946,116 @@ gate reboot will capture the exact wording.
 
 **Fix:** lands in Stage 7's session-chain rebuild (greetd + regreet per GRAND_PLAN
 §5.11 / Stage 7). Do not touch the greetd command or session wiring before then.
+
+---
+
+# Stage 1 gate findings (2026-07-21, gen 18→19, Alex live)
+
+Cutover health PASSED: shell supervised + active, 0 failed units, 0 hyprland
+configerrors, seed `scheme.json` = aurora/dark, `KillMode=process` proven (shell
+restarted mid-session, terminal survived), Plex removed. The findings below are
+the polish/feature gaps Alex surfaced walking the surfaces. Each is tagged with
+where it dies.
+
+## 20. 🔴 Palette completeness — 13 of 54 m3 roles were never pinned (root, PROVEN)
+
+**This is the real cause of the "generic android slop / light orange" reaction,
+not taste.** Stage 1B pinned 44 roles (the seed matches them exactly); the shell
+actually references **54**. The 13 unpinned roles fall back to caelestia's stock
+**warm Material** defaults, which clash hard with the cool dark aurora ladder:
+
+```
+m3outline         #9e8c91   warm mauve-gray  <- every divider/border in the UI
+m3outlineVariant  #514347   warm brown-gray
+m3error           #ffb4ab   pale salmon      <- Alex's "light orange"
+m3errorContainer  #93000a   dark red
+m3success/onSuccess/successContainer/onSuccessContainer   bright greens
+m3neutral / m3scrim / m3shadow                            uncontrolled
+```
+
+The OSD/dashboard read "navy generic slop" because the pinned surfaces
+(`#151d33`/`#1c2742`) are correct dark-slate but every outline/divider on them is
+warm mauve-gray `#9e8c91` and semantic chips are salmon/green. **Fix:** pin all
+13 into cool, palette-consistent values (desaturated crimson error, seafoam
+success, cool dark-blue outline, near-black scrim/shadow) in `Colours.qml`
+M3Palette defaults **and** the seed. Root dependency — do before more surfaces
+build on it (the same "fix the palette first" lesson as §3/§18).
+
+## 21. 🟠 "Not glass / no diff from before" — the wallpaper isn't in yet (expected, Stage 4)
+
+The whole design is translucent panels over a wallpaper that bleeds through and is
+sampled for accents. There is **no wallpaper at Stage 1** (skwd = Stage 4), so
+dark translucent panels over a flat `#080b14` desktop read as flat navy, and Kitty
+at 0.88 opacity over near-black reads as black. This is the audit's own
+"don't judge surfaces before the pipeline exists" (§ dependency note). Re-judge
+glass at Stage 4 + the §3.2 glass A/B evening. Glow rim "doesn't fit the window" →
+§3.2 A/B item, lean **drop**.
+
+## 22. 🟠 Color quality + model — Raycast bar, wallpaper-derived accents, surfaces too navy (design; Alex's direction, 2026-07-21)
+
+Alex's clarified, binding direction (saved to memory `aurora-palette-direction`):
+- **Accents are wallpaper-derived; "aurora" (cyan/purple/seafoam) is one MODE, not
+  the identity.** Warm/red/light wallpapers yield warm/red/light accents; surfaces
+  stay pinned dark. The current hardcoded accents are placeholder plumbing — the
+  real derivation is the Stage 4 generator + clamp (M11). Do not "polish" the
+  Stage-1 hardcoded accents.
+- **Quality bar = Raycast, not the hex code.** Deep, desaturated, polished — his
+  example: "normal hex red" vs "deep polished Raycast red" are different things.
+  `#38bdf8` (baby-blue), `#9b6ff8` (stock purple), the bright green all read
+  generic/Material-bright. Stage 4 palette work MUST hit the Raycast/Linear/Vercel
+  register.
+- **Pinned surfaces read as "flat standard navy," not polished dark slate.**
+  `#151d33`/`#1c2742` blue chroma is likely too high. §3.1 says "never navy" yet
+  its own values are navy — plan-vs-values tension. Revisit toward near-neutral
+  polished dark WITH Alex when doing the color pass; not a unilateral change.
+
+Consequence: Stage 1.5 (below) is mechanical only — pin the clashing warm roles
+(#20) to cool/neutral and clean up plumbing; it does NOT finalize the look. The
+real palette design is deferred to Stage 4 with the bar above.
+
+## 23. 🟠 Double brightness OSD — SwayOSD still running (real leftover)
+
+`swayosd-server` is still active (styled from `modules/home/hyprland/swayosd.css`)
+**and** caelestia's OSD handles brightness → two OSDs on the brightness keys.
+Volume is caelestia-only (correct). §2.2 lists swayosd as retired; it wasn't.
+**Fix:** retire SwayOSD (Stage 2 OSD-ownership sweep, or sooner).
+
+## 24. Keymap not rebuilt yet → Stage 2 (expected)
+
+Cmd+Space runs the **old** float/move bind, not the launcher; no key drives the
+caelestia surfaces yet. Launcher/utilities/Nexus are reachable via IPC now; the
+keymap rebind (Cmd+Space→launcher, brightness ownership, detached launches) is
+Stage 2 per §6.4. Not a defect — the shell is up before the keymap moves onto it.
+
+## 25. Bar placement → Stage 3 (expected)
+
+Persistent horizontal top taskbar (ilyamiro geometry), wifi/bt/status on the top
+bar, System button = Stage 3. Current top-edge dashboard IS caelestia's drawer
+(correct, §5.4); there is no persistent top bar yet by design.
+
+## 26. 🟠 Rail refinements — investigate (open)
+
+- **Duplicate wifi + bluetooth icons/popouts** on the rail, and a **persistent
+  spinning icon**. `bar/popouts/Bluetooth.qml` + `Network.qml` carry busy
+  indicators; the spinner may be an ungated scan state or a stuck service. Investigate.
+- **Notification:** clicking the persistent/critical toast **closes** it; expected
+  behavior is expand-to-details with an X. caelestia notification behavior — refine.
+- **Session menu / OSD buttons:** no hover tooltips — refine.
+- **Calendar click does nothing** — investigate.
+
+## 27. Lock screen "mid / wack icon / generic colored" → Stage 7 (expected)
+
+`modules/home/lock` (old hyprlock, matugen-colored, default avatar) is still
+imported; the composite aurora lock (ilyamiro identity × Vast depth) is Stage 7.
+What Alex saw is the placeholder. Its colors also come from the now-stale matugen
+cache (retires Stage 4).
+
+## 28. 🟠 T2 RTC boot skew → SSL "certificate not yet valid" broke the resume (open)
+
+On the armed-resume reboot the clock came up at epoch (1970) before NTP synced, so
+`claude --continue` hit "SSL certificate is not yet valid" and could not connect
+until the clock corrected. Recurs on every reboot. The resume `--hold` keeps the
+window visible; NTP fixes it within the window. **Investigate** a clock-early fix
+(hardware-clock/timesyncd ordering; `time.hardwareClockInLocalTime` for the macOS
+dual-boot RTC) so the unattended resume is reliable — relevant to Stage 7 boot
+chain. Service start timestamps showing "1970" are the same artifact (cosmetic).
