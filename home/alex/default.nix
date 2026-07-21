@@ -3,12 +3,10 @@
   imports = [
     ../../modules/home/packages.nix
     ../../modules/home/hyprland
-    ../../modules/home/waybar
     ../../modules/home/kitty
-    ../../modules/home/rofi
-    ../../modules/home/quickshell
+    # Aurora: the vendored chassis replaces the Waybar, Rofi, and old QuickShell surfaces.
     ../../modules/home/theming
-    ../../modules/home/wallpaper
+    # Aurora: wallpaper rendering retires now; the surviving theming backends remain imported above.
     ../../modules/home/desktop-apps.nix
     ../../modules/home/fish.nix
     ../../modules/home/lock
@@ -23,6 +21,10 @@
 
   xdg.enable = true;
   fonts.fontconfig.enable = true;
+
+  programs.aurora-shell.enable = true; # Aurora: make the vendored chassis Alex's active declared shell.
+  programs.aurora-shell.cli.enable = true; # Aurora: retain the internal caelestia CLI alongside the shell package.
+  programs.aurora-shell.settings = { }; # Aurora: use baked settings while keeping X-Restart-Triggers inert at v1.
 
   home.activation.createDesktopDirectories = ''
     run mkdir -p "$HOME/Pictures/Screenshots" "$HOME/Pictures/Wallpapers"

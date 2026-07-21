@@ -66,7 +66,7 @@
         # Chrome is part of the permanent desktop and otherwise makes
         # `nix flake check` fail before the integrated NixOS graph is reached.
         pkgs = homePkgs;
-        modules = [ ./home/alex ];
+        modules = [ inputs.aurora-shell.homeManagerModules.default ./home/alex ]; # Aurora: keep standalone Home Manager evaluation aware of the shell options.
       };
 
       packages.${system} = {

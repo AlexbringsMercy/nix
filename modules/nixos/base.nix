@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }: # Aurora: consume the flake inputs already supplied through nixosSystem.specialArgs.
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = false;
@@ -44,6 +44,7 @@
     useUserPackages = true;
     backupFileExtension = "hm-before-aurora";
     extraSpecialArgs = { };
+    sharedModules = [ inputs.aurora-shell.homeManagerModules.default ]; # Aurora: teach every integrated Home Manager user the aurora-shell options.
     users.alex = import ../../home/alex;
   };
 }

@@ -9,13 +9,7 @@ local_ref="path:$local_flake"
 git -C "$repo" diff --check HEAD --
 nix flake check "$repo_ref" --no-build --show-trace --max-jobs 2 --cores 2
 
-default_wallpaper=$(nix eval \
-  "$repo_ref#homeConfigurations.alex.config.aurora.wallpaper.defaultWallpaper" \
-  --raw)
-if [[ ! -r "$default_wallpaper" ]]; then
-  printf 'FAIL: default machine-local wallpaper is missing: %s\n' "$default_wallpaper" >&2
-  exit 1
-fi
+# Aurora: the legacy wallpaper option retired in Stage 1C; Stage 4 adds the skwd-wall gate.
 
 out=$(nix build --no-link --print-out-paths \
   "$local_ref#nixosConfigurations.macbook.config.system.build.toplevel" \
