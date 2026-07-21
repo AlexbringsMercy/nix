@@ -32,21 +32,21 @@ hl.config({
 hl.plugin.hyprbars.add_button({
     bg_color = "rgba(00000000)",
     fg_color = "rgb(e6edf7)",
-    size = 20, -- Aurora: was 14 — operator said tiny.
+    size = 24, -- Aurora: was 20 — slightly larger controls for the operator-requested Stage 2A refinement.
     icon = "󰖭",
     action = "hyprctl dispatch 'hl.dsp.window.close()'" -- Aurora: 0.55 lua close (legacy killactive is rejected).
 })
 hl.plugin.hyprbars.add_button({
     bg_color = "rgba(00000000)",
     fg_color = "rgb(aab6c8)",
-    size = 20,
+    size = 24,
     icon = "󰖯",
     action = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })'" -- Aurora: 0.55 lua maximize toggle.
 })
 hl.plugin.hyprbars.add_button({
     bg_color = "rgba(00000000)",
     fg_color = "rgb(aab6c8)",
-    size = 20,
+    size = 24,
     icon = "󰖰",
     action = "window-minimize" -- Aurora: the vendored omarchy script (its internals now use 0.55 lua dispatch).
 })

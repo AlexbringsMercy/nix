@@ -1,0 +1,105 @@
+diff --git a/hyprbars/barDeco.cpp b/hyprbars/barDeco.cpp
+--- a/hyprbars/barDeco.cpp
++++ b/hyprbars/barDeco.cpp
+@@ -143,9 +143,8 @@ void CHyprBar::onTouchUp(Event::SCallbackInfo& info, ITouch::SUpEvent e) {
+ }
+ 
+ void CHyprBar::onMouseMove(Vector2D coords) {
+-    // ensure proper redraws of button icons on hover when using hardware cursors
+-    if (g_pGlobalState->config.iconOnHover->value())
+-        damageOnButtonHover();
++    // ensure proper redraws of button icons and backgrounds on hover when using hardware cursors
++    damageOnButtonHover();
+ 
+     if (!m_bDragPending || m_bTouchEv || !validMapped(m_pWindow) || m_touchId != 0)
+         return;
+@@ -330,6 +329,7 @@ void CHyprBar::renderBarButtons(CBox* barBox, const float scale, const float a) {
+     const auto BARPADDING       = g_pGlobalState->config.barPadding->value();
+     const auto ALIGNBUTTONS     = g_pGlobalState->config.barButtonsAlignment->value();
+     const auto INACTIVECOLOR    = g_pGlobalState->config.inactiveButtonColor->value();
++    const auto HOVERCOLOR       = g_pGlobalState->config.hoverColor->value();
+ 
+     const bool BUTTONSRIGHT    = ALIGNBUTTONS != "left";
+     const auto visibleCount    = getVisibleButtonCount(BARBUTTONPADDING, BARPADDING, Vector2D{barBox->w, barBox->h}, scale);
+@@ -360,6 +360,12 @@ void CHyprBar::renderBarButtons(CBox* barBox, const float scale, const float a) {
+ 
+         g_pHyprOpenGL->renderRect(buttonBox, color, {.round = static_cast<int>(std::round(scaledButtonSize / 2.0)), .roundingPower = 2.F});
+ 
++        if (m_iButtonHoverState & (1 << i)) {
++            auto hoverColor = configColor(HOVERCOLOR);
++            hoverColor.a *= a;
++            g_pHyprOpenGL->renderRect(buttonBox, hoverColor, {.round = static_cast<int>(std::round(scaledButtonSize / 2.0)), .roundingPower = 2.F});
++        }
++
+         offset += scaledButtonsPad + scaledButtonSize;
+     }
+ }
+@@ -663,6 +669,9 @@ void CHyprBar::damageOnButtonHover() {
+ 
+     const auto COORDS = cursorRelativeToBar();
+ 
++    unsigned int hoverState = 0;
++    size_t       i          = 0;
++
+     for (auto& b : g_pGlobalState->buttons) {
+         const auto BARBUF     = Vector2D{(int)assignedBoxGlobal().w, HEIGHT};
+         Vector2D   currentPos = Vector2D{(BUTTONSRIGHT ? BARBUF.x - BARBUTTONPADDING - b.size - offset : offset), (BARBUF.y - b.size) / 2.0}.floor();
+@@ -669,10 +678,12 @@ void CHyprBar::damageOnButtonHover() {
+         bool       hover = VECINRECT(COORDS, currentPos.x, currentPos.y, currentPos.x + b.size + BARBUTTONPADDING, currentPos.y + b.size);
+ 
+-        if (hover != m_bButtonHovered) {
+-            m_bButtonHovered = hover;
+-            damageEntire();
+-        }
++        if (hover)
++            hoverState |= 1 << i;
+ 
+         offset += BARBUTTONPADDING + b.size;
++        ++i;
+     }
++
++    if (hoverState != m_iButtonHoverState)
++        damageEntire();
+ }
+diff --git a/hyprbars/barDeco.hpp b/hyprbars/barDeco.hpp
+--- a/hyprbars/barDeco.hpp
++++ b/hyprbars/barDeco.hpp
+@@ -55,7 +55,6 @@ class CHyprBar : public IHyprWindowDecoration {
+     bool                       m_bWindowSizeChanged = false;
+     bool                       m_hidden             = false;
+     bool                       m_bTitleColorChanged = false;
+-    bool                       m_bButtonHovered     = false;
+     bool                       m_bLastEnabledState  = false;
+     bool                       m_bWindowHasFocus    = false;
+     std::optional<CHyprColor>  m_bForcedBarColor;
+diff --git a/hyprbars/globals.hpp b/hyprbars/globals.hpp
+--- a/hyprbars/globals.hpp
++++ b/hyprbars/globals.hpp
+@@ -29,7 +29,7 @@ struct SGlobalState {
+     uint32_t                  titleColorRuleIdx = 0;
+ 
+     struct {
+-        SP<Config::Values::CColorValue>  barColor, textColor, inactiveButtonColor;
++        SP<Config::Values::CColorValue>  barColor, textColor, inactiveButtonColor, hoverColor;
+         SP<Config::Values::CIntValue>    barHeight;
+         SP<Config::Values::CIntValue>    barTextSize;
+         SP<Config::Values::CIntValue>    barPadding;
+diff --git a/hyprbars/main.cpp b/hyprbars/main.cpp
+--- a/hyprbars/main.cpp
++++ b/hyprbars/main.cpp
+@@ -211,6 +211,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+     g_pGlobalState->config.textColor           = makeShared<Config::Values::CColorValue>("plugin:hyprbars:col.text", "Change the text color", 0xffffffff);
+     g_pGlobalState->config.inactiveButtonColor = makeShared<Config::Values::CColorValue>(
+         "plugin:hyprbars:inactive_button_color", "Change the inactive button's color. 0x00000000 means unset", 0x00000000);
++    g_pGlobalState->config.hoverColor      = makeShared<Config::Values::CColorValue>("plugin:hyprbars:hover_color", "Change the hovered button's color", 0x22FFFFFF);
+     g_pGlobalState->config.barHeight       = makeShared<Config::Values::CIntValue>("plugin:hyprbars:bar_height", "Change the bar's height", 15);
+     g_pGlobalState->config.barTextSize     = makeShared<Config::Values::CIntValue>("plugin:hyprbars:bar_text_size", "Change the bar's text size", 10);
+     g_pGlobalState->config.barTitleEnabled = makeShared<Config::Values::CBoolValue>("plugin:hyprbars:bar_title_enabled", "Whether to enable titles in the bar", true);
+@@ -232,6 +233,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.barColor);
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.textColor);
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.inactiveButtonColor);
++    HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.hoverColor);
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.barHeight);
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.barTextSize);
+     HyprlandAPI::addConfigValueV2(PHANDLE, g_pGlobalState->config.barTitleEnabled);

@@ -1,8 +1,21 @@
 { pkgs, ... }:
 
 let
+  hyprbarsSource = pkgs.fetchFromGitHub { # Aurora: expose the full ABI-compatible v0.55.0 repository as the -p1 patch root.
+    owner = "hyprwm"; # Aurora: use the official hyprland-plugins repository.
+    repo = "hyprland-plugins"; # Aurora: fetch the repository containing the v0.55.0 hyprbars subtree.
+    rev = "90e66baf99c9025b1d5e9c9e58dd3c80d0911ea2"; # Aurora: exact v0.55.0 tag used by nixpkgs' Hyprland 0.55 plugin set.
+    hash = "sha256-WMUJ7tyw/9QbKUyRzLndEQSqX05fQLmFlRdMAmPD7tI="; # Aurora: v0.55.0 hyprland-plugins source hash (PM-filled from the build).
+  }; # Aurora: finish the pinned v0.55.0 hyprland-plugins source.
+
+  patchedHyprbars = pkgs.hyprlandPlugins.hyprbars.overrideAttrs (_: { # Aurora: retain nixpkgs' Hyprland inputs while replacing only hyprbars source and patching it.
+    src = hyprbarsSource; # Aurora: nixpkgs' subtree src cannot resolve the required a/hyprbars/ paths with its default -p1 patch phase.
+    cmakeDir = "../hyprbars"; # Aurora: after patching from the repository root, configure only the ABI-compatible v0.55.0 hyprbars subtree.
+    patches = [ ./patches/hyprbars-hover.patch ]; # Aurora: add the audited hover-highlight implementation.
+  }); # Aurora: finish the ABI-matched patched hyprbars derivation.
+
   hyprbarsLua = pkgs.writeText "aurora-hyprbars.lua" ( # Aurora: generate a Lua module containing the immutable plugin store path.
-    builtins.replaceStrings [ "@HYPRBARS_PLUGIN@" ] [ "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so" ] ( # Aurora: keep ABI-matched hyprbars in the deployed closure.
+    builtins.replaceStrings [ "@HYPRBARS_PLUGIN@" ] [ "${patchedHyprbars}/lib/libhyprbars.so" ] ( # Aurora: load the locally patched, ABI-matched hyprbars output.
       builtins.readFile ./hyprbars.lua.in # Aurora: preserve the readable Lua source outside the recursively deployed tree.
     ) # Aurora: finish the template substitution input.
   ); # Aurora: publish the generated early-load module.
