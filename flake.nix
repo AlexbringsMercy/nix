@@ -15,6 +15,11 @@
       url = "github:nix-community/home-manager/165228b0efefc3e635e5174020c40ea64271dc25";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    aurora-shell = {
+      url = "path:./modules/home/aurora-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -65,6 +70,7 @@
       };
 
       packages.${system}.home-activation = self.homeConfigurations.alex.activationPackage;
+      packages.${system}.aurora-shell = inputs.aurora-shell.packages.${system}.caelestia-shell;
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
     };
