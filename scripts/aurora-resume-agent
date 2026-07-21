@@ -10,4 +10,8 @@ flag="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-build/resume-armed"
 [ -f "$flag" ] || exit 0
 rm -f "$flag"
 
-exec kitty --directory "$HOME/nix" fish -lc 'claude --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'
+# --directory "$HOME": the build conversation belongs to the home project dir
+# (already trusted); starting in ~/nix hits a first-run trust prompt and finds
+# no conversation to continue. --hold keeps the window open if claude exits,
+# so a failed resume is visible instead of vanishing.
+exec kitty --hold --directory "$HOME" fish -lc 'claude --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'
