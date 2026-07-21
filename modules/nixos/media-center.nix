@@ -14,13 +14,8 @@
     iptables -D nixos-fw -m mac --mac-source 40:2f:86:81:26:3e -j nixos-fw-accept 2>/dev/null || true
   '';
 
-  # Plex Media Server (test — proprietary/account-gated; evaluating DV Direct Play).
-  # Runs as 'alex' so it can read media under /home/alex. Reachable by the TV via
-  # the firewall MAC rule above. (allowUnfree lives in base.nix.)
-  services.plex = {
-    enable = true;
-    user = "alex";
-    group = "users";
-    openFirewall = true;
-  };
+  # Plex removed 2026-07-21 (operator decision): Jellyfin/Moonfin is the media
+  # stack. Plex was a channel-era leftover mistakenly ported in Stage 0 — it is
+  # not used, and its scan/transcode jobs were burning compute and blocking
+  # reboots at service-stop. The user-dir Moonfin/Jellyfin stack is untouched.
 }

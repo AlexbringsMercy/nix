@@ -14,4 +14,7 @@ rm -f "$flag"
 # (already trusted); starting in ~/nix hits a first-run trust prompt and finds
 # no conversation to continue. --hold keeps the window open if claude exits,
 # so a failed resume is visible instead of vanishing.
-exec kitty --hold --directory "$HOME" fish -lc 'claude --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'
+# --dangerously-skip-permissions: the build agent runs unattended across reboots
+# (matches the §7.2 dev-workspace launcher); without it the resumed session
+# prompts for every command (operator-confirmed 2026-07-21).
+exec kitty --hold --directory "$HOME" fish -lc 'claude --dangerously-skip-permissions --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'
