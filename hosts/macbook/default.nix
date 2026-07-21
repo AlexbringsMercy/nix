@@ -6,6 +6,7 @@
     ../../modules/nixos/t2-firmware.nix
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/laptop-power.nix
+    ../../modules/nixos/media-center.nix
   ];
 
   networking.hostName = "macbook";

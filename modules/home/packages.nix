@@ -7,6 +7,7 @@
     cava
     dunst
     easyeffects
+    gh
     grim
     hypridle
     hyprlock
