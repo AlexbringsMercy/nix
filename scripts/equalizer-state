@@ -2,7 +2,10 @@
 set -euo pipefail
 
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-shell"
-preset_root="${XDG_CONFIG_HOME:-$HOME/.config}/easyeffects/output"
+# EasyEffects 8 stores user presets below XDG_DATA_HOME. Its compatibility
+# migration from the old XDG_CONFIG_HOME location is not reliable, so write
+# directly to the directory the running service watches and loads from.
+preset_root="${XDG_DATA_HOME:-$HOME/.local/share}/easyeffects/output"
 state_file="$state_root/equalizer.json"
 preset_name="aurora_live_eq"
 preset_file="$preset_root/$preset_name.json"
@@ -67,7 +70,8 @@ build_preset() {
         .["band\($index)"] = band($frequencies[$index]; $state.bands[$index])) as $bands
     | {
         output: {
-          blocklist: [],
+          # Keep latency-sensitive browser streaming off the extra effects graph.
+          blocklist: ["Google Chrome"],
           plugins_order: ["equalizer#0"],
           "equalizer#0": {
             bypass: false,
@@ -88,6 +92,7 @@ build_preset() {
 
   jq -e '
     .output.plugins_order == ["equalizer#0"]
+    and .output.blocklist == ["Google Chrome"]
     and .output["equalizer#0"]["num-bands"] == 10
     and (.output["equalizer#0"].left | keys | length == 10)
     and (.output["equalizer#0"].right | keys | length == 10)

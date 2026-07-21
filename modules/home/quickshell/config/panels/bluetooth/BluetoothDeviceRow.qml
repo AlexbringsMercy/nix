@@ -90,7 +90,7 @@ Rectangle {
                         const level = root.device.battery <= 1 ? root.device.battery * 100 : root.device.battery;
                         state += " · " + Math.round(level) + "% battery";
                     }
-                    return state;
+                    return Services.BluetoothService.deviceCategory(root.device) + " · " + state;
                 }
                 color: root.device.connected ? Core.Tokens.secondary : Core.Tokens.textMuted
                 font.family: Core.Tokens.uiFont

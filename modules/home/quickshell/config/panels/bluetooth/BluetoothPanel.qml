@@ -72,7 +72,7 @@ Core.PanelHost {
                             Text {
                                 text: Services.BluetoothService.scanning
                                     ? "Looking for nearby devices…"
-                                    : (Services.BluetoothService.enabled ? "Discoverable devices appear below" : "Turn on to connect accessories")
+                                    : (Services.BluetoothService.enabled ? "Named and known devices appear below" : "Turn on to connect accessories")
                                 color: Core.Tokens.textMuted
                                 font.family: Core.Tokens.uiFont
                                 font.pixelSize: 10
@@ -98,7 +98,9 @@ Core.PanelHost {
 
                     Text {
                         Layout.fillWidth: true
-                        text: Services.BluetoothService.scanning ? "Scanning…" : "Devices"
+                        text: Services.BluetoothService.scanning
+                            ? "Scanning… · " + Services.BluetoothService.devices.length + " devices"
+                            : "Devices · " + Services.BluetoothService.devices.length
                         color: Core.Tokens.textMuted
                         font.family: Core.Tokens.uiFont
                         font.pixelSize: 11

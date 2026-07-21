@@ -14,7 +14,7 @@ Singleton {
     readonly property var devices: {
         if (!adapter)
             return [];
-        const result = adapter.devices.values.slice();
+        const result = adapter.devices.values.filter(device => root.shouldShow(device));
         result.sort((left, right) => {
             if (left.connected !== right.connected)
                 return left.connected ? -1 : 1;
@@ -38,17 +38,61 @@ Singleton {
         }
     }
 
-    Timer {
-        id: scanTimeout
-        interval: 15000
-        repeat: false
-        onTriggered: root.stopScan()
+    function _looksLikeAddress(value): bool {
+        const candidate = String(value || "").trim();
+        return candidate === ""
+            || /^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(candidate)
+            || /^([0-9a-f]{2}-){5}[0-9a-f]{2}$/i.test(candidate);
+    }
+
+    function hasRealName(device): bool {
+        if (!device)
+            return false;
+        return !root._looksLikeAddress(device.name)
+            || !root._looksLikeAddress(device.deviceName);
+    }
+
+    function shouldShow(device): bool {
+        return device && (device.connected || device.paired || root.hasRealName(device));
     }
 
     function displayName(device): string {
         if (!device)
             return "Unknown device";
-        return device.name || device.deviceName || device.address;
+        if (!root._looksLikeAddress(device.name))
+            return device.name;
+        if (!root._looksLikeAddress(device.deviceName))
+            return device.deviceName;
+        return device.address;
+    }
+
+    function deviceCategory(device): string {
+        if (!device)
+            return "Bluetooth device";
+
+        const icon = String(device.icon || "").toLowerCase();
+        const name = root.displayName(device).toLowerCase();
+        if (icon.indexOf("gaming") >= 0 || /xbox|controller|gamepad|joystick/.test(name))
+            return "Game controller";
+        if (icon.indexOf("keyboard") >= 0)
+            return "Keyboard";
+        if (icon.indexOf("mouse") >= 0 || icon.indexOf("touchpad") >= 0)
+            return "Mouse / pointing device";
+        if (icon.indexOf("headset") >= 0 || icon.indexOf("headphone") >= 0)
+            return "Headphones / headset";
+        if (icon.indexOf("audio") >= 0 || icon.indexOf("speaker") >= 0)
+            return "Audio device";
+        if (icon.indexOf("phone") >= 0)
+            return "Phone";
+        if (icon.indexOf("computer") >= 0)
+            return "Computer";
+        if (icon.indexOf("display") >= 0 || icon.indexOf("video") >= 0)
+            return "Display / TV";
+        if (icon.indexOf("camera") >= 0)
+            return "Camera";
+        if (icon.indexOf("printer") >= 0)
+            return "Printer";
+        return "Bluetooth device";
     }
 
     function setEnabled(value: bool): void {
@@ -65,12 +109,10 @@ Singleton {
         if (!root.adapter || !root.adapter.enabled)
             return;
         root.adapter.discovering = true;
-        scanTimeout.restart();
     }
 
     function stopScan(): void {
         root._scanWhenEnabled = false;
-        scanTimeout.stop();
         if (root.adapter)
             root.adapter.discovering = false;
     }
