@@ -17,3 +17,7 @@ result-*
 *~
 *.swp
 .DS_Store
+
+# Research clones (11GB, re-cloneable) — vendored copies enter the tree at
+# Stage 1 with per-file attribution headers; raw upstreams never do.
+/repos/
