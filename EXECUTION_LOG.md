@@ -878,3 +878,30 @@ succeeded (portable output, expected firmware warning):
 - Resume loop: first live run mis-aimed (untrusted ~/nix, no conversation in
   that project) — fixed in eb09b64 (home project dir + kitty --hold), live
   as of gen 17.
+
+## Stage 1 — Chassis (2026-07-21, in progress)
+
+### 1A — Vendor (DONE)
+
+- Codex session 1 (thread 019f84ba…): 449 files vendored to
+  modules/home/aurora-shell, 437 attribution headers, SOURCES.md ledger
+  entry, parent-flake path-input wiring. Its sandbox mounts .git read-only —
+  division fixed permanently: Codex edits, the PM commits.
+- PM verification: header count + sample-file byte checks passed; caught an
+  invalid double dynamic-attr `packages.${system}` definition (fixed in
+  commit); one pkill self-match incident on the PM side, no damage, redone.
+- Build GREEN: nix build .#aurora-shell →
+  /nix/store/2sc3i9j9s0q7i6qjh6bf38ljq0zaywwz-caelestia-shell-1.0.0
+  (quickshell 0.3.0 compiled from caelestia's pin, plugin compiled clean).
+  Pushed through 4b768fe.
+- PM deviations, logged per §0.5: (1) snapshot vendor instead of a subtree
+  history graft — the audited bytes win over history; upstream remote
+  recorded in SOURCES.md for future diffs. (2) M11's generator-clamp half
+  lives in the caelestia CLI (a pinned flake input, not vendored) and is not
+  exercised until wallpaper-driven regeneration exists — it lands in Stage 4
+  with its first real consumer. 1B covers the shell-side scheme now.
+
+### 1B — Scheme (launched)
+
+- codex-prompts/stage1b-aurora-scheme.md → session codex-stage1b: ladder
+  defaults pinned, dark default, accent family defaults, ledger update.
