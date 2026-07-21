@@ -6,6 +6,11 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/fccfa9031a85b78a437f2f153c1f6449f3bc3185";
 
+    t2fanrd = {
+      url = "github:GnomedDev/T2FanRD";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/165228b0efefc3e635e5174020c40ea64271dc25";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -38,6 +43,7 @@
           };
           modules = [
             nixos-hardware.nixosModules.apple-t2
+            inputs.t2fanrd.nixosModules.t2fanrd
             home-manager.nixosModules.home-manager
             ./hosts/macbook
           ];

@@ -33,9 +33,21 @@
     pulse.enable = true;
   };
 
+  hardware.graphics = {
+    enable = true;
+    extraPackages = [ pkgs.intel-media-driver ];
+  };
+
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
+    settings.LE = {
+      # Xbox BLE firmware can negotiate overly slow defaults under BlueZ.
+      # 7..9 ticks is 8.75..11.25 ms, matching the controller's 100 Hz protocol.
+      MinConnectionInterval = 7;
+      MaxConnectionInterval = 9;
+      ConnectionLatency = 0;
+    };
   };
   services.blueman.enable = true;
   services.upower.enable = true;

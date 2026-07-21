@@ -73,7 +73,28 @@
       "inputs": {
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_2",
+        "t2fanrd": "t2fanrd"
+      }
+    },
+    "t2fanrd": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1777412856,
+        "narHash": "sha256-WrcIo3y9uFCuzgzbxc465FBS3zAZMQlfYszefkOUCWc=",
+        "owner": "GnomedDev",
+        "repo": "T2FanRD",
+        "rev": "48baf962697ec3d4d969c74cf601ee8e15b7aeaa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GnomedDev",
+        "repo": "T2FanRD",
+        "type": "github"
       }
     }
   },
