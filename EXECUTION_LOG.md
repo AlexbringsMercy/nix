@@ -921,6 +921,59 @@ succeeded (portable output, expected firmware warning):
 - Build GREEN → 46jqdy8svnx719hw1ybcz5db40nggbfs-caelestia-shell-1.0.0.
   Pushed through 9f64c36.
 
-NEXT: 1C — cutover session (programs.aurora-shell HM module, supervised
-service, old-tree retirement with keepers carried, aurora scheme.json seed).
-Activation and the Stage 1 visual gate happen with Alex present.
+### 1C — Cutover (DONE, file work; activation pending the gate)
+
+- Codex session 3 (thread 019f860d…, prompt `codex-prompts/stage1c-cutover.md`):
+  renamed the vendored HM module `programs.caelestia` → `programs.aurora-shell`
+  and its unit `caelestia` → `aurora-shell` with the §2.2 hardening —
+  **`KillMode=process`** (a shell restart never kills user apps — the P0
+  Waybar-cgroup class dies here), `SuccessExitStatus=143`, `LimitCORE=0`,
+  `StartLimitIntervalSec=30`/`Burst=3`. Threaded the module into **both** HM
+  eval paths (`base.nix` `home-manager.sharedModules` — `inputs` added to its
+  signature — and `flake.nix` `homeConfigurations.alex`) and enabled it (+ cli)
+  in `home/alex/default.nix`. Retired `modules/home/{waybar,rofi,quickshell,
+  wallpaper}` (42 files, 6273 lines); carried the **dunst
+  aurora-notification-fallback** keeper into the aurora-shell module with a
+  static, palette-independent `assets/fallback-dunstrc` (the old one was
+  matugen-rendered by the retiring wallpaper tree). Seeded a **write-if-absent**
+  `~/.local/state/caelestia/scheme.json` (`assets/aurora-scheme.json`) via an
+  HM activation, mutable so Stage 4 scheme changes still overwrite it.
+- PM verification: diff scope matched the report exactly (4 M, 2 new assets,
+  42 D); rename clean (zero stray `programs.caelestia`/`services.caelestia`);
+  **seed = the 1B palette exactly** (24/24 unique hexes both directions,
+  44/44 roles); no surviving module sets a retired option; `preflight.sh` edit
+  clean. App internals (`caelestia-shell` binary, `caelestia/` config+state,
+  `caelestia` CLI) deliberately unchanged — only namespace + unit name flipped.
+- Build GREEN, **both eval paths**: home-manager-generation
+  `fi5py6wflyg4s0v71r62nampii102dsa` + portable toplevel
+  `j4y0rw9mai26pjglnd4izx7s7s1j2pd0` (firmware warning expected on the portable
+  output). `caelestia-cli` + the `with-cli` plugin compiled clean;
+  `aurora-shell.service` and `aurora-notification-fallback.service` .drvs both
+  built. Committed 18b5182; pushed at the sub-stage per §2.3.
+- Codex deviations, logged per §0.5: (1) `.git` mounts read-only in the sandbox
+  → PM staged and committed (the permanent Codex-edits/PM-commits division).
+  (2) removed `preflight.sh`'s retired `aurora.wallpaper.defaultWallpaper` gate
+  — Stage 4 adds the skwd-wall replacement gate. (3) seed carries
+  `variant:"tonalspot"` + `flavour:"default"` — the vendored CLI's Scheme
+  constructor needs `variant`; the shell's `Colours.qml` `load()` ignores extra
+  top-level keys, so it is harmless to first light and defensive for the CLI.
+- Transitional state after 1C (flagged, not absorbed — retires on schedule):
+  `packages.nix` still installs waybar/rofi/quickshell/awww/waypaper and
+  `hyprland` still declares rofi-toggle/SwayOSD (Stage 2 window-model sweep);
+  `modules/home/lock` still points at `~/.cache/aurora-theme/hyprlock.conf` and
+  the matugen `theming` tree stays intact (Stage 4 / Stage 7). **Caelestia's own
+  `background` module renders the wallpaper at the Stage 1 gate** (skwd takes the
+  layer at Stage 4); the `~/.cache/aurora-theme` gtk.css `@import` is dormant
+  until then. All cosmetic, all sequenced by the plan.
+
+NEXT: **Stage 1 visual gate — Alex present.** Deploy the built closure via the
+wrapper (refresh lock → build via `path:/home/alex/.config/nixos-local` →
+profile `--set` → `switch-to-configuration boot` + armed-resume reboot, or a
+fully detached switch — never a live switch attached to the agent terminal).
+**Pre-gate step (seed is write-if-absent):** remove any pre-existing non-aurora
+`~/.local/state/caelestia/scheme.json` before first activation so the aurora
+seed lands. Then the §3.2 glass A/B (evening), VA-API `vainfo` check, and the
+Stage 0 leftovers deferred to this gate (TV-from-couch reachability, Xbox
+controller pairing). Gate checklist: shell runs supervised; launcher /
+dashboard / notifications / OSD / session / utilities / Nexus all open; IPC
+works; nothing dies on `systemctl --user restart aurora-shell`.
