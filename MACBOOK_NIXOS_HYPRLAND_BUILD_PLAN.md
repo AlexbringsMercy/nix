@@ -1,1 +1,1 @@
-/home/alex/nix/BUILD_PLAN.md
+BUILD_PLAN.md

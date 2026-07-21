@@ -822,5 +822,22 @@ provide the lifecycle; fix lands in Stage 7's session-chain rebuild (§5.11).
 succeeded (portable output, expected firmware warning):
 `/nix/store/h5lcbhhcxn31hld03lnixcgic0djlkj7-nixos-system-macbook-26.11.20260616.567a49d`
 
-PENDING AT GATE: gh auth + push, nixos-rebuild switch, reboot,
+### PM verification amendments (same day)
+
+- Commit 6: restored `xdg-utils` (the one true parity gap — the channel carried
+  it in systemPackages, the flake had it nowhere; home packages now carry it)
+  and made the `MACBOOK_NIXOS_HYPRLAND_BUILD_PLAN.md` symlink relative (it was
+  absolute, which breaks any clone outside /home/alex/nix).
+- Machine-local wrapper (`~/.config/nixos-local`, not in Git): `macbook-config`
+  input changed from `path:` to `git+file:///home/alex/nix`, lock refreshed
+  (the Jul 16 lock predated the t2fanrd input entirely). Reason: the `path:`
+  fetcher copies the whole worktree into the store — including the 11 GB
+  `repos/` research clones — while the git fetcher ships the committed tree
+  only. Its stale `result` GC root (Jul 16 toplevel) was removed.
+- Gate deploys via the wrapper using the boot-only sequence recorded above
+  (profile --set, then switch-to-configuration boot), with the store path baked
+  into a single sudo line. Final toplevel + tick results land in the Stage 0
+  close-out entry after the gate.
+
+PENDING AT GATE: gh auth + push, boot-only install via wrapper, reboot,
 TV/controller/fan checks, delete system generations 1-7.

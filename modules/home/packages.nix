@@ -27,5 +27,6 @@
     wireplumber
     wl-clipboard
     wlogout
+    xdg-utils
   ];
 }
