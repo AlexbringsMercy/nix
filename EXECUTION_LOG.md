@@ -852,5 +852,29 @@ succeeded (portable output, expected firmware warning):
   First activation still needs the operator password (the rule ships with
   the new generation).
 
-PENDING AT GATE: gh auth + push, boot-only install via wrapper, reboot,
-TV/controller/fan checks, delete system generations 1-7.
+### Stage 0 close-out (2026-07-21) — GATE PASSED
+
+- Deployed: gen 16 (boot-only + operator reboot), then gen 17 — the first
+  fully autonomous deploy (resume-loop fix; built and activated passwordless
+  through the harness). Booted hha12kk… (gen 16), current y236h6d0… (gen 17).
+- All commits pushed to github.com/AlexbringsMercy/nix (codex/macbook-desktop).
+- Generations 1–7 deleted, boot menu pruned; 8–17 remain (15 = last
+  channel-lineage build, kept as the rollback anchor until the Stage 10 wipe).
+  nix-collect-garbage freed 9.7 GiB (7,792 store paths); disk now 73G/120G.
+- Ticks: desktop boot OK; WiFi OK (firmware via the git+file wrapper
+  confirmed working). NO start-hyprland warning observed on the gen 16 boot —
+  better than the root-caused expectation; watch subsequent boots
+  (ISSUE_LOG §19 stands). Deferred to the Stage 1 gate as formalities
+  (operator away from the TV): TV-from-couch reachability and Xbox pairing —
+  risk accepted because the TV MAC rule is verified inside the live
+  firewall-start script, firewall.service and plex.service are active, and
+  the BlueZ LE settings + /var/lib/bluetooth pairings are untouched.
+- Incident + policy: the gen 17 live activation was SIGKILLed together with
+  the agent terminal (likely memory pressure; the kernel journal is
+  off-limits to the scoped sudo list by design). The activation completed as
+  root regardless. POLICY: every future activation runs detached from the
+  agent terminal (setsid + log file), or boot-only + armed-resume reboot for
+  anything that touches the session.
+- Resume loop: first live run mis-aimed (untrusted ~/nix, no conversation in
+  that project) — fixed in eb09b64 (home project dir + kitty --hold), live
+  as of gen 17.
