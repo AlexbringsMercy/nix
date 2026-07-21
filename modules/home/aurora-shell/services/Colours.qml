@@ -17,8 +17,8 @@ Singleton {
     property string scheme
     property string flavour
     readonly property bool light: showPreview ? previewLight : currentLight
-    property bool currentLight
-    property bool previewLight
+    property bool currentLight: false // Aurora: dark is the default shell identity.
+    property bool previewLight: false // Aurora: previews also start from the dark identity.
     readonly property M3Palette palette: showPreview ? preview : current
     readonly property M3TPalette tPalette: M3TPalette {}
     readonly property M3Palette current: M3Palette {}
@@ -229,44 +229,44 @@ Singleton {
     }
 
     component M3Palette: QtObject {
-        property color m3primary_paletteKeyColor: "#a8627b"
-        property color m3secondary_paletteKeyColor: "#8e6f78"
-        property color m3tertiary_paletteKeyColor: "#986e4c"
+        property color m3primary_paletteKeyColor: "#38bdf8" // Aurora: cyan accent family anchor.
+        property color m3secondary_paletteKeyColor: "#7c3aed" // Aurora: purple accent family anchor.
+        property color m3tertiary_paletteKeyColor: "#34d399" // Aurora: seafoam accent family anchor.
         property color m3neutral_paletteKeyColor: "#807477"
         property color m3neutral_variant_paletteKeyColor: "#837377"
-        property color m3background: "#191114"
-        property color m3onBackground: "#efdfe2"
-        property color m3surface: "#191114"
-        property color m3surfaceDim: "#191114"
-        property color m3surfaceBright: "#403739"
-        property color m3surfaceContainerLowest: "#130c0e"
-        property color m3surfaceContainerLow: "#22191c"
-        property color m3surfaceContainer: "#261d20"
-        property color m3surfaceContainerHigh: "#31282a"
-        property color m3surfaceContainerHighest: "#3c3235"
-        property color m3onSurface: "#efdfe2"
-        property color m3surfaceVariant: "#514347"
-        property color m3onSurfaceVariant: "#d5c2c6"
-        property color m3inverseSurface: "#efdfe2"
-        property color m3inverseOnSurface: "#372e30"
+        property color m3background: "#080b14" // Aurora: pinned background.
+        property color m3onBackground: "#e6edf7" // Aurora: pinned primary text.
+        property color m3surface: "#151d33" // Aurora: pinned mid surface.
+        property color m3surfaceDim: "#080b14" // Aurora: dim surfaces use the deepest base.
+        property color m3surfaceBright: "#1c2742" // Aurora: bright surfaces use the elevation ceiling.
+        property color m3surfaceContainerLowest: "#0a0e1a" // Aurora: pinned glass surface.
+        property color m3surfaceContainerLow: "#0f1526" // Aurora: pinned first elevation.
+        property color m3surfaceContainer: "#151d33" // Aurora: pinned mid container.
+        property color m3surfaceContainerHigh: "#1c2742" // Aurora: pinned selected elevation.
+        property color m3surfaceContainerHighest: "#1c2742" // Aurora: highest aliases the pinned elevation ceiling.
+        property color m3onSurface: "#e6edf7" // Aurora: pinned primary text; never pure white.
+        property color m3surfaceVariant: "#1c2742" // Aurora: variants use the pinned elevation ceiling.
+        property color m3onSurfaceVariant: "#aab6c8" // Aurora: pinned secondary text.
+        property color m3inverseSurface: "#e6edf7" // Aurora: inverse surface uses the pinned light endpoint.
+        property color m3inverseOnSurface: "#151d33" // Aurora: inverse content uses the pinned mid surface.
         property color m3outline: "#9e8c91"
         property color m3outlineVariant: "#514347"
         property color m3shadow: "#000000"
         property color m3scrim: "#000000"
-        property color m3surfaceTint: "#ffb0ca"
-        property color m3primary: "#ffb0ca"
-        property color m3onPrimary: "#541d34"
-        property color m3primaryContainer: "#6f334a"
-        property color m3onPrimaryContainer: "#ffd9e3"
-        property color m3inversePrimary: "#8b4a62"
-        property color m3secondary: "#e2bdc7"
-        property color m3onSecondary: "#422932"
-        property color m3secondaryContainer: "#5a3f48"
-        property color m3onSecondaryContainer: "#ffd9e3"
-        property color m3tertiary: "#f0bc95"
-        property color m3onTertiary: "#48290c"
-        property color m3tertiaryContainer: "#b58763"
-        property color m3onTertiaryContainer: "#000000"
+        property color m3surfaceTint: "#38bdf8" // Aurora: surface tint follows the primary cyan family.
+        property color m3primary: "#38bdf8" // Aurora: luminous cyan primary.
+        property color m3onPrimary: "#082f49" // Aurora: dark cyan on-primary.
+        property color m3primaryContainer: "#075985" // Aurora: dark same-family primary container.
+        property color m3onPrimaryContainer: "#bae6fd" // Aurora: pale cyan on-primary-container.
+        property color m3inversePrimary: "#0284c7" // Aurora: inverse primary keeps the cyan family.
+        property color m3secondary: "#9b6ff8" // Aurora: purple anchor lifted for near-black contrast.
+        property color m3onSecondary: "#260c59" // Aurora: dark purple on-secondary.
+        property color m3secondaryContainer: "#5b21b6" // Aurora: dark same-family secondary container.
+        property color m3onSecondaryContainer: "#ede9fe" // Aurora: pale purple on-secondary-container.
+        property color m3tertiary: "#34d399" // Aurora: luminous seafoam tertiary.
+        property color m3onTertiary: "#022c22" // Aurora: dark green on-tertiary.
+        property color m3tertiaryContainer: "#047857" // Aurora: dark same-family tertiary container.
+        property color m3onTertiaryContainer: "#d1fae5" // Aurora: pale seafoam on-tertiary-container.
         property color m3error: "#ffb4ab"
         property color m3onError: "#690005"
         property color m3errorContainer: "#93000a"
@@ -275,18 +275,18 @@ Singleton {
         property color m3onSuccess: "#213528"
         property color m3successContainer: "#374B3E"
         property color m3onSuccessContainer: "#D1E9D6"
-        property color m3primaryFixed: "#ffd9e3"
-        property color m3primaryFixedDim: "#ffb0ca"
-        property color m3onPrimaryFixed: "#39071f"
-        property color m3onPrimaryFixedVariant: "#6f334a"
-        property color m3secondaryFixed: "#ffd9e3"
-        property color m3secondaryFixedDim: "#e2bdc7"
-        property color m3onSecondaryFixed: "#2b151d"
-        property color m3onSecondaryFixedVariant: "#5a3f48"
-        property color m3tertiaryFixed: "#ffdcc3"
-        property color m3tertiaryFixedDim: "#f0bc95"
-        property color m3onTertiaryFixed: "#2f1500"
-        property color m3onTertiaryFixedVariant: "#623f21"
+        property color m3primaryFixed: "#bae6fd" // Aurora: pale cyan fixed role.
+        property color m3primaryFixedDim: "#7dd3fc" // Aurora: dim cyan fixed role.
+        property color m3onPrimaryFixed: "#082f49" // Aurora: dark cyan on fixed role.
+        property color m3onPrimaryFixedVariant: "#075985" // Aurora: cyan fixed variant relationship.
+        property color m3secondaryFixed: "#ede9fe" // Aurora: pale purple fixed role.
+        property color m3secondaryFixedDim: "#c4b5fd" // Aurora: dim purple fixed role.
+        property color m3onSecondaryFixed: "#260c59" // Aurora: dark purple on fixed role.
+        property color m3onSecondaryFixedVariant: "#5b21b6" // Aurora: purple fixed variant relationship.
+        property color m3tertiaryFixed: "#d1fae5" // Aurora: pale seafoam fixed role.
+        property color m3tertiaryFixedDim: "#6ee7b7" // Aurora: dim seafoam fixed role.
+        property color m3onTertiaryFixed: "#022c22" // Aurora: dark green on fixed role.
+        property color m3onTertiaryFixedVariant: "#047857" // Aurora: seafoam fixed variant relationship.
         property color term0: "#353434"
         property color term1: "#ff4c8a"
         property color term2: "#ffbbb7"

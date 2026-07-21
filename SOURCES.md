@@ -8,7 +8,7 @@ signal for this personal installation.
 
 | Component | Upstream repo | Upstream path | Vendored path | Local delta |
 |---|---|---|---|---|
-| aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim. |
+| aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim; aurora scheme defaults (ladder pinned, dark default, accent families). <!-- # Aurora: Stage 1B local delta. --> |
 
 The chassis was vendored from the on-disk snapshot audited by the research corpus. The upstream remote `github.com/caelestia-dots/shell` is recorded for future diffs. A history graft was deliberately not performed so the audited bytes stay exact (PM decision, 2026-07-21).
 
