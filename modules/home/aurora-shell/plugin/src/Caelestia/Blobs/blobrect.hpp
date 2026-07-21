@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/blobrect.hpp. Aurora build; local changes tracked in git.
 #pragma once
 
 #include "blobshape.hpp"

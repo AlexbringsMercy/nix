@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/tickingservice.cpp. Aurora build; local changes tracked in git.
 #include "tickingservice.hpp"
 
 #include "../Config/config.hpp"

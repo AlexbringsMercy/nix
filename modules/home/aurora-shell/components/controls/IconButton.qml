@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/controls/IconButton.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Caelestia.Config
 import qs.components

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/cutils.cpp. Aurora build; local changes tracked in git.
 #include "cutils.hpp"
 
 #include <QtConcurrent/qtconcurrentrun.h>

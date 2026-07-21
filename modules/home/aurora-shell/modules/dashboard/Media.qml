@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/dashboard/Media.qml. Aurora build; local changes tracked in git.
 import "media"
 import QtQuick
 import QtQuick.Layouts

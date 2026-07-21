@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/dashboard/Dash.qml. Aurora build; local changes tracked in git.
 import "dash"
 import QtQuick.Layouts
 import Caelestia.Config

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/sidebarconfig.hpp. Aurora build; local changes tracked in git.
 #pragma once
 
 #include "configobject.hpp"

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/hyprdevices.cpp. Aurora build; local changes tracked in git.
 #include "hyprdevices.hpp"
 
 #include <qjsonarray.h>

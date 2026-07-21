@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — utils/Searcher.qml. Aurora build; local changes tracked in git.
 import "scripts/fzf.js" as Fzf
 import "scripts/fuzzysort.js" as Fuzzy
 import QtQuick

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/requests.cpp. Aurora build; local changes tracked in git.
 #include "requests.hpp"
 
 #include <qjsvalueiterator.h>

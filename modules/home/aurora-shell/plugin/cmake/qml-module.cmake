@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — plugin/cmake/qml-module.cmake. Aurora build; local changes tracked in git.
 message(STATUS "QML install dir: ${CMAKE_INSTALL_PREFIX}/${INSTALL_QMLDIR}")
 
 function(qml_module arg_TARGET)

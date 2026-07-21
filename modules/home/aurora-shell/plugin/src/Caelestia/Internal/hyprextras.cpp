@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/hyprextras.cpp. Aurora build; local changes tracked in git.
 #include "hyprextras.hpp"
 #include "hyprdevices.hpp"
 

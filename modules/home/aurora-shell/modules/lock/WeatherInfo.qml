@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/lock/WeatherInfo.qml. Aurora build; local changes tracked in git.
 import "weather"
 import QtQuick
 import Caelestia.Config

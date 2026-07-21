@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/font.cpp. Aurora build; local changes tracked in git.
 #include "font.hpp"
 #include "appearanceconfig.hpp"
 

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/images/CachingImage.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import Caelestia.Images

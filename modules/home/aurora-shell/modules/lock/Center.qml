@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/lock/Center.qml. Aurora build; local changes tracked in git.
 import "center"
 import QtQuick
 import QtQuick.Layouts

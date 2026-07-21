@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/cavaprovider.cpp. Aurora build; local changes tracked in git.
 #include "cavaprovider.hpp"
 
 #include "audiocollector.hpp"

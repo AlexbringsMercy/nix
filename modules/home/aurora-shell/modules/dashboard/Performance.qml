@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/dashboard/Performance.qml. Aurora build; local changes tracked in git.
 import "performance"
 import QtQuick
 import QtQuick.Layouts

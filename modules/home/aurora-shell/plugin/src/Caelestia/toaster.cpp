@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/toaster.cpp. Aurora build; local changes tracked in git.
 #include "toaster.hpp"
 
 #include <qlogging.h>

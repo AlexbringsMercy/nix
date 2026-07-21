@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/controls/MenuItem.qml. Aurora build; local changes tracked in git.
 import QtQuick
 
 QtObject {

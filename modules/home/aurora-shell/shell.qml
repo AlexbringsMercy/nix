@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — shell.qml. Aurora build; local changes tracked in git.
 //@ pragma Env QS_CRASHREPORT_URL=https://github.com/caelestia-dots/shell/issues/new?template=crash.yml
 //@ pragma DefaultEnv QS_NO_RELOAD_POPUP=1
 //@ pragma DefaultEnv QS_DROP_EXPENSIVE_FONTS=1

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/effects/Colouriser.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Effects
 import qs.components

@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/ISSUE_TEMPLATE/feature.yml. Aurora build; local changes tracked in git.
 name: Feature request
 description: Suggest a new feature
 labels: ["enhancement"]

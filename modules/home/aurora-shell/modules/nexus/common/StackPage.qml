@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/common/StackPage.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Controls
 import Caelestia.Config

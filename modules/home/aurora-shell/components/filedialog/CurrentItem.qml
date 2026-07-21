@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/filedialog/CurrentItem.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Shapes
 import Caelestia.Config

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/utilities/Background.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Shapes
 import qs.components

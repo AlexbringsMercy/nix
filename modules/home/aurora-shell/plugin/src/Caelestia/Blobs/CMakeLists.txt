@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/CMakeLists.txt. Aurora build; local changes tracked in git.
 qml_module(caelestia-blobs
     URI Caelestia.Blobs
     SOURCES

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/blobshape.cpp. Aurora build; local changes tracked in git.
 #include "blobshape.hpp"
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"

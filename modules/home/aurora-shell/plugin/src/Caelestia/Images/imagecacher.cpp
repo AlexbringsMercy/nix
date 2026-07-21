@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Images/imagecacher.cpp. Aurora build; local changes tracked in git.
 #include "imagecacher.hpp"
 
 #include <qcryptographichash.h>

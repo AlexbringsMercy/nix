@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — nix/default.nix. Aurora build; local changes tracked in git.
 {
   rev,
   lib,

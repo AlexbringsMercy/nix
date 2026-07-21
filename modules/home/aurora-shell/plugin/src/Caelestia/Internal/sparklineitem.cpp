@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/sparklineitem.cpp. Aurora build; local changes tracked in git.
 #include "sparklineitem.hpp"
 #include "circularbuffer.hpp"
 

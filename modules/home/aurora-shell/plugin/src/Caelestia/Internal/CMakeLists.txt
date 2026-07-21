@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/CMakeLists.txt. Aurora build; local changes tracked in git.
 qml_module(caelestia-internal
     URI Caelestia.Internal
     SOURCES

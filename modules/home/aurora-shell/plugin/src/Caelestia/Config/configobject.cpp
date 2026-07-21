@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/configobject.cpp. Aurora build; local changes tracked in git.
 #include "configobject.hpp"
 
 #include <qjsonarray.h>

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/gpu.cpp. Aurora build; local changes tracked in git.
 #include "gpu.hpp"
 
 #include "../Config/config.hpp"

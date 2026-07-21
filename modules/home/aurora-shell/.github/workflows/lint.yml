@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/workflows/lint.yml. Aurora build; local changes tracked in git.
 name: Lint code
 
 on:

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/circularindicatormanager.cpp. Aurora build; local changes tracked in git.
 #include "circularindicatormanager.hpp"
 #include <qeasingcurve.h>
 #include <qpoint.h>

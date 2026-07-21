@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/circularbuffer.cpp. Aurora build; local changes tracked in git.
 #include "circularbuffer.hpp"
 
 #include <algorithm>

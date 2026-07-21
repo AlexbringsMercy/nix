@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/widgets/WavyTopRect.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Shapes
 import qs.components

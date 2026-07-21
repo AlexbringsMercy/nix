@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/workflows/release.yml. Aurora build; local changes tracked in git.
 name: Create release
 
 on:

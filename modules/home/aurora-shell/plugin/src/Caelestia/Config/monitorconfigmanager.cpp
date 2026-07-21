@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/monitorconfigmanager.cpp. Aurora build; local changes tracked in git.
 #include "monitorconfigmanager.hpp"
 #include "config.hpp"
 #include "tokens.hpp"

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/sessionmanager.cpp. Aurora build; local changes tracked in git.
 #include "sessionmanager.hpp"
 
 #include <QtDBus/qdbusconnection.h>

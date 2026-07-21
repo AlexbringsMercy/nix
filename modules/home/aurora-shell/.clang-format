@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .clang-format. Aurora build; local changes tracked in git.
 ---
 BasedOnStyle: LLVM
 IndentWidth: 4

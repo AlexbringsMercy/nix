@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/shaders/blob.vert. Aurora build; local changes tracked in git.
 #version 440
 
 layout(location = 0) in vec4 qt_VertexPosition;

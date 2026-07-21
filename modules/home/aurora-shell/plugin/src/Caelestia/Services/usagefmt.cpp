@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/usagefmt.cpp. Aurora build; local changes tracked in git.
 #include "usagefmt.hpp"
 
 namespace {

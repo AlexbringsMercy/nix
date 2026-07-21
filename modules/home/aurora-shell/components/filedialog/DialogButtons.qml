@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/filedialog/DialogButtons.qml. Aurora build; local changes tracked in git.
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components

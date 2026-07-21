@@ -4,6 +4,14 @@ Every imported idea or adapted component is reviewed before use. A missing
 license is recorded as provenance; it is not treated as a quality or malware
 signal for this personal installation.
 
+## Vendored components
+
+| Component | Upstream repo | Upstream path | Vendored path | Local delta |
+|---|---|---|---|---|
+| aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim. |
+
+The chassis was vendored from the on-disk snapshot audited by the research corpus. The upstream remote `github.com/caelestia-dots/shell` is recorded for future diffs. A history graft was deliberately not performed so the audited bytes stay exact (PM decision, 2026-07-21).
+
 | Source | Planning revision | Use |
 |---|---|---|
 | AlexbringsMercy/nix | `4974921` | Original host configuration and repository |

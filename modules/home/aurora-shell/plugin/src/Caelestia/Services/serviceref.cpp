@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/serviceref.cpp. Aurora build; local changes tracked in git.
 #include "serviceref.hpp"
 
 #include "service.hpp"

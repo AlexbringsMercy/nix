@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/tokensattached.cpp. Aurora build; local changes tracked in git.
 #include "tokensattached.hpp"
 #include "anim.hpp"
 #include "appearanceconfig.hpp"

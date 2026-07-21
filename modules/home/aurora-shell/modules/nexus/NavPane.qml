@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/NavPane.qml. Aurora build; local changes tracked in git.
 import "navpane"
 import QtQuick
 import QtQuick.Layouts

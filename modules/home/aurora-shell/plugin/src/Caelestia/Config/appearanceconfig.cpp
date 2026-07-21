@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/appearanceconfig.cpp. Aurora build; local changes tracked in git.
 #include "appearanceconfig.hpp"
 #include "tokens.hpp"
 

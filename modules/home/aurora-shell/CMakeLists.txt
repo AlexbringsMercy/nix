@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — CMakeLists.txt. Aurora build; local changes tracked in git.
 cmake_minimum_required(VERSION 3.19)
 
 if(NOT DEFINED VERSION)

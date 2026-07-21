@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/ISSUE_TEMPLATE/crash.yml. Aurora build; local changes tracked in git.
 name: Crash report
 description: Report a crash
 labels: ["bug", "crash"]

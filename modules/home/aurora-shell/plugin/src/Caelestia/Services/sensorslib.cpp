@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/sensorslib.cpp. Aurora build; local changes tracked in git.
 #include "sensorslib.hpp"
 
 #include <atomic>

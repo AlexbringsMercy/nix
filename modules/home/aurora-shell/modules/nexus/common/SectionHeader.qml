@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/common/SectionHeader.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config

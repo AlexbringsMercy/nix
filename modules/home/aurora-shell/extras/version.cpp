@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — extras/version.cpp. Aurora build; local changes tracked in git.
 #include <iostream>
 
 int main(int argc, char* argv[]) {

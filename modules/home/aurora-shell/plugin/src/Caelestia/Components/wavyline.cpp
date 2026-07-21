@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Components/wavyline.cpp. Aurora build; local changes tracked in git.
 #include "wavyline.hpp"
 
 #include <qpainter.h>

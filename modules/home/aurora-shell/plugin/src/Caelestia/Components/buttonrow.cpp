@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Components/buttonrow.cpp. Aurora build; local changes tracked in git.
 #include "buttonrow.hpp"
 
 namespace caelestia::components {

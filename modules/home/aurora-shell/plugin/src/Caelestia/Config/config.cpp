@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/config.cpp. Aurora build; local changes tracked in git.
 #include "config.hpp"
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"

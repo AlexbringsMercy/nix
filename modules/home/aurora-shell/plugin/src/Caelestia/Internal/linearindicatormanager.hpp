@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/linearindicatormanager.hpp. Aurora build; local changes tracked in git.
 #pragma once
 
 #include <qcolor.h>

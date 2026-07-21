@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/WindowFactory.qml. Aurora build; local changes tracked in git.
 pragma Singleton
 
 import QtQuick

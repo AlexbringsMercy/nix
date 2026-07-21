@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/workflows/build-nix.yml. Aurora build; local changes tracked in git.
 name: Build on Nix
 
 on:

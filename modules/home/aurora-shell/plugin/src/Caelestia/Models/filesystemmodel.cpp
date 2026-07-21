@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Models/filesystemmodel.cpp. Aurora build; local changes tracked in git.
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>

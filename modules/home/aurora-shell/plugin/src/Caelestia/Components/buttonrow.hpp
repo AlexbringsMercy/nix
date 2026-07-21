@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Components/buttonrow.hpp. Aurora build; local changes tracked in git.
 #pragma once
 
 #include <qquickitem.h>

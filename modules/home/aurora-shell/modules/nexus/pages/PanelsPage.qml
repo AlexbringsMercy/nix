@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/pages/PanelsPage.qml. Aurora build; local changes tracked in git.
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.modules.nexus.common

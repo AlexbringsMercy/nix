@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/lyrics.cpp. Aurora build; local changes tracked in git.
 #include "lyrics.hpp"
 
 #include "../Config/config.hpp"

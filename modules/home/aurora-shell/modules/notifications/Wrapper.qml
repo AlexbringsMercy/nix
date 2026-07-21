@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/notifications/Wrapper.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import qs.components
 

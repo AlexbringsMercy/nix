@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Images/cachingimageprovider.cpp. Aurora build; local changes tracked in git.
 #include "cachingimageprovider.hpp"
 
 #include "imagecacher.hpp"

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/requests.hpp. Aurora build; local changes tracked in git.
 #pragma once
 
 #include <qnetworkaccessmanager.h>

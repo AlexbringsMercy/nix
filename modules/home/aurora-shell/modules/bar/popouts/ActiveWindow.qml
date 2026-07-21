@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/bar/popouts/ActiveWindow.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Wayland

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/imageanalyser.cpp. Aurora build; local changes tracked in git.
 #include "imageanalyser.hpp"
 
 #include <QtConcurrent/qtconcurrentrun.h>

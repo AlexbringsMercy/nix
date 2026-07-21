@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/audioprovider.cpp. Aurora build; local changes tracked in git.
 #include "audioprovider.hpp"
 
 #include "audiocollector.hpp"

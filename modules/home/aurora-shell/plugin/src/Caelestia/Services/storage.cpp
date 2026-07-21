@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/storage.cpp. Aurora build; local changes tracked in git.
 #include "storage.hpp"
 
 #include <algorithm>

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — services/NetworkUsage.qml. Aurora build; local changes tracked in git.
 pragma Singleton
 
 import QtQuick

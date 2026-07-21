@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — extras/CMakeLists.txt. Aurora build; local changes tracked in git.
 # Version
 add_executable(version version.cpp)
 target_compile_definitions(version PRIVATE

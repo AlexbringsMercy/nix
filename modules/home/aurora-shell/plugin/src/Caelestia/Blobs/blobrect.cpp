@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/blobrect.cpp. Aurora build; local changes tracked in git.
 #include "blobrect.hpp"
 #include "blobgroup.hpp"
 

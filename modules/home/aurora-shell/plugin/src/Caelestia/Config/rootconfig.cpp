@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/rootconfig.cpp. Aurora build; local changes tracked in git.
 #include "rootconfig.hpp"
 
 #include <qdatetime.h>

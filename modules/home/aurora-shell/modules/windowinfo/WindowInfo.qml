@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/windowinfo/WindowInfo.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell

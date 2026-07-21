@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/workflows/update-flake-inputs.yml. Aurora build; local changes tracked in git.
 name: Update flake inputs
 
 on:

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/controls/StyledRadioButton.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config

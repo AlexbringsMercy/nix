@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/drawers/Panels.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import Caelestia.Config

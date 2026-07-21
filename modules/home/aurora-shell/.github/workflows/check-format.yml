@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .github/workflows/check-format.yml. Aurora build; local changes tracked in git.
 name: Check formatting
 
 on:

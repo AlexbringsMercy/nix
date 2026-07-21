@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/lyriccandidate.cpp. Aurora build; local changes tracked in git.
 #include "lyriccandidate.hpp"
 
 namespace caelestia::services {

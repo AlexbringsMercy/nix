@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/diskinfo.cpp. Aurora build; local changes tracked in git.
 #include "diskinfo.hpp"
 
 namespace caelestia::services {

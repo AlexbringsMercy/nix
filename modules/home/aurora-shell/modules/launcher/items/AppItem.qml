@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/launcher/items/AppItem.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import Quickshell.Widgets

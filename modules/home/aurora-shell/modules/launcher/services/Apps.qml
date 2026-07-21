@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/launcher/services/Apps.qml. Aurora build; local changes tracked in git.
 pragma Singleton
 
 import Quickshell

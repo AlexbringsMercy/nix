@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/widgets/ExtraIndicator.qml. Aurora build; local changes tracked in git.
 import "../effects"
 import QtQuick
 import Caelestia.Config

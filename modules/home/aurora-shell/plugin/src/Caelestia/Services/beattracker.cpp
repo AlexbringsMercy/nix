@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Services/beattracker.cpp. Aurora build; local changes tracked in git.
 #include "beattracker.hpp"
 
 #include "audiocollector.hpp"

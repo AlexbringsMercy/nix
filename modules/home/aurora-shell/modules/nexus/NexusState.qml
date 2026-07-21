@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/NexusState.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth

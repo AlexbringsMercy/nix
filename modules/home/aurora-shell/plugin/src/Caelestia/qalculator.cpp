@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/qalculator.cpp. Aurora build; local changes tracked in git.
 #include "qalculator.hpp"
 
 #include <libqalculate/qalculate.h>

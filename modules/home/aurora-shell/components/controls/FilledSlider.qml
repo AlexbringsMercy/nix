@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/controls/FilledSlider.qml. Aurora build; local changes tracked in git.
 import "../effects"
 import QtQuick
 import QtQuick.Templates

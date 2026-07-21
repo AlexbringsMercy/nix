@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — utils/scripts/fuzzysort.js. Aurora build; local changes tracked in git.
 .pragma library
 
 /*

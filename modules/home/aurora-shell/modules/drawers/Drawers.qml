@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/drawers/Drawers.qml. Aurora build; local changes tracked in git.
 pragma ComponentBehavior: Bound
 
 import QtQuick

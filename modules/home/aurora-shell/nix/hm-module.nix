@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — nix/hm-module.nix. Aurora build; local changes tracked in git.
 self: {
   config,
   pkgs,

@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Config/anim.cpp. Aurora build; local changes tracked in git.
 #include "anim.hpp"
 #include "appearanceconfig.hpp"
 #include "tokens.hpp"

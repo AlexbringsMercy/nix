@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Blobs/blobmaterial.cpp. Aurora build; local changes tracked in git.
 #include "blobmaterial.hpp"
 
 #include <cstring>

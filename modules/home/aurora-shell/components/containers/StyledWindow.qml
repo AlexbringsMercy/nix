@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/containers/StyledWindow.qml. Aurora build; local changes tracked in git.
 import Quickshell
 import Quickshell.Wayland
 import Caelestia.Config

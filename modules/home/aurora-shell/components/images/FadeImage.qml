@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — components/images/FadeImage.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import qs.components

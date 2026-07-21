@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Vendored from caelestia-dots/shell — scripts/qml-lint-conventions.py. Aurora build; local changes tracked in git.
 """Checks QML files for Qt coding convention violations.
 
 https://doc.qt.io/qt-6/qml-codingconventions.html

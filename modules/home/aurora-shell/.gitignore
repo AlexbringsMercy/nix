@@ -1,3 +1,4 @@
+# Vendored from caelestia-dots/shell — .gitignore. Aurora build; local changes tracked in git.
 .direnv
 /result
 /.qmlls.ini

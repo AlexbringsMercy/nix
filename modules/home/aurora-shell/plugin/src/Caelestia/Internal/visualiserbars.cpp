@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — plugin/src/Caelestia/Internal/visualiserbars.cpp. Aurora build; local changes tracked in git.
 #include "visualiserbars.hpp"
 
 #include <algorithm>

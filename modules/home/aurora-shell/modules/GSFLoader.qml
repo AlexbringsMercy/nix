@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/GSFLoader.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 

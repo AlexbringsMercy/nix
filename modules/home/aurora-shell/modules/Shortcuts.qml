@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/Shortcuts.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Quickshell
 import Quickshell.Io

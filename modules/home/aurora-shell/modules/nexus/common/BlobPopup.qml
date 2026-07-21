@@ -1,3 +1,4 @@
+// Vendored from caelestia-dots/shell — modules/nexus/common/BlobPopup.qml. Aurora build; local changes tracked in git.
 import QtQuick
 import Caelestia.Blobs
 import Caelestia.Config
