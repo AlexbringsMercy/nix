@@ -772,3 +772,55 @@ wallpaper-adaptive theme pipeline is in place, and the complete source and
 recovery history is local. It is not yet reasonable to call the project fully
 accepted because two lifecycle defects need correction and the physical
 operator checklist has not been completed.
+
+## Stage 0 — Reconcile & baseline (2026-07-21)
+
+Reconciled the two config lineages (flake + channel edits) per GRAND_PLAN §8.7
+and §10 Stage 0. The flake is the sole authority from these commits forward.
+
+### Commits
+
+1. `5931205` fix(hw): commit live hardware tuning — Xbox BLE intervals, t2fanrd 50/75 curve, VA-API (iHD)
+2. `15bacf1` fix(shell): Bluetooth panel reliability + EasyEffects 8 preset path
+3. `f6093ee` feat(stage0): port channel config into the flake — TV MAC-accept rule + Plex; add gh
+4. `4eeaf4b` docs(stage0): land the Grand Plan, research corpus, and repo hygiene
+5. (this commit) docs(stage0): execution log entry
+
+### Ported channel blocks (→ modules/nixos/media-center.nix, imported by hosts/macbook)
+
+- LG TV MAC-accept firewall rule: `networking.firewall.extraCommands` /
+  `extraStopCommands` inserting/removing an `nixos-fw` iptables accept for MAC
+  `40:2f:86:81:26:3e` (both directions reachable; survives TV IP changes).
+- Plex Media Server: `services.plex` enabled, running as `alex:users`,
+  `openFirewall = true` (DV Direct Play evaluation).
+
+### Parity-sweep verdict
+
+Every channel setting in `/etc/nixos/configuration.nix` has a flake equivalent:
+boot.loader (3 lines), networkmanager, hostName, timeZone, allowUnfree, user
+alex + groups, experimental-features, hyprland, fish, greetd, fonts (flake adds
+inter), pipewire (alsa+pulse), openssh, nix-ld, stateVersion 26.11, the
+nixos-hardware apple-t2 import, and the brcm firmware wrapper (machine-local
+adapter at ~/.config/nixos-local supplies /etc/nixos/firmware/brcm, matching
+the channel's path reference). The two previously missing blocks are the two
+ported above. Only intentional systemPackages drift remains: xdg-utils is
+nowhere in the flake; fish/waybar/rofi/wl-clipboard/grim/slurp/brightnessctl
+moved to programs.* or home packages; waybar/rofi/thunar retire in later
+stages by design. No change made.
+
+### start-hyprland warning
+
+Root cause (ISSUE_LOG.md §19): the flake's greetd launches the
+`start-hyprland` wrapper where the channel launched bare `Hyprland`, so the
+wrapper's outside-a-managed-session warning entered the boot path with the
+flake lineage; cosmetic because hyprland-session.target + autostart.lua already
+provide the lifecycle; fix lands in Stage 7's session-chain rebuild (§5.11).
+
+### Build verification
+
+`nix build ~/nix#nixosConfigurations.macbook.config.system.build.toplevel`
+succeeded (portable output, expected firmware warning):
+`/nix/store/h5lcbhhcxn31hld03lnixcgic0djlkj7-nixos-system-macbook-26.11.20260616.567a49d`
+
+PENDING AT GATE: gh auth + push, nixos-rebuild switch, reboot,
+TV/controller/fan checks, delete system generations 1-7.
