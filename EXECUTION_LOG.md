@@ -905,3 +905,22 @@ succeeded (portable output, expected firmware warning):
 
 - codex-prompts/stage1b-aurora-scheme.md → session codex-stage1b: ladder
   defaults pinned, dark default, accent family defaults, ledger update.
+
+### 1B — Scheme (DONE)
+
+- Codex session 2: Colours.qml fallback palette is the authority (plugin holds
+  no palette — zero C++ changes). Ladder pinned per §3.1 with an explicit
+  role-mapping table (highest/variant alias the #1c2742 ceiling — no sixth
+  rung exists); dark hard-set; accents defaulted to cyan #38bdf8 / purple
+  main lifted #7c3aed → #9b6ff8 (3.4:1 → 5.5:1 against the glass RGB, the
+  §3.1 luminous-not-pastel intent) / seafoam #34d399. 46 Aurora-marked lines
+  across 2 files; PM hex-count verification matched the mapping table exactly.
+- Structural caveat (Codex finding, correct): a pre-existing state
+  scheme.json overrides the QML fallback — 1C must seed clean aurora state at
+  cutover; the CLI's own Catppuccin default gets replaced in Stage 4.
+- Build GREEN → 46jqdy8svnx719hw1ybcz5db40nggbfs-caelestia-shell-1.0.0.
+  Pushed through 9f64c36.
+
+NEXT: 1C — cutover session (programs.aurora-shell HM module, supervised
+service, old-tree retirement with keepers carried, aurora scheme.json seed).
+Activation and the Stage 1 visual gate happen with Alex present.
