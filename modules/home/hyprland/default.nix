@@ -33,9 +33,18 @@ let
     ];
     text = builtins.readFile ../../../scripts/rofi-toggle;
   };
+
+  # Build-period scaffolding — removed at Stage 10 together with
+  # modules/nixos/build-harness.nix.
+  auroraResumeAgent = pkgs.writeShellApplication {
+    name = "aurora-resume-agent";
+    runtimeInputs = with pkgs; [ coreutils ];
+    text = builtins.readFile ../../../scripts/aurora-resume-agent;
+  };
 in
 {
   home.packages = [
+    auroraResumeAgent
     rofiToggle
     screenshotArea
     screenshotFull

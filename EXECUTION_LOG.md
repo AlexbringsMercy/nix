@@ -839,5 +839,18 @@ succeeded (portable output, expected firmware warning):
   into a single sudo line. Final toplevel + tick results land in the Stage 0
   close-out entry after the gate.
 
+- Commit 7 (operator-requested mid-gate): build harness. Scoped NOPASSWD
+  sudoers rules for the deploy verbs only (nix-env, canonical
+  switch-to-configuration, systemctl reboot/poweroff, reboot,
+  nix-collect-garbage — everything else still prompts) in
+  modules/nixos/build-harness.nix, plus an armed-resume loop:
+  `~/.local/state/aurora-build/resume-armed` is set by the agent before a
+  planned reboot; autostart.lua runs aurora-resume-agent, which consumes the
+  flag and relaunches the agent via `claude --continue` in Kitty. Un-armed
+  boots do nothing. Explicitly temporary: removal is a Stage 10 line item;
+  the §7.5 sudo session switch supersedes it for daily use from Stage 8.
+  First activation still needs the operator password (the rule ships with
+  the new generation).
+
 PENDING AT GATE: gh auth + push, boot-only install via wrapper, reboot,
 TV/controller/fan checks, delete system generations 1-7.

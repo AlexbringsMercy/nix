@@ -1,0 +1,13 @@
+# Build-period scaffolding — removed at Stage 10 alongside
+# modules/nixos/build-harness.nix (GRAND_PLAN §10). Deployed via
+# writeShellApplication (set -euo pipefail and PATH come from the wrapper).
+#
+# A planned reboot arms the flag below; this script, run once per Hyprland
+# start, consumes it and relaunches the build agent in a terminal with its
+# conversation resumed. An un-armed boot does nothing — no surprise agents.
+
+flag="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-build/resume-armed"
+[ -f "$flag" ] || exit 0
+rm -f "$flag"
+
+exec kitty --directory "$HOME/nix" fish -lc 'claude --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'

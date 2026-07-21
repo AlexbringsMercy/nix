@@ -7,6 +7,7 @@
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/laptop-power.nix
     ../../modules/nixos/media-center.nix
+    ../../modules/nixos/build-harness.nix
   ];
 
   networking.hostName = "macbook";

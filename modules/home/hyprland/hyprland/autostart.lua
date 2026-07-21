@@ -10,6 +10,10 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("nm-applet --indicator")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("hyprctl setcursor Adwaita 24")
+
+    -- Build-period only (removed at Stage 10 with build-harness.nix): a
+    -- planned reboot arms a flag; this relaunches the build agent once.
+    hl.exec_cmd("aurora-resume-agent")
 end)
 
 hl.on("hyprland.shutdown", function()
