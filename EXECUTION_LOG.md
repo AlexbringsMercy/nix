@@ -1162,3 +1162,71 @@ keybinds are config but desktop.nix needs the system rebuild anyway). Checklist:
 §6.2 + the §5 input/window bug list + half-snap on disposable windows + DWT
 debug-events A/B + the drag-spring live A/B (decision #5) + volume-gesture call
 (above) + launcher/dashboard animation lag observation.
+
+### Stage 2 gate — RAN 2026-07-21 evening (Alex live; gen 25)
+
+Mechanical: gen 25 booted clean, 0 failed units both scopes, shell supervised,
+0 configerrors, quirk file landed, snap binds registered.
+
+**Root cause PROVEN live — Super+drag / titlebar-drag jump (decision #5 settled):**
+tiled-window *pickup placement*. With drag animation toggled off live the jump was
+identical (animation theory dead); at unchanged scale a *floating* window dragged
+perfectly (scaling theory dead). The compositor centers a tiled window under the
+cursor when plucking it from the layout — grab offset discarded. Both drag paths
+(Super+drag, titlebar) hit it; floating windows never do.
+
+**Half-snap (2C): works but two defects, one family.** (1) Placement drifts out of
+frame top-left (decoration/gap space likely uncounted). (2) The snapped window
+STAYS floating forever — new windows then tile *underneath* it (this was the whole
+"windows go somewhere else after 5" report — nothing goes to another workspace)
+and its floater covered another window's close button. Snap needs a release path
+back into the layout.
+
+**Operator decisions (register):**
+7. **scroll_factor 0.6 FINAL** — full live A/B loop 1.0/0.8/0.7/0.6; 0.6 wins on
+   feel. Choppiness at low factors is quantization (proven at 1.0-smooth); kitty's
+   line-scroll texture is kitty-side, minor polish note.
+8. **animate_mouse_windowdragging = false permanent** — the plan's value,
+   live-confirmed irrelevant to the jump; operator kept the rigid feel.
+9. **Volume gesture DEFERRED by operator** until the Hyprland bump whose newer
+   gesture API does continuous natively. Not cut — owed, revisit at the bump.
+
+**Other findings:** third-window-closes bug DEAD (repro attempt failed — Waybar
+cgroup fix held). DWT typing-protection only partially better — quirk may have
+been pre-applied by libinput's stock Apple rule; deeper diagnosis needed (palm
+attrs), live A/B at the re-check. Corner resize hit-or-miss — the plan's
+predicted hyprbars×resize_on_border interaction (#355); investigate, else apply
+the plan's documented fallback (Super+RMB + document). Launcher/dashboard
+animation lag unchanged → Stage 3 motion pass (surfaces retime onto our tokens
+there anyway).
+
+**Gate status: CONDITIONAL PASS.** Window model core proven; Stage 2 closes when
+the 2D batch lands (drag pickup, snap geometry+release, DWT diagnosis, corner
+resize verdict) and the operator's 5-minute re-check confirms feel.
+
+### 2D — Window-lifecycle fixes (file work DONE; verified)
+
+- Codex session codex-stage2d (thread 019f87ec…): **shipped** — drag animation
+  false permanent (caelestia misc.lua:6 is the community precedent);
+  **half-snap reworked**: decoration-aware geometry (client box at y=38 —
+  8px gap + 30px reserved hyprbars extent — 843px halves, 5px center gap, all
+  edges in frame) + the release path (arrow press on a snapped window retiles
+  it; dragging a snapped float works normally, next arrow re-snaps). PM
+  verified every citation (caelestia misc.lua, installed default float-toggle
+  form, stub window fields) + luac on both files.
+- **Drag-pickup ESCALATION (evidence complete):** 0.55.4 has NO config option
+  for pickup placement (exhaustive metadata read); upstream main STILL centers
+  tiled windows under the cursor (DragController — a compositor bump inherits
+  no fix); caelestia/end-4/DMS/installed-default all bind the dispatcher raw
+  and live with it; the pre-float bind wrapper was correctly NOT shipped
+  (mouse press/release semantics through a lua callback unverifiable
+  statically). Real fix = compositor-source patch. Operator decision pending.
+- **DWT verdict:** stock libinput 1.31.3 already applies keyboard-integration
+  AND the corrected T2 palm-size threshold (1600) — the 2C override was
+  redundant-but-harmless. Remaining palm leaks need per-device measurement
+  (`libinput measure`, operator's hands) before any further quirk ships;
+  report-only candidate stanza recorded in the 2D report.
+- **Corner resize verdict:** the known hyprbars top-decoration conflict; no
+  config-level repair exists (extend_border_grab_area can't reach through the
+  bar's event handling). Plan's pre-authorized fallback stands: Super+RMB
+  corner resize (already bound) + document in Nexus Input help (Stage 9 page).

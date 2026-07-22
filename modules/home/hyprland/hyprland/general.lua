@@ -95,7 +95,7 @@ hl.config({
         mouse_move_enables_dpms = true,
         key_press_enables_dpms = true,
         animate_manual_resizes = true,
-        animate_mouse_windowdragging = true,
+        animate_mouse_windowdragging = false, -- caelestia/hypr/hyprland/misc.lua:6.
         initial_workspace_tracking = false,
         middle_click_paste = false,
         allow_session_lock_restore = true

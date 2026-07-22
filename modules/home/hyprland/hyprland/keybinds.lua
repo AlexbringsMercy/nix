@@ -54,26 +54,77 @@ hl.bind("SUPER + Down", hl.dsp.exec_cmd("window-minimize"), { description = "Win
 -- hypr/hyprland/keybinds.lua:109-119 and hypr/hyprland/functions.lua:52-75.
 -- Native float/resize/move forms: caelestia-dots/caelestia —
 -- hypr/hyprland/execs.lua:32-37 and hypr/hyprland/functions.lua:72-75.
+-- Window at/size/floating fields: installed Hyprland 0.55.4 hl.meta.lua:717-748.
+-- Float-toggle form: installed Hyprland 0.55.4 hyprland.lua:262.
+-- Geometry constants mirror general.lua:20-21 and hyprbars.lua.in:12; hyprbars
+-- reserves its bar above the client (hyprbars/barDeco.cpp:56-67 in the pinned source).
+local snap_gaps_in = 5
+local snap_gaps_out = 8
+local snap_titlebar_height = 30
+
+local function snap_geometry(screen, side)
+    local monitor_width = math.floor((screen.width / screen.scale) + 0.5)
+    local monitor_height = math.floor((screen.height / screen.scale) + 0.5)
+    local usable_width = monitor_width - (2 * snap_gaps_out) - snap_gaps_in
+    local left_width = math.floor(usable_width / 2)
+    local snap_width = side == "right" and (usable_width - left_width) or left_width
+    local move_x = screen.x + snap_gaps_out
+    if side == "right" then
+        move_x = move_x + left_width + snap_gaps_in
+    end
+
+    return {
+        x = math.floor(move_x),
+        y = math.floor(screen.y + snap_gaps_out + snap_titlebar_height),
+        width = snap_width,
+        height = monitor_height - (2 * snap_gaps_out) - snap_titlebar_height
+    }
+end
+
+local function near(actual, expected)
+    return type(actual) == "number" and math.abs(actual - expected) <= 1
+end
+
+local function matches_snap(win, geometry)
+    return win.floating
+        and type(win.at) == "table"
+        and type(win.size) == "table"
+        and near(win.at.x, geometry.x)
+        and near(win.at.y, geometry.y)
+        and near(win.size.x, geometry.width)
+        and near(win.size.y, geometry.height)
+end
+
+local function is_half_snapped(win, screen)
+    return matches_snap(win, snap_geometry(screen, "left"))
+        or matches_snap(win, snap_geometry(screen, "right"))
+end
+
 local function half_snap(side)
     local win = hl.get_active_window()
     local screen = hl.get_active_monitor()
-    if not (win and screen and type(screen.width) == "number" and type(screen.height) == "number" and type(screen.scale) == "number") then
+    if not (win and screen and type(screen.width) == "number" and type(screen.height) == "number"
+        and type(screen.scale) == "number" and screen.scale > 0) then
         return
     end
 
-    local monitor_width = math.floor((screen.width / screen.scale) + 0.5)
-    local monitor_height = math.floor((screen.height / screen.scale) + 0.5)
-    local split_x = math.floor(monitor_width / 2)
-    local snap_width = side == "right" and (monitor_width - split_x) or split_x
-    local move_x = math.floor(screen.x + (side == "right" and split_x or 0))
-    local move_y = math.floor(screen.y)
+    -- A second Left/Right press on either half releases the float back into the
+    -- dwindle tree. After a native Super+LMB drag changes the geometry, the window
+    -- is an ordinary float again and the next arrow press snaps it rather than tiles it.
+    if is_half_snapped(win, screen) then
+        hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+        return
+    end
+
+    local geometry = snap_geometry(screen, side)
 
     -- Floating first is explicit: exact pixel resize/move cannot half-snap a tiled
-    -- dwindle node without removing it from the layout tree.
+    -- dwindle node without removing it from the layout tree. Exact coordinates
+    -- address the client box, so y includes the reserved bar and height excludes it.
     local actions = {
         hl.dsp.window.float({ action = "on", window = win }),
-        hl.dsp.window.resize({ x = snap_width, y = monitor_height, "exact", window = win }),
-        hl.dsp.window.move({ x = move_x, y = move_y, relative = false, window = win })
+        hl.dsp.window.resize({ x = geometry.width, y = geometry.height, "exact", window = win }),
+        hl.dsp.window.move({ x = geometry.x, y = geometry.y, relative = false, window = win })
     }
     for _, action in ipairs(actions) do
         hl.dispatch(action)
