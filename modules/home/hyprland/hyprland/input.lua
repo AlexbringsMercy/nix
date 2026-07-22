@@ -15,7 +15,7 @@ hl.config({
             disable_while_typing = true,
             clickfinger_behavior = true,
             tap_button_map = "lrm",
-            scroll_factor = 0.3 -- Aurora: normalize the T2 touchpad's overly sensitive scroll.
+            scroll_factor = 0.6 -- Aurora: 0.3 was too slow (operator) — bumped up; tune to feel.
         }
     },
     gestures = {
@@ -36,20 +36,9 @@ hl.gesture({
     action = "workspace"
 })
 
-local function adjust_volume(event) -- Aurora: implement Hyprland's native live-function gesture against PipeWire.
-    local amount = -0.25 * event.delta.y -- Aurora: turn vertical gesture distance into small continuous percentage steps.
-    if math.abs(amount) < 0.01 then return end -- Aurora: ignore begin/end events and zero-distance updates.
-    local suffix = amount > 0 and "%+" or "%-" -- Aurora: express wpctl's relative direction without a signed percentage.
-    local command = string.format("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ %.2f%s", math.abs(amount), suffix) -- Aurora: retain the same 100%% cap as the volume key.
-    hl.dispatch(hl.dsp.exec_cmd(command)) -- Aurora: use the verified native dispatcher form for each live update.
-end -- Aurora: finish the continuous volume callback.
-
-hl.gesture({ -- Aurora: add the Stage 2 three-finger vertical live-volume gesture.
-    fingers = 3, -- Aurora: preserve horizontal workspace and partition only the vertical axis.
-    direction = "vertical", -- Aurora: accept either vertical direction as relative volume movement.
-    action = adjust_volume -- Aurora: feed native gesture events to the continuous PipeWire callback.
-}) -- Aurora: finish the live-volume gesture.
-
+-- Aurora: 3-finger vertical live-volume removed — a lua-function gesture action
+-- faulted at runtime (operator saw the error). Deferred until a verified native
+-- form is found; pinch-zoom below is a standard string action and works.
 hl.gesture({ -- Aurora: add the native compositor magnifier gesture.
     fingers = 2, -- Aurora: use the standard two-finger pinch without adding any four-finger Stage 5/8 action.
     direction = "pinch", -- Aurora: accept pinch-in and pinch-out.
