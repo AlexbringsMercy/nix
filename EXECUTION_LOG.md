@@ -1005,3 +1005,80 @@ works; nothing dies on `systemctl --user restart aurora-shell`.
 - **NEXT: Stage 2 — the window model + keymap.** Sweeps SwayOSD retire +
   brightness/volume-key ownership, Cmd+Space→launcher, detached-launch, hyprbars +
   minimize + focus policy + input tuning, and retests the §5 input/window bug list.
+
+## Stage 2 — Window model + keymap (2026-07-21)
+
+Split into 2A (window model) + 2B (input/keymap/OSD). **2A DONE, gen 22 live.**
+
+### 2A — Window model (DONE)
+
+- **hyprbars** (nixpkgs `hyprlandPlugins.hyprbars`, ABI-matched) per-window
+  titlebar buttons: close/maximize/minimize, clean monochrome glyphs, transparent
+  bg, size 24. Operator direction: NOT the plan's §6.1 "red/yellow/green"
+  traffic-lights (Fable wording, overridden), NOT a Windows/macOS copy — clean
+  modern monochrome (memory `aurora-palette-direction`).
+- **Button/double-click/snap/minimize actions converted to Hyprland 0.55
+  native-lua dispatch** (`hl.dsp.window.close()`, `.fullscreen({...})`,
+  `.move({window="address:..",workspace,follow=false})`, `focus({window=..})`) —
+  the legacy `hyprctl dispatch killactive`/`fullscreen 1`/`movetoworkspacesilent`
+  strings PARSE fine but the 0.55 Lua parser rejects them AT RUNTIME, so every
+  button/snap/minimize silently did nothing until caught live at the gate. Forms
+  verified against caelestia's own `windowinfo/Buttons.qml`.
+- **Minimize** = OnlyLyan/omarchy-desktop-shell `window-minimize` vendored
+  verbatim (per-window `special:min-<addr>`, LIFO restore), internal dispatches
+  lua-adapted. `follow_mouse=0` click-focus, `focus_on_close=2`, workspaces 1–5,
+  `Super+Q` close / `Super+F`+`Super+Up` maximize / `Super+Down` minimize /
+  `Super+Alt+M` restore; move via `Super+drag` or titlebar drag.
+- **Hover state = PATCHED hyprbars.** Codex-authored C++ patch
+  (`modules/home/hyprland/patches/hyprbars-hover.patch`) adds a hover highlight on
+  the hovered button + a tunable `plugin:hyprbars:hover_color` (default
+  `rgba(ffffff22)`). Built from the **v0.55.0** hyprland-plugins source
+  (`patchedHyprbars` overrideAttrs; PM caught Codex's first pass targeting
+  HEAD/0.56 → ABI-wrong). Operator confirmed: hover works and "looks clean."
+- **Deferred to Stage 3 (with the taskbar):** hiding `special:min-*` workspaces
+  from caelestia's switcher — the switcher is currently the ONLY *visible* restore
+  path for minimized windows, so hiding it before the taskbar exists would make
+  minimize a one-way trip (operator caught this). The 1-line filter is ready in
+  `codex-prompts/stage2a-hide-min-workspaces.md`; deploy WITH the Stage-3 taskbar.
+  Also deferred: `Super+Left/Right` half-snap (needs a verified 0.55 exact-resize
+  lua form).
+
+### Hover crash — expensive lesson (paid for with a compositor SIGSEGV + safe mode)
+
+Deploying the patched plugin via a **live hot-swap** (`hyprctl plugin unload old`
++ `plugin load patched` + `hyprctl reload`, which re-runs the config's
+`hl.plugin.load`) left **TWO hyprbars loaded at once**. hyprbars uses process-wide
+singletons (`g_pGlobalState`, one `PHANDLE`); two `PLUGIN_INIT`s collide and
+re-register the same `plugin:hyprbars:*` config names (return ignored) → the old
+plugin's `barHeight` `CConfigValue` went unbound → `getPositioningInfo()` →
+`barHeight->value()` null-deref → SIGSEGV → Hyprland **safe mode** (stripped
+desktop, "failed to save config"). The backtrace + a Codex adversarial re-audit
+confirmed the **patch was sound**; the **double-load was the bug**.
+
+**LESSON — never hot-swap a compositor plugin.** `hyprctl reload` does not reload
+plugins but DOES re-run `hl.plugin.load` in the config, so unload+load+reload
+double-loads and corrupts singleton state. The only safe path is a **clean single
+load = a normal boot of the generation** (config loads it once). Test compositor
+plugins by rebooting into the gen (previous gen stays selectable as fallback) or
+in an isolated nested Hyprland — NEVER by live-swapping on the operator's session.
+Recovery from the crash: `nix-env --rollback` to the pre-patch gen + switch +
+reboot into a clean gen; then set the patched gen boot-only and reboot for the
+clean single load (which worked — gen 22, hover live, zero crashes).
+
+### Boot friction (operator, recurring — we reboot a lot)
+
+The T2 firmware defaults to **macOS** as the startup disk, so NixOS needs
+Option→Apple picker→"EFI Boot", and that handoff is flaky (black screen → Apple
+logo → macOS recovery; took 3 tries once). **Fix (§5.11, one-time, no macOS):** at
+the Apple boot picker hold **Control** on the EFI Boot entry → the arrow becomes ⟳
+→ press it → NixOS becomes the persistent default startup disk. Redo after macOS
+updates; never touch Startup Security. NixOS cannot set this itself
+(`canTouchEfiVariables = false`, T2 constraint) — it is a firmware-picker action.
+systemd-boot's own default is already NixOS (gen 22); optional later polish:
+`timeout 5→0` + prune old boot entries.
+
+**NEXT: Stage 2B** — the keymap (**Cmd+Space→launcher**, the §6.4 map), input
+tuning (DWT libinput quirk, `scroll_factor 0.3`, `repeat 22/350`), gestures,
+**SwayOSD retire + brightness/mic/media key rebind onto the shell OSD** (kills the
+double brightness OSD), detached-launch sweep, `rules.lua` dead-namespace cleanup.
+Then the Stage 2 gate (§6.2 checklist + the §5 input/window bug list).
