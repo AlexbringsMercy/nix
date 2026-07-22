@@ -33,6 +33,21 @@
     pulse.enable = true;
   };
 
+  # /proc/bus/input/devices:11-21 identifies the keyboard interface as USB
+  # 05ac:0280; MatchUdevType keeps the same-name trackpad interface out.
+  # Match/attribute forms: libinput 1.31.3 share/libinput/50-system-apple.quirks
+  # lines 26-34 and 87-94. Declarative file form: nixos-hardware
+  # apple/macbook-pro/14-1/default.nix:29-47.
+  environment.etc."libinput/local-overrides.quirks".text = ''
+    [Apple T2 Internal Keyboard]
+    MatchName=Apple Inc. Apple Internal Keyboard / Trackpad
+    MatchUdevType=keyboard
+    MatchBus=usb
+    MatchVendor=0x05AC
+    MatchProduct=0x0280
+    AttrKeyboardIntegration=internal
+  '';
+
   hardware.graphics = {
     enable = true;
     extraPackages = [ pkgs.intel-media-driver ];

@@ -1082,3 +1082,83 @@ tuning (DWT libinput quirk, `scroll_factor 0.3`, `repeat 22/350`), gestures,
 **SwayOSD retire + brightness/mic/media key rebind onto the shell OSD** (kills the
 double brightness OSD), detached-launch sweep, `rules.lua` dead-namespace cleanup.
 Then the Stage 2 gate (§6.2 checklist + the §5 input/window bug list).
+
+### 2B — Keymap / OSD / input (DONE except items below; commits 29fedce, 262472b)
+
+- Landed: **Cmd+Space → launcher**, SwayOSD retired with brightness/media keys
+  rebound onto caelestia's own OSD (double-OSD dead), input tuning (repeat 22/350,
+  natural scroll), `shell.json` made writable, detached-launch sweep, rules cleanup.
+- This close-out is written retroactively by the incoming PM — the prior session
+  landed the commits but never logged them. Process gap noted below.
+
+### Operator decisions register (backfilled 2026-07-21; log these inline from now on)
+
+Standing rule, operator-mandated: every decision Alex makes lands in this log the
+day it's made — not buried in a commit message. Backfill of recent calls:
+
+1. **Snap/window keys on bare Super+arrows — no Ctrl.** Windows-style. (2A, d47ae38.)
+2. **Titlebar buttons: clean modern monochrome** — not the plan's traffic-light
+   red/yellow/green wording. (2A; also in memory `aurora-palette-direction`.)
+3. **scroll_factor 0.6**, not the plan's 0.3 — 0.3 far too slow on this trackpad;
+   tune further by feel at the gate. (2B, 262472b.)
+4. **The 3-finger vertical live-volume gesture is NOT cut.** The prior session
+   "dropped" it when a lua-function gesture action faulted at runtime. Operator
+   ruling: parked-is-not-fixed; restore it from a verified, sourced native form.
+   Cutting planned features to silence a bug is never a fix on this project.
+5. **Super+drag spring: root cause is CONTESTED — settle it live, not on paper.**
+   The Codex investigation (proposal-only, 2026-07-21) blamed the tiled-pickup
+   recenter amplified by `animate_mouse_windowdragging=true` overshoot; the
+   operator suspects scaling/rendering (the plan's `false` note is about GPU lag,
+   not a half-screen throw — don't pattern-match them together). Both are
+   config-level and live-testable: at the Stage 2 gate, A/B the animation flag
+   live, then a 10-second scale-1.0 drag check. Evidence decides; nothing ships
+   as "the fix" before then.
+6. **PM conduct (operator, binding):** full grounding reads + a stated read list
+   before any work; decisions logged; fixes come from community sources, never
+   from cutting scope or hand-patching upstream first; PM communicates plain and
+   high-level. (Also in PM memory.)
+
+**NEXT: Stage 2C — close out the window model.** One Codex session:
+(1) restore 3-finger vertical live-volume from a verified native 0.55 form,
+(2) half-snap on bare **Super+Left/Right** (verified exact-resize form — the 2A
+deferral comes due), (3) the DWT libinput quirk (`AttrKeyboardIntegration=internal`,
+bus-matched on this machine) so `disable_while_typing` actually works.
+Then the **Stage 2 gate, Alex present**: §6.2 checklist + §5 input/window bug list
++ the drag-spring live A/B (decision #5) + launcher/dashboard animation lag
+observation (open from 262472b).
+
+### 2C — Window-model close-out (file work DONE; commits below)
+
+- Codex session codex-stage2c (thread 019f87af…, prompt
+  `codex-prompts/stage2c-window-model-closeout.md`):
+- **Half-snap SHIPPED** — bare Super+Left/Right (decision #1), a lua half_snap()
+  composed entirely from verified in-repo forms: caelestia's own callback-bind +
+  float→resize→move dispatch chain (functions.lua:52-75, keybinds.lua:109-119,
+  execs.lua:32-37) + end-4's `"exact"` resize marker (keybinds.lua:359). Floats
+  tiled windows explicitly first (dwindle nodes can't half-snap in-tree). Logical
+  geometry 1707×1067 from scale 1.5, complementary 853/854 halves. PM re-verified
+  every citation against the actual files + installed 0.55.4 stub; luac parse OK.
+- **DWT quirk SHIPPED** — `/etc/libinput/local-overrides.quirks` via desktop.nix:
+  `AttrKeyboardIntegration=internal` matched narrowly to the T2 internal keyboard
+  (USB 05ac:0280, MatchUdevType=keyboard excludes the same-name trackpad).
+  `libinput quirks validate` passed. HONEST CAVEAT (Codex, correct to raise):
+  libinput 1.31.3 already ships a broader Apple internal-keyboard rule, so the
+  attribute may already apply and DWT's ineffectiveness may have another cause —
+  the gate's `libinput debug-events` before/after decides; do not pre-declare
+  this fixed.
+- **Volume gesture ESCALATED, not shipped** (the hard rule worked): pinned
+  Hyprland 0.55.4's gesture API takes only `string|function` actions — the
+  continuous start/update action table in the current wiki does not exist in
+  0.55.4 (verified against installed hl.meta.lua:444-454 + the C++ header). The
+  one-shot lua-callback form exists but is the same class that faulted in 2B, and
+  the shell exposes no volume IPC target to route through. Options for Alex at
+  the gate: (a) one-shot swipe = volume-step via callback, tested in a nested
+  Hyprland first (never the live session); (b) park until the compositor bump
+  whose newer gesture API does continuous natively — logged deviation, feature
+  stays owed. Plan-vs-reality gap flagged per authority order; NOT a cut.
+
+NEXT: **Stage 2 gate — Alex present** (deploy = boot-only + armed-resume reboot;
+keybinds are config but desktop.nix needs the system rebuild anyway). Checklist:
+§6.2 + the §5 input/window bug list + half-snap on disposable windows + DWT
+debug-events A/B + the drag-spring live A/B (decision #5) + volume-gesture call
+(above) + launcher/dashboard animation lag observation.

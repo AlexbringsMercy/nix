@@ -46,11 +46,42 @@ for i, direction in ipairs({"left", "right", "up", "down"}) do
 end
 
 -- Aurora: Super+Up maximize / Super+Down minimize (Windows-style, native 0.55 lua).
--- Half-snap on Super+Left/Right is DEFERRED until the 0.55 exact-resize lua form is
--- verified live — a broken snap is worse than none (operator 2026-07-21). The old
--- Super+Ctrl snap used legacy `resizewindowpixel` strings the 0.55 parser rejects.
 hl.bind("SUPER + Up", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }), { description = "Window: Maximize" })
 hl.bind("SUPER + Down", hl.dsp.exec_cmd("window-minimize"), { description = "Window: Minimize" })
+
+-- Exact-resize marker: end-4/dots-hyprland — dots/.config/hypr/hyprland/keybinds.lua:359.
+-- Active window/monitor geometry and scale handling: caelestia-dots/caelestia —
+-- hypr/hyprland/keybinds.lua:109-119 and hypr/hyprland/functions.lua:52-75.
+-- Native float/resize/move forms: caelestia-dots/caelestia —
+-- hypr/hyprland/execs.lua:32-37 and hypr/hyprland/functions.lua:72-75.
+local function half_snap(side)
+    local win = hl.get_active_window()
+    local screen = hl.get_active_monitor()
+    if not (win and screen and type(screen.width) == "number" and type(screen.height) == "number" and type(screen.scale) == "number") then
+        return
+    end
+
+    local monitor_width = math.floor((screen.width / screen.scale) + 0.5)
+    local monitor_height = math.floor((screen.height / screen.scale) + 0.5)
+    local split_x = math.floor(monitor_width / 2)
+    local snap_width = side == "right" and (monitor_width - split_x) or split_x
+    local move_x = math.floor(screen.x + (side == "right" and split_x or 0))
+    local move_y = math.floor(screen.y)
+
+    -- Floating first is explicit: exact pixel resize/move cannot half-snap a tiled
+    -- dwindle node without removing it from the layout tree.
+    local actions = {
+        hl.dsp.window.float({ action = "on", window = win }),
+        hl.dsp.window.resize({ x = snap_width, y = monitor_height, "exact", window = win }),
+        hl.dsp.window.move({ x = move_x, y = move_y, relative = false, window = win })
+    }
+    for _, action in ipairs(actions) do
+        hl.dispatch(action)
+    end
+end
+
+hl.bind("SUPER + Left", function() half_snap("left") end, { description = "Window: Snap left half" })
+hl.bind("SUPER + Right", function() half_snap("right") end, { description = "Window: Snap right half" })
 
 for workspace = 1, 5 do -- Aurora: expose the five persistent daily workspaces.
     hl.bind("SUPER + " .. workspace, hl.dsp.focus({ workspace = workspace }), {
