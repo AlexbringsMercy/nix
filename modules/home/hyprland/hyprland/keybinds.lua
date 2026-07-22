@@ -1,16 +1,21 @@
 local terminal = "kitty"
 local browser = "google-chrome-stable --ozone-platform-hint=auto"
 local files = "thunar"
-local launcher = "rofi-toggle"
 
 -- Bare Super opens the clickable launcher too; Super+D is the discoverable
 -- Windows-style fallback.  Release avoids opening it during another chord.
-hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd(launcher), {
+hl.bind("SUPER + SUPER_L", hl.dsp.global("caelestia:launcher"), { -- Aurora: route the primary Apps entry to caelestia's registered launcher.
     release = true,
     description = "Desktop: Open applications"
 })
-hl.bind("SUPER + SUPER_R", hl.dsp.exec_cmd(launcher), { release = true })
-hl.bind("SUPER + D", hl.dsp.exec_cmd(launcher), { description = "Desktop: Open applications" })
+hl.bind("SUPER + SUPER_R", hl.dsp.global("caelestia:launcher"), { release = true }) -- Aurora: keep either Super key on the shell launcher.
+hl.bind("SUPER + D", hl.dsp.global("caelestia:launcher"), { description = "Desktop: Open applications" }) -- Aurora: keep the discoverable Apps fallback on caelestia too.
+
+hl.bind("SUPER + Space", hl.dsp.global("caelestia:launcher"), { description = "Shell: Open launcher" }) -- Aurora: make Cmd+Space the headline caelestia launcher path.
+hl.bind("SUPER + N", hl.dsp.global("caelestia:sidebar"), { description = "Shell: Notification history" }) -- Aurora: open caelestia's notification sidebar.
+hl.bind("SUPER + K", hl.dsp.global("caelestia:dashboard"), { description = "Shell: Dashboard" }) -- Aurora: retain caelestia's upstream panels chord for the dashboard surface.
+hl.bind("SUPER + U", hl.dsp.global("caelestia:utilities"), { description = "Shell: Utilities" }) -- Aurora: expose the utilities drawer directly.
+hl.bind("SUPER + Comma", hl.dsp.global("caelestia:nexus"), { description = "Shell: Nexus settings" }) -- Aurora: use the familiar Cmd+, settings chord for Nexus.
 
 hl.bind("SUPER + Return", hl.dsp.exec_cmd(terminal), { description = "Apps: Terminal" })
 hl.bind("SUPER + E", hl.dsp.exec_cmd(files), { description = "Apps: Files" })
@@ -25,10 +30,10 @@ hl.bind("ALT + F4", hl.dsp.window.close(), { description = "Window: Close (Windo
 hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }), { description = "Window: Maximize" })
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { description = "Window: Fullscreen" })
 hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("window-minimize restore"), { description = "Window: Restore last minimized" }) -- Aurora: expose the omarchy LIFO restore path until taskbar restore lands.
-hl.bind("SUPER + Space", hl.dsp.window.float({ action = "toggle" }), { description = "Window: Float or tile" })
+hl.bind("SUPER + T", hl.dsp.window.float({ action = "toggle" }), { description = "Window: Float or tile" }) -- Aurora: free Cmd+Space for the launcher while retaining float-toggle.
 hl.bind("SUPER + J", hl.dsp.layout("togglesplit"), { description = "Window: Toggle split" })
 hl.bind("SUPER + L", hl.dsp.exec_cmd("hyprlock"), { description = "Session: Lock" })
-hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("qs -c aurora-shell ipc call panels toggle power"), {
+hl.bind("CTRL + ALT + Delete", hl.dsp.global("caelestia:session"), { -- Aurora: replace the retired old-QuickShell power IPC with caelestia's session surface.
     description = "Session: Open power controls"
 })
 
@@ -67,18 +72,17 @@ hl.bind("Print", hl.dsp.exec_cmd("screenshot-full"), {
 
 -- Mac function row / multimedia keys.  Locked binds continue to work while the
 -- session is locked; repeating applies only to continuous level adjustment.
--- PipeWire changes are observed by the permanent QuickShell volume OSD. Using
--- SwayOSD for the same output would draw two overlays for every key press.
+-- Aurora: direct device/service commands are observed by caelestia, leaving one shell-owned OSD.
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("swayosd-client --input-volume mute-toggle"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("swayosd-client --brightness raise --device=intel_backlight --min-brightness 2"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("swayosd-client --brightness lower --device=intel_backlight --min-brightness 2"), { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true }) -- Aurora: let caelestia observe source mute directly.
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -d intel_backlight set 5%+"), { locked = true, repeating = true }) -- Aurora: adjust the device watched by caelestia's Brightness service.
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -d intel_backlight set 5%-"), { locked = true, repeating = true }) -- Aurora: adjust the device watched by caelestia's Brightness service.
 hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd("brightnessctl --device=':white:kbd_backlight' set 10%+"), { locked = true, repeating = true })
 hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd("brightnessctl --device=':white:kbd_backlight' set 10%-"), { locked = true, repeating = true })
-hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("swayosd-client --playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("swayosd-client --playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioNext", hl.dsp.exec_cmd("swayosd-client --playerctl next"), { locked = true })
-hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("swayosd-client --playerctl prev"), { locked = true })
-hl.bind("XF86AudioStop", hl.dsp.exec_cmd("swayosd-client --playerctl stop"), { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true }) -- Aurora: let caelestia's MPRIS service observe playback.
+hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true }) -- Aurora: map either play/pause key to the same MPRIS toggle.
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true }) -- Aurora: use the direct MPRIS next command.
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true }) -- Aurora: use playerctl's full previous verb.
+hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true }) -- Aurora: use the direct MPRIS stop command.

@@ -21,7 +21,6 @@
     quickshell
     rofi
     slurp
-    swayosd
     waybar
     waypaper
     wireplumber

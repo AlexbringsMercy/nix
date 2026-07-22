@@ -11,6 +11,12 @@ self: {
   shell-default = self.packages.${system}.with-cli;
 
   cfg = config.programs.aurora-shell; # Aurora: expose the vendored chassis under the product namespace.
+  shellSeed = pkgs.writeText "aurora-shell.json" (builtins.toJSON { # Aurora: materialize the initial writable shell configuration as an immutable seed source.
+    general.idle.timeouts = [ # Aurora: preserve the approved idle policy while allowing caelestia to save later edits.
+      { timeout = 1200; idleAction = "lock"; } # Aurora: lock after 20 minutes.
+      { timeout = 1500; idleAction = "dpms off"; } # Aurora: power off displays after 25 minutes without auto-suspend.
+    ]; # Aurora: finish the seeded idle timeout list.
+  }); # Aurora: finish the JSON seed derivation.
 in {
   imports = [
     (lib.mkRenamedOptionModule ["programs" "aurora-shell" "environment"] ["programs" "aurora-shell" "systemd" "environment"]) # Aurora: keep the environment compatibility alias inside the renamed namespace.
@@ -142,6 +148,15 @@ in {
           run ${pkgs.coreutils}/bin/install $VERBOSE_ARG -m 0600 ${../assets/aurora-scheme.json} "$scheme_file" # Aurora: copy instead of symlinking so future scheme changes can overwrite it.
         fi # Aurora: make activation write-once and leave user-selected schemes untouched.
       ''; # Aurora: finish the write-if-absent seed activation.
+
+      home.activation.seedAuroraShellConfig = lib.hm.dag.entryAfter ["writeBoundary"] '' # Aurora: seed mutable shell config only after Home Manager removes obsolete managed links.
+        config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/caelestia" # Aurora: honor XDG_CONFIG_HOME while retaining caelestia's default path.
+        config_file="$config_dir/shell.json" # Aurora: target the file caelestia reads and writes at runtime.
+        if [ ! -e "$config_file" ] && [ ! -L "$config_file" ]; then # Aurora: write only when no regular file or symlink exists, including a broken symlink.
+          run ${pkgs.coreutils}/bin/install $VERBOSE_ARG -d -m 0700 "$config_dir" # Aurora: create private writable configuration storage when absent.
+          run ${pkgs.coreutils}/bin/install $VERBOSE_ARG -m 0600 ${shellSeed} "$config_file" # Aurora: copy the idle seed so the destination remains mutable rather than store-linked.
+        fi # Aurora: preserve all later caelestia/user changes across activations.
+      ''; # Aurora: finish the shell.json write-if-absent activation.
 
       xdg.configFile = let
         mkConfig = c:

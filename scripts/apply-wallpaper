@@ -133,7 +133,7 @@ awww img "$wallpaper" \
 # signal and a compositor config reload apply their generated fragments.
 # Never signal Kitty: SIGUSR1 is not a configuration reload and terminates
 # clients on this build. New Kitty processes read the new include safely.
-systemctl --user try-restart swayosd.service >/dev/null 2>&1 || true
+# Aurora: caelestia owns OSD state directly; there is no secondary overlay service to refresh.
 systemctl --user try-restart aurora-notification-fallback.service >/dev/null 2>&1 || true
 pkill -SIGUSR2 waybar >/dev/null 2>&1 || true
 hyprctl reload >/dev/null 2>&1 || true

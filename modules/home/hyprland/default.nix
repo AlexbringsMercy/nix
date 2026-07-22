@@ -83,12 +83,6 @@ in
     windowMinimize # Aurora: place minimize/restore on PATH for hyprbars and keybinds.
   ];
 
-  services.swayosd = {
-    enable = true;
-    topMargin = 0.08;
-    stylePath = ./swayosd.css;
-  };
-
   # systemd's graphical-session targets intentionally refuse direct manual
   # starts. This compositor-owned wrapper pulls them in as dependencies and
   # gives raw start-hyprland sessions the same clean service lifecycle a full

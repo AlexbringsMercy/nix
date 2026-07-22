@@ -57,24 +57,4 @@ for name, class in pairs({ -- Aurora: suppress server titlebars where the shell 
     }) -- Aurora: close the no-bar window rule.
 end -- Aurora: finish shell and CSD no-bar rules.
 
--- Frost the translucent GTK/QML surfaces, without forcing blur on opaque app
--- windows.  QuickShell panels keep independent placement and animation state.
-for _, namespace in ipairs({
-    "waybar",
-    "rofi",
-    "launcher",
-    "swayosd",
-    "osd",
-    "notifications",
-    "quickshell:.*",
-    "aurora-.*"
-}) do
-    hl.layer_rule({ match = { namespace = namespace }, blur = true })
-    hl.layer_rule({ match = { namespace = namespace }, blur_popups = true })
-    hl.layer_rule({ match = { namespace = namespace }, ignore_alpha = 0.50 })
-end
-
-hl.layer_rule({ match = { namespace = "waybar" }, animation = "slide top" })
-hl.layer_rule({ match = { namespace = "quickshell:notification.*" }, animation = "fade" })
-hl.layer_rule({ match = { namespace = "quickshell:.*left.*" }, animation = "slide left" })
-hl.layer_rule({ match = { namespace = "quickshell:.*right.*" }, animation = "slide right" })
+-- Aurora: retired layer namespaces need no static rules; Colours.qml owns live caelestia-drawers blur.
