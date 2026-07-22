@@ -1,0 +1,20 @@
+diff --git a/src/layout/supplementary/DragController.cpp b/src/layout/supplementary/DragController.cpp
+index ad68274..82203e7 100644
+--- a/src/layout/supplementary/DragController.cpp
++++ b/src/layout/supplementary/DragController.cpp
+@@ -66,8 +66,14 @@ bool CDragStateController::updateDragWindow() {
+         DRAGGINGTARGET->rememberFloatingSize((DRAGGINGTARGET->position().size() * 0.8489).clamp(MINSIZE, Vector2D{}).floor());
+ 
+         if (m_dragThresholdReached) {
+-            DRAGGINGTARGET->setPositionGlobal(CBox{g_pInputManager->getMouseCoordsInternal() - DRAGGINGTARGET->position().size() / 2.F, DRAGGINGTARGET->position().size()});
++            const auto MOUSECOORDS = g_pInputManager->getMouseCoordsInternal();
++            const auto TILED_BOX   = DRAGGINGTARGET->position();
++            const auto GRAB_ANCHOR = (MOUSECOORDS - TILED_BOX.pos()) / TILED_BOX.size();
++
+             g_layoutManager->changeFloatingMode(DRAGGINGTARGET);
++
++            const auto FLOATING_SIZE = DRAGGINGTARGET->position().size();
++            DRAGGINGTARGET->setPositionGlobal(CBox{MOUSECOORDS - GRAB_ANCHOR * FLOATING_SIZE, FLOATING_SIZE});
+             m_draggingTiled = true;
+         }
+     }

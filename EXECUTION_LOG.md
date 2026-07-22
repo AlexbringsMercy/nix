@@ -1230,3 +1230,44 @@ resize verdict) and the operator's 5-minute re-check confirms feel.
   config-level repair exists (extend_border_grab_area can't reach through the
   bar's event handling). Plan's pre-authorized fallback stands: Super+RMB
   corner resize (already bound) + document in Nexus Input help (Stage 9 page).
+
+### Drag-fix deep research + carried patch (2026-07-22)
+
+**Research (Codex xhigh, thread 019f88…, budget-corrected to ≤2 subagents; report
+in scratchpad dragresearch-final.md):** the pickup jump is an upstream
+REGRESSION. Hyprland's 2022 drag code preserved the grab vector
+(`originalPosition + (currentMouse - beginMouse)`, floated only at drag END —
+mirror commits 3e36f1c42c / 8a4f6d01f3); current code centers the new floating
+box under the cursor (`cursor - size/2`, DragController.cpp L58-80 @ v0.55.4).
+Upstream issue #3712 documents exactly this and was closed "not planned"
+(PM-verified via direct fetch); 0.56 and post-0.56 main retain the centering
+(release notes + source checked — the planned compositor bump inherits NO fix).
+No config option, no community plugin, no downstream distro patch carries a fix
+(per-lane coverage accounting in the report). The pre-float Lua wrapper is
+partial by construction: it cannot intercept hyprbars (which enters
+MBIND_MOVE from C++) and it breaks drop-to-retile. Operator's ruling that "a
+fix exists" vindicated: the fix is Hyprland's own former behavior, forward-ported.
+
+**Operator decision #10 (2026-07-22): carry the compositor patch.** Conditions
+set by operator and verified before execution: (a) proven that older Hyprland
+actually preserved the grab point — yes, in read source, not just the issue;
+(b) strictly isolated, no scope opening — the patch touches only the
+tiled-pickup placement inside `if (m_dragThresholdReached)`. Operator's
+pre-float idea evaluated and declined for the two reasons above (hyprbars
+unreachable, retile semantics lost).
+
+**Execution (Codex xhigh, thread 019f8aa0…):**
+`modules/nixos/patches/hyprland-drag-anchor.patch` — captures the normalized
+anchor `(cursor - tiledTopLeft)/tiledSize` before `changeFloatingMode`, then
+places the floating box at `cursor - anchor*floatingSize`; handles the 0.8489×
+remembered-size shrink by construction; `m_draggingTiled` and all drop/retile,
+resize, threshold, focus, fullscreen paths untouched (isolation audit in
+report). Carried via a single nixpkgs overlay in flake.nix applied to BOTH
+eval paths (homePkgs + nixosSystem module), so `pkgs.hyprland` AND
+`pkgs.hyprlandPlugins.hyprbars` (plugin helper consumes top-level hyprland)
+rebuild against the same patched compositor — no ABI drift. PM verified:
+patch context matches pinned blob (ad68274 @ a0136d8c), dry-run applies with
+zero fuzz, overlay live in real eval (`nixosConfigurations.macbook.pkgs.
+hyprland.patches` lists the patch). Live gate matrix owed at re-test: 4 grab
+points × short/tall windows × Super+LMB/titlebar; floating drag unchanged;
+drop/retile intact.

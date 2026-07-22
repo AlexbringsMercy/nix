@@ -32,9 +32,18 @@
     }:
     let
       system = "x86_64-linux";
+      hyprlandOverlay = _: prev: { # Aurora: carry the approved tiled-drag grab-anchor fix in every package set.
+        hyprland = prev.hyprland.overrideAttrs (old: { # Aurora: extend nixpkgs' pinned Hyprland derivation without replacing its attributes.
+          patches = (old.patches or [ ]) ++ [ # Aurora: retain any nixpkgs patches before applying the local compositor fix.
+            ./modules/nixos/patches/hyprland-drag-anchor.patch # Aurora: preserve the normalized grab anchor when a tiled window floats on pickup.
+          ]; # Aurora: finish the additive Hyprland patch list.
+        }); # Aurora: finish the patched Hyprland derivation.
+      }; # Aurora: share one compositor override across standalone Home Manager and NixOS evaluation.
+
       homePkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
+        overlays = [ hyprlandOverlay ]; # Aurora: make standalone pkgs.hyprland and hyprlandPlugins consume the same patched compositor.
       };
 
       mkMacbook =
@@ -47,6 +56,9 @@
             inherit inputs firmwareSource;
           };
           modules = [
+            {
+              nixpkgs.overlays = [ hyprlandOverlay ]; # Aurora: make the integrated NixOS and Home Manager package set use the patched compositor.
+            }
             nixos-hardware.nixosModules.apple-t2
             inputs.t2fanrd.nixosModules.t2fanrd
             home-manager.nixosModules.home-manager
