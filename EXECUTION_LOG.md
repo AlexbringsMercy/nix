@@ -1271,3 +1271,50 @@ zero fuzz, overlay live in real eval (`nixosConfigurations.macbook.pkgs.
 hyprland.patches` lists the patch). Live gate matrix owed at re-test: 4 grab
 points × short/tall windows × Super+LMB/titlebar; floating drag unchanged;
 drop/retile intact.
+
+### 2026-07-22 session close-out (PM handoff follows)
+
+**Drag patch:** committed `df37152` (patch + overlay, PM-verified — see prior
+entry). The build of both eval paths was interrupted before the patched
+compositor compiled — only stock hyprland-0.55.4 is in the store. **Builds
+owed** (nix resumes from store; re-run the two builds as-is).
+
+**DWT ROOT CAUSE FOUND (live measurement, PM-run):** the T2 trackpad carries
+`ID_INPUT_TOUCHPAD_INTEGRATION=external` (udev default for USB touchpads —
+verified `udevadm info /dev/input/event7`), and libinput reports
+`Disable-w-typing: n/a` — **DWT does not exist on this device**; Hyprland's
+`dwt = true` has been a silent no-op the whole build. This supersedes all
+prior "partially effective" framing. Evidence: live capture (keyboard event2 +
+trackpad event7, tap+dwt enabled) during operator typing — 22 palm-taps fired,
+most within ±0.15s of keypresses, some between keystrokes; log preserved at
+`~/.local/state/aurora-build/pm/dwt-capture.log`. Fix (NOT yet implemented):
+udev hwdb entry `touchpad:usb:v05acp0280:*` →
+`ID_INPUT_TOUCHPAD_INTEGRATION=internal` (`services.udev.extraHwdb` in
+desktop.nix; systemd's stock `70-touchpad.hwdb` documents the key; hwdb match
+needs lowercase vid/pid). Second half: palm/thumb-tap classification — run
+`libinput measure touch-size /dev/input/event7` with the operator's hands
+(tool verified at `/nix/store/md7kljxi6ys3vbghgbliqcrp1x40mj1x-libinput-
+1.31.3-bin/bin/libinput`; alex is in `input` group, no sudo needed) and fill
+the 2D report's candidate quirk stanza with measured AttrPalmSizeThreshold /
+AttrThumbSizeThreshold values.
+
+**Operator decision #11 (2026-07-22): corner resize REOPENED — non-negotiable.**
+The PM wrongly described the 2D fallback verdict as "closed"; the operator
+never accepted it: "I want corner resize... just like the drag its a non
+negotiable we dont just skip over." Fix path: research the hyprbars top-
+decoration × resize_on_border interaction in the carried v0.55.0 hyprbars
+source (we already patch it — hover patch precedent) and extend our carried
+patch so corner grabs work reliably. Not started.
+
+**Operator directive (standing): batch fixes — fewer rebuild cycles.** Group
+file-work into batches; one build + one reboot per batch. Current batch:
+drag patch (built) + DWT hwdb/quirk fix + corner-resize hyprbars patch, then
+stage boot-only and re-test everything (incl. gen-26 snap rework) in ONE reboot.
+
+**Stage 3 prep:** mapping prompt `codex-prompts/stage3-taskbar-mapping.md`
+launched (component map, batch plan, dev-loop feasibility: second QuickShell
+instance from the worktree for hot QML iteration). Session died mid-run at the
+machine interruption; thread `019f8ad6-f360-7340-8c92-c17189e395b0` is
+resumable (`codex exec [global flags] resume <id>` — flags BEFORE resume).
+Partial event stream preserved at `~/.local/state/aurora-build/pm/
+stage3prep-events.jsonl`.

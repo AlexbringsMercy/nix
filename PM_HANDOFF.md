@@ -1,221 +1,261 @@
 # The Aurora Build — PM Handoff Brief
 
-The design phase of this project ended when `GRAND_PLAN.md` was written; execution began
-immediately after and is now mid-flight. The previous project manager session ran the build
-through Stage 0 and two-thirds of Stage 1 before hitting its usage limit, and wrote this
-brief so that you inherit its exact operating state — role, machinery, policies, lessons,
-and resume point. When it's read, you are the PM, and the build continues without a seam.
+The design phase ended when `GRAND_PLAN.md` was written; execution is mid-flight. This
+brief was written by the Fable PM session that closed out most of Stage 2, for the next
+PM session. When it's read, you are the PM, and the build continues without a seam.
 
-Written 2026-07-21. Where this file and `EXECUTION_LOG.md` disagree, trust the log.
+Written 2026-07-22. Where this file and `EXECUTION_LOG.md` disagree, trust the log.
 
 ## Who you are
 
 You are the **project manager and verifier** of a complete operating system build — not
-the designer (that work is done and locked in `GRAND_PLAN.md`), and not the executor
-(that work is delegated). You are the brains that keeps everyone honest. Alex's words,
-binding: the PM model is expensive and "best used as the project manager and brains to
-verify everyones work does/is what they say. if its simple, delegate it for sure."
+the designer (done and locked in `GRAND_PLAN.md`), and not the executor (delegated).
+Alex's operating guidance to the PM model, binding and learned the hard way across three
+PM sessions (two fired):
 
-The execution model, exactly as Alex set it:
+- **Stay high-level and efficient.** The PM model is expensive. Use your reasoning where
+  it moves needles and needs Alex's decisions; delegate execution to Codex. Stay out of
+  the weeds.
+- **Straight talk, no overformatted jargon.** Tell him things plainly, as a high-level
+  PM. Ping him when you *actually* need him, not every 5 minutes.
+- **Never narrow what's intended.** Any answer that means cutting or downgrading a
+  planned feature to silence a bug is WRONG. "The ecosystem lives with it" from one
+  narrow search is a void conclusion (preamble precedence): if Alex says a fix exists,
+  keep looking — this session's drag-bug research proved him right (upstream regression,
+  fix = forward-port; see below). Easy answers in a new suit are still easy answers.
+- **Nothing is "closed" or "deferred" unless Alex said so, in his words.** The PM called
+  corner resize "closed by verdict" when Alex never accepted the fallback — he reopened
+  it as non-negotiable. Plan features are commitments. Fallbacks are proposals until he
+  signs off. Log his decisions in the EXECUTION_LOG decisions register **the same day**.
+- **State your read list before starting work.** He will ask what you've read. The
+  Tier 1 list below is the answer; read it fully, not performatively.
 
-- **You write specific execution prompts** — exact files, patches, configs, test criteria.
-  **Codex sessions do the terminal/file work.** You launch, monitor, and steer Codex
-  directly (it is your de facto subagent; Alex never ferries anything between you).
-- **You verify everything** before it counts: diff scope, claimed-vs-actual, build results.
-  Execution agents are competent but literal, and this project has been burned by agents
-  who invented instead of adapting. Verification has already caught one real bug
-  (a flake dynamic-attrs error Codex introduced in 1A). Assume nothing.
-- **You commit, build, and push.** Codex physically cannot commit — its sandbox mounts
-  `.git` read-only. This division is permanent: Codex edits, PM commits.
-- **Alex gate-tests** from compressed checklists you prepare ("open this, click this,
-  yes/no"). Mechanical gates (0, 2, 6) are quick checklists, batched. Visual gates
-  (1, 4, 7) are sit-down sessions — he needs to see and feel it. Gate 0 has passed;
-  Stage 1's visual gate is the next one, and it needs him present.
-- **Big stages (1, 3, 7) split across multiple Codex sessions.** Stage 1 is running as
-  1A (done), 1B (done), 1C (next).
-- **Subagent tiers** (Alex, binding): **never haiku — def dont use haiku.** Sonnet for
-  light tasks. Opus for medium and up, reasoning effort high minimum where the interface
-  allows. Codex for file execution whenever the work is well-specified.
-- **Every Codex session and every subagent reads `/home/alex/nix/SESSION_PREAMBLE.md`
-  first.** No exceptions — that file exists because five consecutive sessions once got a
-  load-bearing claim wrong by grepping instead of reading.
+The execution model:
 
-Work autonomously between gates. Come to Alex only for decisions, sudo outside the harness
-scope, reboots needing his presence, and gate checks.
+- **You write execution prompts** — exact scope, citations required, IN/OUT lists, report
+  format. **Codex does the terminal/file work.** You launch, monitor, and steer directly.
+  Codex gets the preamble + task-scoped context, NOT the full PM read list — it's the
+  delegee; the PM is where full context lives (Alex's calibration).
+- **You verify everything before it counts.** Diff the tree against claimed scope, re-run
+  the checks Codex's sandbox couldn't (nix eval/build need the daemon — Codex can't reach
+  it), verify load-bearing citations yourself (this session WebFetch-verified the upstream
+  issue before acting on it).
+- **You commit, build, push.** Codex's sandbox mounts `.git` read-only. Codex edits,
+  PM commits. `git add` explicit paths only.
+- **Alex gate-tests** from compressed checklists. Batch his touches: **one build + one
+  reboot per batch of fixes** (his standing directive — rebuild-per-fix wasted his time).
+- **Research/patch work runs Codex on xhigh** (`-c model_reasoning_effort=xhigh`) with
+  **at most ~2 judicious subagents** — never 6+ fan-outs (operator budget ruling).
+- **Subagent tiers: never haiku.** Sonnet light, Opus medium+. Every Codex session and
+  every subagent reads `/home/alex/nix/SESSION_PREAMBLE.md` first, no exceptions.
+
+Work autonomously between gates. Come to Alex for decisions, gate tests, reboots, and
+anything needing his hands (e.g. the touch-size measurement below).
 
 ## What you're managing
 
-The execution of `~/nix/GRAND_PLAN.md` — the complete NixOS + Hyprland "Aurora" desktop —
-on Alex's 2020 MacBook Air: T2, Intel i3 dual-core, 8GB RAM, 121GB partition. The hardware
-constraint is real and shapes operations: `--max-jobs 2 --cores 2` on builds, memory caps
-on Codex, bulk file operations scripted rather than looped through tools. An OOM has
-already killed a PM terminal mid-activation once; the policies below exist because of it.
+Execution of `~/nix/GRAND_PLAN.md` — the complete NixOS + Hyprland "Aurora" desktop —
+on Alex's 2020 MacBook Air: T2, Intel i3 dual-core, 8GB RAM, 2560×1600 @ 1.5 scale.
+The hardware shapes operations: `--max-jobs 2 --cores 2`, memory caps on Codex units,
+no parallel heavy builds. The flake at `~/nix` is sole authority; deploys go through the
+machine-local wrapper flake at `~/.config/nixos-local/` (injects Apple firmware).
 
-The flake at `~/nix` is the sole configuration authority (Stage 0 reconciled and retired
-the channel lineage). Deploys go through a machine-local wrapper flake at
-`~/.config/nixos-local/` that injects Apple firmware from `/etc/nixos/firmware/brcm`.
+Hyprland is 0.55.4 **native-Lua config** (not legacy): `hyprctl keyword` fails ("use
+eval"); live changes via `hyprctl eval 'hl.config({...})'`; legacy dispatch strings parse
+but fail at runtime. We now **carry a compositor patch** (see state) — plugin/compositor
+changes require a clean reboot into the new gen, never hot-swap (SIGSEGV, learned live).
 
 ## Authority order
 
-1. **`SESSION_PREAMBLE.md` rules and GRAND_PLAN locked decisions** — not yours to relitigate.
-   You are not the designer; if execution reveals a genuine flaw in the plan, log it, flag
-   it to Alex, and let him decide. Deviations you do make on execution grounds (the PM has
-   made one: snapshot-vendor instead of history graft, because audited bytes win) get
-   recorded explicitly in `EXECUTION_LOG.md` and `SOURCES.md`.
-2. **`EXECUTION_LOG.md`** — the record of what physically happened. Beats this file and
-   beats memory.
-3. **`GRAND_PLAN.md`** — the design authority for everything not yet built.
-4. **Ground truth** — the repo, the git history, the running machine. A verified read
-   beats every second-hand claim, including the ones in this brief.
+1. **`SESSION_PREAMBLE.md` + GRAND_PLAN locked decisions** — not yours to relitigate.
+2. **`EXECUTION_LOG.md`** — what physically happened + the operator decisions register.
+   Beats this file and beats memory.
+3. **`GRAND_PLAN.md` / `MASTER_REQUIREMENTS.md` / `macbook-build-spec.md`** — design
+   authority for everything not yet built.
+4. **Ground truth** — repo, git history, the running machine. A verified read beats every
+   second-hand claim, including this brief's.
 
 ## Files to read
 
-### Tier 1 — read fully, in this order, before acting
+### Tier 1 — read fully, in this order, before any work; state the list to Alex
 
-- **`SESSION_PREAMBLE.md`** — binds you and everyone you spawn. The failure case study it
-  opens with is the reason this project's verification culture exists.
-- **This file** — you're in it.
-- **`GRAND_PLAN.md`** — the source of truth you are executing. Read it whole once; every
-  verification you ever do is against this document. Note §2.1 (fork manifest), §3.1
-  (palette ladder), §8.7 (protected state), §9–10 (stage sequence and gates).
-- **`EXECUTION_LOG.md`** — Stage 0 close-out, the house deploy procedure with exact
-  commands, incident reports, Stage 1A/1B close-outs, and the NEXT pointer.
-- **`ISSUE_LOG.md`** — known issues; §19 (start-hyprland warning) is root-caused and stands.
+- **`SESSION_PREAMBLE.md`** — binds you and everyone you spawn.
+- **This file.**
+- **`GRAND_PLAN.md`** — whole, once. Note §3.3 (motion), §5.1–5.2 (Stage 3 target),
+  §6.2 (window spec), §10 (stage sequence).
+- **`MASTER_REQUIREMENTS.md`** and **`macbook-build-spec.md`** — the requirement ledger
+  and hardware spec. A previous PM skipped these and was corrected; don't.
+- **`EXECUTION_LOG.md`** — at minimum: the operator decisions register, the Stage 2 gate
+  entry, the 2C/2D close-outs, and both 2026-07-22 entries (drag patch + session
+  close-out). The close-out is the precise complement to this brief's state section.
+- **`ISSUE_LOG.md`** — known issues.
 
-### Tier 2 — read fully before your first Codex launch
+### Tier 2 — before your first Codex launch
 
-- **`SOURCES.md`** — the vendored-components ledger; aurora-shell row + provenance note.
-- **`codex-prompts/stage1a-vendor-chassis.md`** and **`codex-prompts/stage1b-aurora-scheme.md`**
-  — the house prompt style. Match it for 1C: mandatory preamble read, scope IN/OUT, hard
-  rules, tasks, raw-data report format.
-- **`modules/nixos/build-harness.nix`** — the scoped passwordless sudo you inherit.
-- **`scripts/aurora-resume-agent`** and the `aurora-resume-agent` line in
-  `modules/home/hyprland/hyprland/autostart.lua` — the reboot-resume loop.
-- **`~/.config/nixos-local/flake.nix`** — the machine-local wrapper (NOT in this repo).
-  Read the comment explaining why its input is `git+file://` and never `path:`.
+- **`SOURCES.md`** — vendored-components ledger.
+- **House prompt style**: `codex-prompts/stage2d-drag-anchor-patch.md` (execution) and
+  `codex-prompts/stage3-taskbar-mapping.md` (research/mapping) are the current templates:
+  preamble first, task-scoped reads, IN/OUT scope, isolation constraints, verification
+  duties, raw-data report.
+- **`modules/nixos/build-harness.nix`** — scoped passwordless sudo (nix-env,
+  switch-to-configuration, reboot/poweroff, nix-collect-garbage).
+- **`scripts/aurora-resume-agent`** + its autostart.lua line — the reboot-resume loop.
+- **`~/.config/nixos-local/flake.nix`** — wrapper (NOT in repo); `git+file://` on purpose,
+  never `path:` (would copy 11GB of `repos/` to store).
+- **`~/.local/state/aurora-build/pm/`** — the PM artifact directory (see machinery).
+  Contains the drag research report, Codex final reports, the DWT evidence capture.
 
-### Tier 3 — when you start 1C work
+### Tier 3 — per-task, when you pick the task up
 
-- **`modules/home/aurora-shell/nix/hm-module.nix`** — the upstream HM module you'll have
-  Codex adapt into `programs.aurora-shell`.
-- **`modules/home/aurora-shell/services/Colours.qml`** — the 1B palette work and the
-  `scheme.json` watch chain (the source of the caveat below).
-- **`modules/home/{waybar,rofi,wallpaper,quickshell}`** — the trees 1C retires. Live
-  desktop: untouchable by Codex until the cutover is actually deployed at the gate.
-- **`modules/home/theming/default.nix`** — keeper wirings that must be carried before
-  retirement: equalizer-state backend, weather cache pattern.
-- **`repos/`** — read-only reference clones, gitignored. Never staged, never modified.
+Named in the work queue below.
 
 ## The machinery you inherit
 
-**Build harness** (BUILD-PERIOD SCAFFOLDING — removed Stage 10; the §7.5 sudo toggle
-supersedes daily use at Stage 8). Scoped NOPASSWD sudo for exactly: `nix-env`, the
-canonical `/nix/var/nix/profiles/system/bin/switch-to-configuration`, `systemctl reboot`,
-`reboot`, `systemctl poweroff`, `nix-collect-garbage`. Everything else prompts.
+**PM artifact directory — NEW RULE, paid for twice**: session scratchpads die with
+sessions; two sessions' research reports were nearly stranded that way. ALL PM outputs —
+Codex finals, event streams, research reports, evidence captures, build logs — go to
+`/home/alex/.local/state/aurora-build/pm/`, never to session-scoped scratch dirs.
 
-**Armed resume loop** — how you survive reboots. Create the flag file
-`~/.local/state/aurora-build/resume-armed`, reboot; autostart runs `aurora-resume-agent`,
-which consumes the flag and opens kitty running `claude --continue` in `$HOME`. That
-resumes the most recent conversation — after handoff, that's you. Un-armed boots do nothing.
-
-**Deploy procedure** (exact commands in `EXECUTION_LOG.md`): refresh the wrapper-flake
-lock first (`nix flake update --flake /home/alex/.config/nixos-local` — it pins a git rev
-of `~/nix`, so every deploy after new commits needs this), `nix build` the toplevel via
-`path:/home/alex/.config/nixos-local`, `sudo nix-env --profile /nix/var/nix/profiles/system
---set`, then `switch-to-configuration boot`. The console line "Not checking switch
-inhibitors (action = boot)" is benign informational output.
-
-**Activation safety — POLICY, paid for with an OOM incident**: never run a live
-`switch-to-configuration switch` attached to your own terminal. Either fully detach
-(`setsid bash -c '… > log 2>&1' &`) or go boot-only + armed-resume reboot for anything
-that touches the session.
-
-**The Codex pipeline** (proven across two sessions). codex-cli 0.144.4 at
-`/home/alex/.npm-global/bin/codex`. Launch recipe:
+**The Codex pipeline** (codex-cli at `/home/alex/.npm-global/bin/codex` — ALWAYS the
+absolute path: systemd user units don't inherit the interactive PATH; a bare `codex`
+dies exit 127):
 
 ```
-systemd-run --user --unit=codex-stageXX \
+systemd-run --user --unit=codex-<task> \
   -p WorkingDirectory=/home/alex/nix -p MemoryHigh=3G -p MemoryMax=4G -p CPUWeight=30 \
-  /run/current-system/sw/bin/bash -lc \
-  '/home/alex/.npm-global/bin/codex exec --cd /home/alex/nix --sandbox workspace-write --json \
-   --output-last-message <scratchpad>/stageXX-final.md "$(cat /home/alex/nix/codex-prompts/stageXX-*.md)" \
-   > <scratchpad>/stageXX-events.jsonl 2>&1'
+  bash -lc '/home/alex/.npm-global/bin/codex exec --cd /home/alex/nix \
+   --sandbox workspace-write --json -c model_reasoning_effort=xhigh \
+   --output-last-message /home/alex/.local/state/aurora-build/pm/<task>-final.md \
+   "$(cat /home/alex/nix/codex-prompts/<task>.md)" \
+   > /home/alex/.local/state/aurora-build/pm/<task>-events.jsonl 2>&1'
 ```
 
-`<scratchpad>` is your session's scratchpad directory. Watch with a background poller on
-`systemctl --user is-active --quiet codex-stageXX`. The working directory is set redundantly
-because omitting it cost the previous PM three failed launches ("Not inside a trusted
-directory"). The event stream carries a thread ID; `codex exec resume <id>` steers a
-session mid-flight.
+Watch with a detached poller on `systemctl --user is-active --quiet codex-<task>`.
+**Steering/resume: global flags go BEFORE the `resume` subcommand** —
+`codex exec --cd ... --json -c ... --output-last-message ... resume <thread-id> '<msg>'`
+(the other order is exit 3). Thread IDs are in the first line of the events stream.
+`--enable multi_agent` is available and stable when a prompt calls for subagents (≤2).
+
+**Long builds**: also detached `systemd-run --user` units (a tool-managed background
+task has a hard timeout; a killed nix build loses the whole in-flight derivation —
+the compositor is ONE derivation, don't lose 40 minutes of compile to a 10-minute leash).
+
+**Deploy procedure** (exact commands in EXECUTION_LOG): `nix flake update --flake
+/home/alex/.config/nixos-local` (repins the git rev — needed after every commit) →
+`nix build path:/home/alex/.config/nixos-local#nixosConfigurations.macbook.config.system.build.toplevel
+--max-jobs 2 --cores 2` → `sudo nix-env --profile /nix/var/nix/profiles/system --set "$TOP"`
+→ `sudo /nix/var/nix/profiles/system/bin/switch-to-configuration boot`. ("Not checking
+switch inhibitors (action = boot)" is benign.) **Never** run a live `switch` attached to
+your own terminal (OOM incident) — boot-only + armed resume.
+
+**Armed resume loop**: `touch ~/.local/state/aurora-build/resume-armed`, then reboot;
+autostart opens kitty running `claude --continue`. Un-armed boots do nothing.
+
+**Verification both-paths rule**: every config change builds BOTH
+`path:/home/alex/nix#homeConfigurations.alex.activationPackage` and
+`path:/home/alex/nix#nixosConfigurations.macbook.config.system.build.toplevel` before
+staging. Codex cannot build (no daemon in its sandbox) — building is yours.
 
 ## Current state — the exact resume point
 
-- **Done and pushed**: Stage 0 (gate PASSED), Stage 1A, Stage 1B. HEAD `3044e5e` on
-  branch `codex/macbook-desktop`, remote `github.com/AlexbringsMercy/nix`, tree clean.
-- **Builds green**: `nix build /home/alex/nix#aurora-shell` →
-  `/nix/store/46jqdy8svnx719hw1ybcz5db40nggbfs-caelestia-shell-1.0.0`.
-- **Generations**: 17 current, 16 booted-verified, 15 = last channel-lineage build kept as
-  rollback anchor until Stage 10. Gens 1–7 deleted and GC'd.
-- **NEXT: Stage 1C — the cutover Codex session.** Scope: adapt
-  `modules/home/aurora-shell/nix/hm-module.nix` into `programs.aurora-shell` (rename per
-  §2.1), supervised systemd user service, retire `modules/home/{waybar,rofi,wallpaper,quickshell}`
-  with keepers carried first (equalizer-state backend, weather cache pattern,
-  dunst/aurora-notification-fallback), **seed a clean aurora `scheme.json`**, IPC/keybind
-  smoke. Codex does the file work now; activation and the Stage 1 visual gate wait for
-  Alex (glass A/B evening, VA-API check, plus the Stage 0 leftovers: TV-from-couch
-  reachability, Xbox controller pairing).
-- **The 1B caveat that makes the seed load-bearing**: the aurora palette pinned in
-  `services/Colours.qml` is only the *fallback* — any pre-existing
-  `${XDG_STATE_HOME}/caelestia/scheme.json` overrides it, and the caelestia CLI's own
-  default scheme is Catppuccin Mocha. Without the seed, first light is stock, not aurora.
+- **Branch** `codex/macbook-desktop`, remote `github.com/AlexbringsMercy/nix`. HEAD at
+  handoff includes the drag patch commit `df37152` and the handoff commit; pushed.
+- **Generations**: gen 25 booted (Stage 2C content), **gen 26 staged boot-only and
+  NEVER TESTED** — it carries the 2D half-snap rework (in-frame geometry + arrow-press
+  release path). Do not report 2D fixes as live; the running system is gen 25.
+- **Stage 2: CONDITIONAL PASS**, closes after the open items below land and Alex re-tests
+  everything in ONE reboot.
 
-## Standing constraints — locked, enforce on yourself and everyone you spawn
+### The open work queue, in order
+
+1. **Finish the drag-patch builds.** The carried compositor patch
+   (`modules/nixos/patches/hyprland-drag-anchor.patch` + overlay in `flake.nix`) is
+   committed and PM-verified (applies with zero fuzz to the pinned source; overlay
+   present in real eval; hyprbars rebuilds against the patched compositor via the
+   overlay automatically). The interrupted build never compiled the patched Hyprland —
+   re-run both builds (they resume from store). Background: the bug, the research, and
+   the operator's conditions are in the 2026-07-22 log entries and
+   `~/.local/state/aurora-build/pm/{dragresearch-final.md,dragpatch-final.md}`.
+2. **DWT fix — root cause is FOUND, implement it.** The T2 trackpad is USB, udev defaults
+   USB touchpads to `ID_INPUT_TOUCHPAD_INTEGRATION=external`, and libinput therefore
+   reports `Disable-w-typing: n/a` — **DWT has never been active on this machine**;
+   Hyprland's `dwt=true` is a silent no-op. Fix: udev hwdb entry
+   (`touchpad:usb:v05acp0280:*` → `ID_INPUT_TOUCHPAD_INTEGRATION=internal`, lowercase
+   vid/pid, via `services.udev.extraHwdb`). Then the tap-classification half: run
+   `libinput measure touch-size /dev/input/event7` WITH ALEX (tool:
+   `/nix/store/md7kljxi6ys3vbghgbliqcrp1x40mj1x-libinput-1.31.3-bin/bin/libinput`;
+   alex is in `input` group, no sudo; keyboard=event2, trackpad=event7) and fill the 2D
+   report's candidate stanza with measured palm/thumb size thresholds. Evidence of the
+   leak: `pm/dwt-capture.log` (22 palm-taps during typing, ±0.15s of keypresses).
+3. **Corner resize — REOPENED by operator, non-negotiable (decision #11).** He wants it
+   working, not the Super+RMB fallback. Known mechanism: carried hyprbars v0.55.0
+   reserves the 30px top bar and consumes pointer events over it, shadowing the
+   compositor's corner border-grab zones. We already patch hyprbars (hover patch,
+   `modules/home/hyprland/default.nix` + `patches/hyprbars-hover.patch`) — research and
+   extend the carried patch so corner grabs work. Codex xhigh, house research style,
+   sourced fixes preferred, isolation constraints like the drag prompt.
+4. **Batch → one rebuild → one staged boot → ONE reboot with Alex.** Items 1–3 all land
+   together. His re-test checklist: drag grab-point (4 grab positions × short/tall ×
+   Super-drag/titlebar; floating unchanged; drop-retile works), gen-26 half-snap
+   (in-frame, arrow-release, no permanent floaters), DWT (`Disable-w-typing: enabled` in
+   `libinput list-devices` + typing test), corner resize. Then **Stage 2 gate closes** —
+   push at the gate.
+5. **Stage 3 prep — resume the mapping thread.** Prompt:
+   `codex-prompts/stage3-taskbar-mapping.md` (component map donor→target for every §5.1
+   element, batch plan sized to rebuilds, dev-loop feasibility: a second QuickShell
+   instance running from the worktree for hot QML iteration — load-bearing for cycle
+   time). The session died mid-run; thread `019f8ad6-f360-7340-8c92-c17189e395b0` is
+   resumable; partial events at `pm/stage3prep-events.jsonl`. Verify anything it
+   claims before you build the Stage 3 batches from it.
+
+### Parked with paper trail (do not silently drop)
+
+- Volume gesture: **deferred by Alex** (decision #9) to the compositor bump; note 0.56
+  adds Lua touchpad gestures — revisit at the bump.
+- Launcher/dashboard animation lag → Stage 3 motion pass.
+- Minimized-workspace hiding → deploys with the Stage 3 taskbar.
+- Corner-resize documentation in Nexus Input help → Stage 9 (after the real fix lands).
+- Scroll: 0.6 FINAL (decision #7). Drag animation flag false permanent (decision #8).
+
+## Standing constraints — locked
 
 - Attribution for vendored code = upstream repo + path only. **Never mention licensing.
   Ever. For any reason** — not in code, commits, logs, prompts, or reports.
-- Never stage or push: `secrets/`, the firmware tree, wallpaper binaries, `repos/`.
-- `git add` explicit paths only. Never `git add -A` at repo root.
-- `/etc/nixos` is read-only reference; its `firmware/` dir is load-bearing for the wrapper.
-- Protected state per GRAND_PLAN §8.7: Media Center stack, TV firewall rule, Xbox BT
-  tuning, `/var/lib/bluetooth`, firmware, T2 invariants.
-- Push at every stage gate. Append close-outs to `EXECUTION_LOG.md` as you go.
-- Report honestly — failures, deviations, and your own mistakes included. The previous PM
-  confessed a triple-botched Codex launch; that standard holds.
+- Never stage or push: `secrets/`, firmware tree, wallpaper binaries, `repos/`.
+- `git add` explicit paths only. Never `git add -A`.
+- `/etc/nixos` read-only reference; protected state per GRAND_PLAN §8.7 (Media Center,
+  TV firewall rule, Xbox BT, `/var/lib/bluetooth`, firmware, T2 invariants).
+- Push at every stage gate. Append to EXECUTION_LOG as you go, decisions same-day.
+- Report honestly — failures, deviations, your own mistakes. This session's PM owned a
+  staged-vs-live misreport and a premature "closed" label; that standard holds.
 
-## Lessons already paid for (don't re-buy them)
+## Lessons already paid for (don't re-buy)
 
-- Shell cwd resets across reboots — `git -C /home/alex/nix` style, always.
-- `pkill -f` patterns can match your own shell and kill you (exit 144). Bracket trick:
-  `"nix buil[d]"`.
-- The gh credential helper must stay PATH-resolved (`!gh auth git-credential`) — a store
-  path written by an ephemeral `nix shell` got GC'd and broke pushes once.
-- The wrapper flake's `path:` fetcher would copy the whole worktree including 11GB of
-  `repos/` into the store. It is `git+file://` for a reason; it ships committed tree only.
-- Live switches attached to your terminal can die at exit 137 and take you with them.
-
-## What NOT to do
-
-- **Don't redesign.** GRAND_PLAN stands. Execution-forced deviations get logged and flagged,
-  not silently absorbed.
-- **Don't execute what you should delegate.** Well-specified file work goes to Codex;
-  light verification sweeps go to sonnet subagents. You verify and integrate.
-- **Don't trust reports without checking.** Diff the actual tree against the claimed scope
-  every time.
-- **Don't spawn haiku. Don't skip the preamble read for any spawn.**
-- **Don't touch protected state, live desktop trees (until the 1C gate deploy), or
-  anything in the never-push list.**
+- systemd user units don't inherit your PATH — absolute binary paths, always.
+- Codex resume: global flags BEFORE the `resume` subcommand (else exit 3).
+- Session scratchpads die with sessions — everything durable goes to
+  `~/.local/state/aurora-build/pm/`.
+- Staged ≠ live: check `readlink /run/current-system` before telling Alex to test.
+- A background tool task's timeout can kill a nix build mid-derivation — long builds go
+  in detached systemd units.
+- Single-source conclusions are void; "no fix exists" requires per-lane coverage
+  accounting, and even then it's a coverage report, not a fact.
+- `hyprctl keyword` is dead on native-Lua configs; `hl.dsp.*` forms must be cited from
+  installed stubs or reference configs — legacy strings parse then fail at runtime.
+- Never hot-swap compositor plugins (singleton collision, SIGSEGV) — clean reboot.
+- Live `switch-to-configuration switch` attached to your terminal can OOM-kill you.
+- Shell cwd resets across reboots — `git -C /home/alex/nix` style.
+- `pkill -f` can match your own shell (bracket trick: `"nix buil[d]"`).
+- The gh credential helper stays PATH-resolved (`!gh auth git-credential`).
+- Empty shell vars make dispatches silently no-op — verify state changed, not that the
+  command returned ok.
 
 ## First actions
 
-1. Complete the Tier 1 + Tier 2 reading.
-2. Confirm repo state matches this brief; tell Alex your understanding of where the build
-   stands and your 1C plan in a few sentences.
-3. Draft `codex-prompts/stage1c-cutover.md` in the house style, launch it through the
-   pipeline, verify, commit, build, push.
-4. Schedule the activation + Stage 1 visual gate for when Alex is at the machine.
-
-Open items awaited from Alex (non-blocking): Erdtree ASCII art (the Night's Edge piece is
-done at `~/Downloads/nightsedge.ansi`, ships raw via fastfetch file-raw at the fetch-pane
-stage), backup destination, headphone model names, calendar ICS URL. Deferred by decision:
-KDE Connect. Sequenced later: M11 generator-clamp half lands Stage 4 with the CLI;
-light-mode code removal is a recorded later cleanup; harness removal at Stage 10.
+1. Tier 1 + Tier 2 reading; state the read list to Alex with your understanding of where
+   the build stands, in a few plain sentences.
+2. Confirm ground truth matches this brief: branch/HEAD, `readlink /run/current-system`
+   (expect gen 25), gen 26 staged, untracked/clean tree state.
+3. Resume the work queue at item 1 (the builds — they're mechanical and free to start
+   immediately) and item 3's prompt drafting in parallel; item 2's measurement needs
+   Alex's hands, so schedule it with him alongside the reboot.
