@@ -2413,3 +2413,101 @@ so `wrz9r718…` was reused throughout, as decision 20 item 23 requires.
 
 **Stage 2 remains OPEN.** The reboot is a runtime-validation pass; the physical gate
 follows.
+
+---
+
+# ═══════════════════════════════════════════════════════════════════
+## STAGE 2 RUNTIME GATE — FAILED — 2026-07-29 — GENERATION 31
+# ═══════════════════════════════════════════════════════════════════
+
+**Generation 31 booted and remains active** while the correction batch is
+developed. **Generation 26 remains the fallback.** Operator halted further testing
+for this generation — sufficient blocking evidence exists.
+
+### Operator results, recorded verbatim
+
+**Passed**
+- Tiled titlebar drag remains under the cursor.
+- Basic compositor minimize/restore works for an isolated single-app window.
+- Natural palm placement does not move the cursor.
+- Clock/tray/status/launcher/power basics appear intact.
+- Super+K and the top-edge dashboard trigger are dead.
+
+**Blocking failures**
+
+1. **Corner resizing.** Corner drag only resizes horizontally. It does not provide
+   diagonal grow/shrink. The accepted behavior must work from the normal window
+   state without requiring Alex to perform an unexplained manual "float first"
+   preparation step. Test both tiled split-resize semantics and freeform/floating
+   resize. All four corners must move both relevant axes and support grow and
+   shrink.
+   **Operator correction to the test record:** *"Floating corner resize: PASS,
+   incidental and not the acceptance target. Tiled corner resize: FAIL, Stage 2
+   blocker."* The accepted requirement is ordinary mouse resizing on **normal tiled
+   windows** — grabbing any corner must resize both applicable axes where
+   neighboring layout space permits, **without first toggling the window floating
+   and without requiring a memorized hotkey.** *"Do not treat working floating
+   resize as resolution, and do not introduce 'float first' as the workflow. Alex
+   does not ordinarily use floating windows and does not want floating behavior
+   elevated into a prerequisite or primary window-management model."*
+
+2. **Deterministic snap.** Current behavior is not a half snap: the selected window
+   becomes floating; it is offset beyond the usable upper-left work area; it does
+   not occupy the exact half; the existing surplus window remains tiled
+   beneath/alongside it instead of minimizing. Must reconcile/minimize the existing
+   occupant and surplus **before** final placement, then place into exactly 50% of
+   the usable desktop area excluding rail/reserved margins. Must not rely on
+   Hyprland opportunistically allocating a dwindle slot before the snap state
+   machine finishes.
+
+3. **Rail and grouped applications.** Single-window Thunar minimize/rail restore
+   worked. Two windows of the same app failed: Kitty displayed one icon with two
+   dots but no usable exact-window preview; minimizing one Kitty window left no
+   distinguishable recovery item; clicking the grouped icon did nothing; grouped
+   hover previews are a complete failure. The rail must expose **exact windows** for
+   grouped apps, visibly distinguish minimized members, and restore the selected
+   address — not merely operate on the application group.
+
+4. **Brightness-to-zero rail bug.** Hovering/interacting around a valid minimized
+   rail entry caused display brightness to fall to zero. **Severe; must be
+   root-caused, not masked.** No ordinary hover may invoke brightness control.
+
+5. **Floating-window focus.** `follow_mouse=2` behaves correctly for ordinary tiled
+   windows, but merely hovering a floating window transfers keyboard focus.
+   Tiled and floating must both: receive pointer scrolling under hover; retain
+   keyboard focus on the last clicked window; transfer keyboard focus only on click.
+
+6. **DWT clarification.** Palm rejection passed. Touchpad suppression during active
+   typing may be normal DWT behavior — measure how quickly pointer control returns
+   after typing stops. Do not classify as a failure unless suppression persists
+   beyond a reasonable libinput delay.
+
+7. **Screenshot lifecycle and UI.** Region/window screenshots can produce sharp,
+   colour-correct output, but integration fails: closing/completing capture leaves
+   the visibly focused prior window unable to receive typing until clicked again;
+   selecting another window for capture can transfer subsequent typing into that
+   window; automatic window bounds appear inconsistent for floating windows; **Alex
+   has no Print key**, so "press Print" is not a valid full-screen path; a
+   screenshot/image utility appears as a dead icon in the app rail.
+
+8. **Boot time/network readiness.** After reboot, Chrome restored before time was
+   reliably synchronized, produced a clock error and invalidated ChatGPT
+   authentication. The resumed terminal harness also emitted an API error before its
+   reboot-resume message. Treat as one likely boot-readiness problem but **verify
+   rather than assume**. Fix the root boot ordering; **do not special-case ChatGPT**.
+
+9. **Wallpaper replacement.** Wallpaper rendering works, but Alex could not locate
+   the claimed picker/change path. Since Waypaper and awww were removed on the
+   assertion that a live replacement exists, report the exact ordinary mouse path.
+   **If it is not presently discoverable and usable, that cleanup gate remains
+   failed.**
+
+**Screenshot evidence:** image 1 visibly confirms the snap defect — offset floating
+overlay rather than an exact usable half, with another window remaining behind it.
+Image 2 contains only the selected terminal window and is sharp and colour-correct,
+proving exact-window output can work in at least that case.
+
+### Also approved for the next reboot
+
+The already-approved one-time procedure making **NixOS the persistent default boot
+target**, folded into the correction batch — **not** a separate reboot.
