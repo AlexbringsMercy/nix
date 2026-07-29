@@ -300,7 +300,24 @@ local function reconcile_pair(ws_id)
         end
     end
 
-    if not left_ok or not right_ok or surplus_returned then
+    -- Aurora: a window opened AFTER the pair completed dissolves it. The
+    -- completion sweep is deliberately one-time (gated on s.completed), so a new
+    -- window is never minimized -- it must surface normally. But leaving the pair
+    -- standing would strand two floating halves over a freshly tiled window and
+    -- keep stale bookkeeping alive, so the pair returns to ordinary tiling
+    -- instead. Only a *strict* pair reacts: with a single side snapped there is
+    -- no pair to dissolve and new windows tile normally as they always have.
+    local intruder = false
+    if s.left and s.right then
+        for _, w in ipairs(workspace_windows(ws_id)) do
+            if not w.hidden and w.address ~= s.left and w.address ~= s.right and not s.surplus[w.address] then
+                intruder = true
+                break
+            end
+        end
+    end
+
+    if not left_ok or not right_ok or surplus_returned or intruder then
         dissolve_pair(ws_id, { skip_left = not left_ok, skip_right = not right_ok })
     end
 end
