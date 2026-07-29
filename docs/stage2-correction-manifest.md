@@ -130,7 +130,26 @@ overlapping floating windows. The toolbar is **not** an independent layer-shell
 surface — it is a plain `Item` inside the single `caelestia-area-picker`
 `PanelWindow`, so focus-strand hazard (b) is structurally impossible.
 
-**Hazard (a) is not solved by construction — being corrected now.** In
+**Hazard (a) — RESOLVED in commit `6805009`; the paragraph below records what was
+found.** Region and window capture now compute geometry, tear down the layer-shell
+window, and crop with `grim -g` from a separate process, matching
+`GRAND_PLAN.md` §5.12. Proving it exposed a **live defect that was not
+theoretical**: Hyprland keeps *rendering* an unmapped layer surface for the whole
+`layersOut`/`fadeLayersOut` animation (~300 ms / ~280 ms). Measured on generation
+31 with a throwaway opaque Overlay surface torn down the same way — grim at 5 ms
+still captured ~100 % of it, at 153 ms ~76 %, clean only at ~307 ms. **The
+existing 50 ms `toolbarFullSettle` timer was therefore already broken in
+practice: the toolbar's own Full screen button was almost certainly baking the
+toolbar into captures at high opacity.** A plain unmap-then-grim would have
+inherited the bug. The replacement waits on `hyprctl layers` confirming the
+namespace is gone — a compositor-confirmed predicate, not a delay — inside the
+same `sh -c` as grim so nothing can reorder them, bounded at 40 polls (~2.3 s) so
+a namespace rename degrades rather than hangs. `hiddenForCapture` was removed
+because its replacement is live in the same change (decision 21).
+
+The original finding, for the record:
+
+
 region/window mode the code hides overlay, border and toolbar and activates
 `screencopy` in the same tick with no settle. The Qt-scenegraph argument in the
 existing comment is real but addresses the wrong layer: `screencopy`'s *content*
