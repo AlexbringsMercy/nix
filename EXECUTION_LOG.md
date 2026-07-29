@@ -2903,3 +2903,71 @@ of a symptom.
 
 **Status:** documentation correction only. No behaviour in the tree depends on it
 today; recorded so a future session does not re-derive it or avoid a usable path.
+
+---
+
+### Build failure and root cause — the `path:` fetcher filled the disk (2026-07-29)
+
+**The first attempt at the Stage 2 correction build failed.** Recorded in full
+because the cause is structural, has been silently accumulating for days, and
+very likely explains an earlier phantom build.
+
+**Symptom:** Hyprland failed to link at 5%:
+
+```
+ar: unable to copy file 'libhyprland_lib.a'; reason: No space left on device
+make[2]: *** [CMakeFiles/hyprland_lib.dir/build.make:6624: libhyprland_lib.a] Error 1
+```
+
+`/` was at **98% (2.7 GB free)** of 120 GB. **The compositor patch set was never
+the problem** — the compile died on disk, not on code.
+
+**Root cause.** Three separate 11 GB copies of the repository worktree were
+sitting in the Nix store — **33 GB**:
+
+```
+11G  /nix/store/kvskqsaybk7wlrqxgm4v8hm9bqc3ssnh-source
+11G  /nix/store/dw1rlhmnr55fd6p7lcv59cv4kg30w1yy-source
+11G  /nix/store/drjk8xa6pih41qbjvlxi2zpnjbz8y4wp-source
+```
+
+Each contained a full `repos/` tree. They come from
+`--override-input macbook-config path:/home/alex/nix`. **The `path:` fetcher does
+not honour `.gitignore`**, so every evaluation copies the entire worktree —
+including the 11 GB of research clones that `/repos/` exists to keep out of Git.
+
+The machine-local wrapper's own `flake.nix` warns about precisely this: *"git+file
+(not path:): the path fetcher would copy the whole worktree into the store —
+including the 11 GB repos/ research clones — on every eval."* **`README.md`
+contradicted that warning** by documenting the `--override-input … path:` form as
+the deployment command, and `PM_OPERATING_RULES.md` §2's "repin with
+`nix flake update` after every commit" is the procedure that avoids it.
+
+**This is probably not the first build it killed.** Two of the three copies
+contain `AURORA_OPERATOR_GUIDE.md` and `BUILD_PLAN.md` at their root — files
+moved into `archive/superseded-handoffs/2026-07-28/` on 2026-07-28. Those copies
+therefore predate that commit. The 2026-07-29 morning session reported starting a
+correction build that left **no generation, no boot entry, and no store output**.
+A silent ENOSPC failure in a detached unit fits that evidence exactly. Recorded
+as the most probable explanation, **not** as proven — that session's build log was
+not preserved.
+
+**Recovery.** All three paths verified before deletion: **0 referrers, 0 GC
+roots**, and absent from both the generation 26 and generation 31 closures. Gen 26
+(the operator's fallback) and gen 31 (active) were untouched. Deleted with
+`nix store delete`; **111 GB → 79 GB used, 35 GB free.** No generation was
+garbage-collected — deliberately, since `nix-collect-garbage -d` would have
+destroyed the gen-26 fallback.
+
+**Corrections landed.**
+
+- `README.md` now documents `nix flake update --flake ~/.config/nixos-local`
+  followed by a build of the wrapper's **committed** `git+file:` input, with an
+  explicit warning never to pass `--override-input … path:/home/alex/nix` and why.
+- The detached build script uses the git tree for both evaluation paths.
+- Because `git+file:` ships committed content only, work must be committed before
+  it can be built — which is already what `PM_OPERATING_RULES.md` requires.
+
+**Standing lesson for every future session:** a detached build unit that fails can
+look identical to one still running. Check the unit `Result`, the log tail, **and**
+free disk before reporting a build as started, progressing, or complete.
