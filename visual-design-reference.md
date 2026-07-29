@@ -4,6 +4,9 @@
 
 This is the master visual reference for overhauling the MacBook NixOS desktop.
 Read the EXECUTION_LOG.md and BUILD_PLAN.md on disk for infrastructure context.
+*(2026-07-28: `BUILD_PLAN.md` is archived at
+`archive/superseded-handoffs/2026-07-28/BUILD_PLAN.md`; `GRAND_PLAN.md`
+supersedes it.)*
 The plumbing (flake, T2 integration, Hyprland Lua framework, QuickShell panel
 coordinator, Matugen pipeline) is already built. What needs replacing is every
 visual surface — Waybar CSS/layout, Rofi theme, QuickShell panel styling,
@@ -629,7 +632,9 @@ match:
 
 Read these for infrastructure context:
 - `/home/alex/nix/EXECUTION_LOG.md` — what was built and current state
-- `/home/alex/nix/BUILD_PLAN.md` — design intent and source integration
+- `/home/alex/nix/GRAND_PLAN.md` — design intent and source integration (supersedes
+  `BUILD_PLAN.md`, archived 2026-07-28 at
+  `archive/superseded-handoffs/2026-07-28/BUILD_PLAN.md`)
 - `/home/alex/nix/SOURCES.md` — community provenance
 - `/home/alex/nix/docs/controls.md` — current keybinds and mouse paths
 - `/home/alex/nix/docs/recovery.md` — rollback procedures

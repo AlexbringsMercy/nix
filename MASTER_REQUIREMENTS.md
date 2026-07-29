@@ -289,3 +289,62 @@ Firm decisions made after the L2.5 gap review. These override any conflicting st
 - **Kitty Ctrl+Shift+T:** the reopen-closed-tab requirement was primarily about reopening FILES; it moves into dev-workspace planning (§7) rather than standing as a Kitty config demand. Native Kitty tab-restore is confirmed impossible.
 - **Neovim:** promoted from "deferred, never evaluated" to "evaluate during dev-experience research" alongside Starship, Alt+Tab, and terminal autosuggestions.
 - **Contested-claims rule:** any research finding that has flip-flopped between sessions (e.g., "caelestia's sidebar is/isn't just a notification drawer") is treated as UNSETTLED regardless of which session said it last. Before such a claim is used in planning, a targeted verification pass settles it against the actual repo — treat nothing as gospel, spawn a focused check on the single question.
+
+---
+
+## EXECUTION GOVERNANCE — 2026-07-28
+
+Binding on every execution session, PM session, and delegated agent. Recorded in
+full, with reasons, in `EXECUTION_LOG.md` under **OPERATOR DECISIONS — 2026-07-28
+— ACTIVE GENERATION 26** (decisions 12–18). Where this section and a stage report
+disagree, this section wins.
+
+1. **Planned, written, built, installed, activated, live-tested, and accepted are
+   seven distinct states.** They are never collapsed. A report that states one of
+   them while implying another is a false report.
+
+2. **A stage closes only after its entire gate passes.** Not when the code is
+   written, not when a build succeeds, not when a generation is installed, not
+   when most things work, not when the remainder looks small. All seven states
+   must be true for every requirement in the stage, and Alex must pass the
+   complete gate. Until then the stage is reported as **OPEN**.
+
+3. **No silent deferrals, divergences, scope reductions, or fallback
+   substitutions.** No requirement may be moved to another stage, deferred, cut,
+   narrowed, declared impossible, or satisfied by a workaround-treated-as-final
+   without Alex's explicit approval. A fallback is a proposal until he signs off.
+
+4. **Alex must explicitly approve every plan change.** Any divergence from
+   `GRAND_PLAN.md` and any newly discovered incompatibility goes to him as a
+   decision, before it is acted on.
+
+5. **Every operator decision is logged in `EXECUTION_LOG.md` the same day**, with
+   the date and the **actual confirmed active generation**, using the decision
+   template in `PM_OPERATING_RULES.md`. Conversation memory is not a decision
+   record.
+
+6. **Implementation detail stays with the agents; Alex receives decision-level
+   summaries.** He is asked for product/architecture calls, tradeoffs, scope
+   changes, deferral approvals, and physical gate acceptance — not for
+   command-by-command choices.
+
+7. **"Impossible" requires exhaustive evidence.** Configuration options,
+   community implementations, older upstream behaviour, and narrow patches must
+   all be investigated before a limitation is accepted. A single-lane search that
+   concludes "the ecosystem lives with it" is a void conclusion, not a finding.
+   (Precedent: the drag bug's fix was Hyprland's own former behaviour,
+   forward-ported — the operator was right and the first verdict was wrong.)
+
+8. **A narrow custom patch is a valid answer** when all of the following hold:
+   existing configuration cannot solve the problem; community and upstream
+   evidence has been properly investigated; the desired behaviour is proven
+   technically possible; the patch is isolated and tested; and Alex approves
+   carrying it. Carried patches are recorded in `SOURCES.md`.
+
+9. **Every stage-gate report carries a requirement-by-requirement table** with
+   pass / fail / unverified per requirement. No row may be dropped because it is
+   inconvenient, and no skipped check becomes an implied pass. The table format
+   is in `PM_OPERATING_RULES.md`.
+
+The current Stage 2 close-out brief is `STAGE2_CLOSEOUT_WORK_ORDER.md`. The
+incoming PM's operating contract is `PM_OPERATING_RULES.md`.

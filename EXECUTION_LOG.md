@@ -1,9 +1,54 @@
 # Execution log
 
-> **Current handoff:** the authoritative post-reboot state is recorded in
-> “2026-07-16 — full implementation and handoff report” at the end of this
-> file. Earlier statements that no live activation had occurred are historical
-> and are superseded by that report.
+
+# ═══════════════════════════════════════════════════════════════════
+# ⚠ CURRENT AUTHORITY — READ BEFORE THE HISTORICAL LOG
+# ═══════════════════════════════════════════════════════════════════
+
+> **This log contains two incompatible architectures.** Read chronologically and
+> trust later entries over earlier ones.
+>
+> **The 2026-07-16 "full implementation and handoff report" section describes a
+> RETIRED architecture.** It calls itself "the durable current-state report" and
+> claims later sections lose to it. That claim expired on 2026-07-21. It
+> describes Waybar as the permanent taskbar, independent custom QuickShell
+> dropdown panels, matugen/awww/Waypaper theming, and workspaces 1–2. **None of
+> that is the build.** Do not resume from it, cite it as current, or treat its
+> "Instructions for the next chat" as live. (This header replaces the former
+> "Current handoff" pointer that directed readers to that section.)
+>
+> **The current architecture is `GRAND_PLAN.md`:** caelestia forked as
+> `aurora-shell` (one QuickShell instance, systemd-supervised), a new QuickShell
+> top taskbar, caelestia's vertical rail retained, Waybar retired, skwd-wall as
+> the wallpaper authority, staged gates controlling execution.
+>
+> **Start here:** `## Stage 0 — Reconcile & baseline (2026-07-21)`, then read
+> forward to the end. Then read `CURRENT_STATE_AUDIT.md` for verified machine
+> state — this log records what was *attempted*, not what is *running*.
+>
+> **Four corrections to entries below, proven against the machine:**
+> 1. The 2026-07-22 close-out's batch line says "drag patch **(built)**". It was
+>    **not built.** The same entry says so 30 lines earlier ("the build was
+>    interrupted... builds owed"). The patched output is not a valid store path;
+>    stock unpatched Hyprland is running.
+> 2. The handoff's "gen 25 booted, gen 26 staged and NEVER TESTED" is stale. The
+>    machine has since **booted into gen 26**. The 2D half-snap rework is
+>    activated — but still not live-tested.
+> 3. **Generation 26 is the active and default boot generation** (confirmed
+>    2026-07-28). Any generation number stated earlier in this file is historical.
+> 4. **Corner resize is non-negotiable and unresolved** — no implementation, no
+>    research artifact (operator decision #11).
+>
+> **Stage 2 is NOT closed.** Conditional pass only. Report it as `STAGE 2 — OPEN`
+> until its full close-out gate passes and Alex accepts it.
+>
+> **Governing documents for the incoming PM:** `CURRENT_STATE_AUDIT.md`,
+> `PM_OPERATING_RULES.md`, `STAGE2_CLOSEOUT_WORK_ORDER.md`, `GRAND_PLAN.md`,
+> `MASTER_REQUIREMENTS.md`, and the dated operator-decision entries at the end of
+> this file.
+
+# ═══════════════════════════════════════════════════════════════════
+
 
 ## 2026-07-15 — migration started
 
@@ -1318,3 +1363,237 @@ machine interruption; thread `019f8ad6-f360-7340-8c92-c17189e395b0` is
 resumable (`codex exec [global flags] resume <id>` — flags BEFORE resume).
 Partial event stream preserved at `~/.local/state/aurora-build/pm/
 stage3prep-events.jsonl`.
+
+---
+
+# ═══════════════════════════════════════════════════════════════════
+## OPERATOR DECISIONS — 2026-07-28 — ACTIVE GENERATION 26
+# ═══════════════════════════════════════════════════════════════════
+
+**Ground truth confirmed at the time of writing (read-only):** branch
+`codex/macbook-desktop`, HEAD `6486742`, clean tree, 0 ahead / 0 behind
+`origin/codex/macbook-desktop`. `/run/current-system` =
+`/nix/store/92bdqiipmfazicpi1b1vy4hbn77wf33r-nixos-system-macbook-…`;
+`/nix/var/nix/profiles/system` → `system-26-link` → the same store path.
+**Active generation = default boot generation = 26.**
+
+This entry is a governance and documentation session only. No implementation,
+build, activation, service restart, or reboot occurred.
+
+---
+
+### Decision 12 — Stage completion means fully accepted
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+**Decision:** A stage is **not** complete merely because code was written, a
+build succeeded, a generation was installed, a PM says most things work, or the
+remaining issues appear small.
+
+A stage is complete only when **all seven** of these are true:
+
+1. Every requirement assigned to it is accounted for.
+2. Every required implementation is written.
+3. Every required output builds.
+4. It is installed and activated.
+5. Every physical or visual test is run.
+6. Failures and skipped checks are resolved.
+7. Alex passes the complete stage gate.
+
+**Plan impact:** No `PASS`, `DONE`, `CLOSED`, `COMPLETE`, or equivalent wording
+may be used for a stage before all seven conditions are true. "Conditional pass"
+is a status, not a close. Stage 2 is therefore reported as `STAGE 2 — OPEN`.
+
+**Acceptance condition:** Every stage close-out report carries the
+requirement-by-requirement table defined in `PM_OPERATING_RULES.md`, with no row
+removed, and Alex states his acceptance in his own words before the log records
+the stage as closed.
+
+---
+
+### Decision 13 — No silent deferrals, cuts, or divergences
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+**Decision:** No session may silently move a requirement to another stage, defer
+it, cut it, replace it with a weaker fallback, narrow its intended behaviour,
+declare an issue impossible, treat a workaround as final, or start the next
+stage with an unresolved gate.
+
+Any change from `GRAND_PLAN.md`, any newly discovered incompatibility, and any
+proposed deferral requires **Alex's explicit approval** before it takes effect.
+
+**Plan impact:** Every approval, rejection, override, or deferral is entered into
+this file **the same day**, with: date; active generation; decision status;
+original plan requirement; approved change; reason; target stage or revisit
+trigger; acceptance condition. Conversation memory is **not** an acceptable
+decision record. This extends decision #6 (PM conduct) and makes the register
+format mandatory rather than customary.
+
+**Acceptance condition:** Any stage report containing a deferral that has no
+matching dated entry in this log is rejected and the stage stays open.
+
+---
+
+### Decision 14 — PM communication level
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+**Decision:** Alex handles product and architecture decisions, tradeoffs, scope
+changes, approval of deferrals, and visual/physical gate acceptance. Routine
+implementation choices remain with the PM and the CLI agents.
+
+**Plan impact:** The PM reports to Alex in plain, high-level language: what
+decision is needed, why it matters, what the recommended choice is, what diverges
+from the plan, and what remains unverified. Alex is not dragged through
+command-by-command implementation detail unless his physical participation or a
+real decision is required.
+
+**Acceptance condition:** Alex is asked only for decisions and hands-on tests, and
+every escalation states a recommendation rather than presenting an open menu.
+
+---
+
+### Decision 15 — Screenshot colour defect is urgent and is pulled into Stage 2
+
+**Status:** APPROVED / BINDING — explicitly approved sequencing change
+**Applies from:** 2026-07-28, generation 26
+
+**Original plan requirement:** `GRAND_PLAN.md` §5.12 rebuilds the capture chain
+onto the carried `modules/areapicker/` architecture at a later stage; the current
+`screenshot-area` / `screenshot-full` bindings were the interim path.
+
+**Observed facts:** Both region **and** full-screen screenshots contain a uniform
+mauve/pink cast.
+
+**Operator decision:** Screenshot colour fidelity becomes a **blocking Stage 2
+close-out deliverable**, and the **final** §5.12 capture architecture is pulled
+forward to satisfy it.
+
+**Consequences, binding on the diagnosis:**
+
+- The defect is **not** proven to be solely the region-selection overlay.
+- Do **not** assume a palette root cause.
+- Do **not** assume an Areapicker-only root cause.
+- Diagnose whether the physical display itself is tinted or whether PNG capture
+  changes the colours.
+- Do **not** improve or preserve an interim screenshot implementation that will
+  later be deleted (MASTER §1.6 — no throwaway bridges).
+- Both region and full-screen paths must be correct; clipboard and saved-file
+  output must both work.
+
+**Acceptance condition:** Stage 2 cannot close while screenshots retain a uniform
+tint or a capture overlay baked into output. Full acceptance list in
+`STAGE2_CLOSEOUT_WORK_ORDER.md` §8.2 D.
+
+---
+
+### Decision 16 — Glass A/B remains in Stage 4 (explicitly approved, not waived)
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+
+**Original plan requirement:** `GRAND_PLAN.md` §3.2's glass A/B gate was listed as
+a Stage 1 gate item. It was not run at the Stage 1 gate; it was deferred without
+an explicit operator approval on record.
+
+**Operator decision:** The deferral to Stage 4 is **now explicitly approved**,
+because the final wallpaper and palette pipeline lands there, the present
+configuration already visibly fails the intended glass standard, and tuning
+temporary Stage 1 theming would duplicate work.
+
+**Plan impact:**
+
+- Stage 1's glass A/B deferral is explicitly approved — it is **not** silently
+  waived, and Stage 1's acceptance is not retroactively reopened.
+- **The current glass appearance is NOT accepted.** Live values
+  (`size 8 / passes 2 / vibrancy_darkness 0.38`) are not a shipped decision.
+- Stage 4 must run the **complete** §3.2 glass A/B matrix: `12/1-pass` vs
+  `8/2-pass`; `xray = true` vs `false`; optional `decoration:glow` rim accent;
+  actual wallpaper visibility.
+
+**Acceptance condition:** Stage 4 cannot close without Alex physically approving
+the glass result.
+
+---
+
+### Decision 17 — Stage 3 remains blocked
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+**Decision:** Stage 3 implementation cannot begin until the complete Stage 2
+close-out gate passes.
+
+**Plan impact:** A read-only Stage 3 **mapping** session may be scheduled later.
+It produces no implementation, touches nothing, and **cannot be used to claim
+Stage 3 has started**. The interrupted mapping thread is not resumed; a fresh
+mapping session is preferred (`CURRENT_STATE_AUDIT.md` §9).
+
+**Acceptance condition:** The first Stage 3 implementation commit is permitted
+only after this log records the Stage 2 gate as passed with Alex's acceptance,
+the date, and the active generation.
+
+---
+
+### Decision 18 — Archive superseded PM material
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-28, generation 26
+**Decision:** Superseded handoffs, kickoff prompts, and authority-conflicting
+plans leave the repository root and move into a dated archive at
+`archive/superseded-handoffs/2026-07-28/`.
+
+**Plan impact:** They remain in Git history and in the archive for provenance, but
+they must not be presented as active instructions. Archived documents lose to
+`CURRENT_STATE_AUDIT.md`, the latest dated entries in this log, `GRAND_PLAN.md`,
+and `MASTER_REQUIREMENTS.md`. Nothing is deleted.
+
+**Acceptance condition:** The repository root presents exactly one unambiguous
+active PM entry set: `CURRENT_STATE_AUDIT.md`, `GRAND_PLAN.md`,
+`MASTER_REQUIREMENTS.md`, `SESSION_PREAMBLE.md`, `EXECUTION_LOG.md`,
+`PM_OPERATING_RULES.md`, `STAGE2_CLOSEOUT_WORK_ORDER.md`, `SOURCES.md`.
+
+---
+
+### Unresolved acceptance debt as of 2026-07-28, generation 26
+
+**None of the following is passed. None may be treated as an implied pass.**
+
+| # | Item | State | Origin |
+|---|---|---|---|
+| 1 | **TV-from-couch reachability** (Media Center reachable from the living-room LG TV) | **UNVERIFIED** — never physically tested; deferred at the Stage 0 gate, never picked up at Stage 1. Inference-backed only (firewall rule verified in the flake and in the live firewall-start script). | Stage 0 gate |
+| 2 | **Xbox controller pairing** | **UNVERIFIED** — never physically tested; same deferral, same status. BlueZ LE tuning is in the flake and `/var/lib/bluetooth` is untouched, but nobody has held the controller. | Stage 0 gate |
+| 3 | **VA-API / iHD encode confirmation** | **UNVERIFIED** — configured (`hardware.graphics.enable` + `intel-media-driver`) but never objectively verified. `vainfo` is not in the current system closure, so `GRAND_PLAN.md` §5.12's check has never been runnable as written. | Stage 1 gate |
+| 4 | **Stage 2D half-snap rework** | **ACTIVATED, NOT LIVE-TESTED** — live in generation 26; no record of Alex exercising it. | Stage 2D |
+| 5 | **Screenshot bindings and colour fidelity** | **ACTIVE AND FAILING / UNVERIFIED** — uniform mauve cast on both region and full-screen output; no recorded retest of the MASTER §5 defect. Now blocking Stage 2 (decision 15). | Stage 2B / decision 15 |
+| 6 | **Disable-while-typing (DWT)** | **ABSENT** — the touchpad is classified `ID_INPUT_TOUCHPAD_INTEGRATION=external`, so libinput reports `Disable-w-typing: n/a`. The feature does not exist on this device; `disable_while_typing = true` has been a silent no-op for the entire build. | Stage 2C/2D |
+| 7 | **Drag-anchor patch** | **WRITTEN, NOT BUILT** — patch and overlay committed (`df37152`) and PM-verified; the patched output is not a valid store path. Stock unpatched Hyprland is running. | Decision #10 |
+| 8 | **Corner resize** | **NO IMPLEMENTATION** — non-negotiable by decision #11; no patch, no research artifact, no prompt. | Decision #11 |
+| 9 | **§3.2 glass A/B** | **NOT RUN** — deferral to Stage 4 now explicitly approved (decision 16); the current glass appearance is not accepted. | Stage 1 gate / decision 16 |
+| 10 | **Key repeat, pinch zoom, launcher, OSD, click-to-focus, window buttons** | **ACTIVATED, NOT RE-TESTED** on the current chain — free riders for the Stage 2 close-out sitting. | Stage 2A/2B |
+
+**Stage status after this entry: `STAGE 2 — OPEN`.** Work order for closing it:
+`STAGE2_CLOSEOUT_WORK_ORDER.md`.
+
+---
+
+### Session record — 2026-07-28 documentation and housekeeping pass
+
+Documentation-only session. Actions taken:
+
+- Prepended the current-authority warning header to this file (replacing the
+  stale "Current handoff" pointer to the retired 2026-07-16 report).
+- Appended this dated operator-decision entry (decisions 12–18 + acceptance debt).
+- Added `## EXECUTION GOVERNANCE — 2026-07-28` to `MASTER_REQUIREMENTS.md`.
+- Added narrow sequencing clarifications to `GRAND_PLAN.md` §10 (Stage 2, Stage 4,
+  Stage 5). The architecture was not altered.
+- Created `PM_OPERATING_RULES.md` and `STAGE2_CLOSEOUT_WORK_ORDER.md`.
+- Committed `CURRENT_STATE_AUDIT.md` (previously untracked) byte-for-byte
+  unmodified.
+- Archived superseded root material to `archive/superseded-handoffs/2026-07-28/`
+  with a manifest (decision 18).
+
+**Not done, by scope:** no Nix/Lua/QML/C++/shell/service/patch edits, no
+`nix build`, no `nixos-rebuild`, no Home Manager activation, no profile set, no
+compositor or shell reload/restart, no plugin load/unload, no reboot, no Stage 2
+implementation, no Stage 3 work, no old thread resumed.

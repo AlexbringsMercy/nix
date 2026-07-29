@@ -1,7 +1,16 @@
 # macbook NixOS configuration
 
-Declarative NixOS, Home Manager, Hyprland Lua, Waybar, and QuickShell setup for
+Declarative NixOS, Home Manager, Hyprland Lua, and QuickShell setup for
 Alex's 2020 Intel/T2 MacBook Air.
+
+> **Status note (2026-07-28).** The "Desktop architecture" section below describes
+> the **retired** 2026-07-16 Waybar-era desktop and is kept only as history. The
+> current architecture is `GRAND_PLAN.md` — caelestia forked as `aurora-shell`
+> under QuickShell, with Waybar, Rofi and SwayOSD retired. For verified machine
+> state read `CURRENT_STATE_AUDIT.md`; for the build's current status and rules
+> read `EXECUTION_LOG.md`, `PM_OPERATING_RULES.md`, and
+> `STAGE2_CLOSEOUT_WORK_ORDER.md`. The build/deploy instructions in this file
+> remain accurate.
 
 The MacBook uses the pinned public flake in this repository plus a machine-local
 wrapper at `/home/alex/.config/nixos-local`. The wrapper supplies proprietary
@@ -58,7 +67,13 @@ first activation.
 
 ## Documentation
 
-- `BUILD_PLAN.md` — durable design, invariants, source integration, and status
+- `GRAND_PLAN.md` — the authoritative build plan (supersedes `BUILD_PLAN.md`)
+- `MASTER_REQUIREMENTS.md` — the requirements ledger, incl. execution governance
+- `CURRENT_STATE_AUDIT.md` — verified machine and repository state
+- `PM_OPERATING_RULES.md` — operating contract for the project-manager session
+- `STAGE2_CLOSEOUT_WORK_ORDER.md` — the current open work order
+- `SESSION_PREAMBLE.md` — mandatory reading for every session and subagent
+- `archive/superseded-handoffs/` — retired handoffs and plans (history only)
 - `docs/controls.md` — pointer paths and optional shortcuts
 - `docs/wallpapers.md` — local collection and adaptive-color pipeline
 - `docs/recovery.md` — symlink-safe dotfile restore and generation rollback
