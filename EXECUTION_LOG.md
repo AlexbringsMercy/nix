@@ -2511,3 +2511,42 @@ proving exact-window output can work in at least that case.
 
 The already-approved one-time procedure making **NixOS the persistent default boot
 target**, folded into the correction batch — **not** a separate reboot.
+
+---
+
+### Requirement addition — screenshot capture toolbar (2026-07-29)
+
+**Operator requirement, added to the correction batch. Part of the final screenshot
+architecture, not optional polish.**
+
+When screenshot mode opens, a **compact toolbar centred at the top of the screen**
+(Windows Snipping Tool in spirit) offering clearly clickable **Region · Window ·
+Full screen**.
+
+- Toolbar appears whenever screenshot mode opens; current mode is visually obvious.
+- Region = manual rectangular selection. Window = highlights and captures only the
+  selected window's **exact** bounds. Full screen = entire active display, one click.
+- Completion or Escape closes the toolbar and **restores the exact previously
+  focused window**.
+- Hovering or selecting a capture target **must not** permanently transfer keyboard
+  focus.
+- The toolbar, picker and screenshot services **must never** appear as app-rail
+  entries or in captured output.
+
+**Alex has no Print key**, so full-screen capture must be reachable **directly from
+this toolbar**. A keyboard shortcut is optional redundancy only — this supersedes
+the earlier plan to solve the no-Print-key problem with a replacement bind.
+
+**Two hazards flagged to the implementing session as already paid for:**
+1. **The toolbar must not be captured.** This is the pink-film class of defect —
+   slurp's overlay composited into the frame, proven arithmetically (alpha `0x55` =
+   ⅓ → predicted floor (80.33, 60.33, 73.00) vs measured (80,60,73)). The toolbar
+   must sit outside the captured subtree **by construction, not by timing**, and the
+   full-screen path must not race its teardown.
+2. **Focus.** The toolbar is another layer-shell surface able to take keyboard focus
+   and must not become a second way to strand the operator's focus.
+
+**Cross-session handoff owned by the PM:** the rail can only filter what it can
+identify, so the screenshot session must give every shell-owned ephemeral surface a
+stable, unambiguous namespace/objectName and list them; the PM hands those
+identifiers to the rail session, which owns the filtering.
