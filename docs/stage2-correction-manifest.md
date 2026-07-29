@@ -238,3 +238,66 @@ Every claim in the reboot request is labelled as exactly one of:
 - **physically verified** — Alex observed it on the machine.
 
 Nothing in this closure is physically verified yet. That is the point of the gate.
+
+---
+
+## 8. Build result — both evaluation paths built clean
+
+**Attempt 1 failed on disk, not on code.** `/` was at 98%; Hyprland died at 5% on
+`ar: unable to copy file 'libhyprland_lib.a'; reason: No space left on device`.
+Cause: three 11 GB worktree copies (33 GB) created by
+`--override-input macbook-config path:/home/alex/nix`, because the `path:` fetcher
+ignores `.gitignore` and copies `repos/` on every eval. All three verified
+unreferenced (0 referrers, 0 GC roots, absent from the gen 26 and gen 31 closures)
+and deleted: **111 GB → 79 GB used, 35 GB free**. No generation was collected —
+`nix-collect-garbage -d` would have destroyed the gen-26 fallback.
+
+**Attempt 2 built clean** via the wrapper's committed `git+file:` input, repinned
+to `6805009`:
+
+| Path | Result | Output |
+|---|---|---|
+| `homeConfigurations.alex.activationPackage` | `HM_EXIT=0` | `1zvqmc65…-home-manager-generation` |
+| `nixosConfigurations.macbook…toplevel` (firmware-backed) | `SYS_EXIT=0` | **`i55p3311…-nixos-system-macbook`** |
+
+### Compositor and plugin identity — ABI consistent
+
+| Component | Generation 31 | This closure |
+|---|---|---|
+| Hyprland (patched) | `wrz9r718…` — 2 patches | **`wf1971v5…` — 3 patches** |
+| hyprbars | `8s56v8nb…` | **`lm09v2cm…`** |
+| aurora-minimize | `yj206xdb…` | **`jnhwa9xd…`** |
+
+Both plugins rebuilt **against the new compositor in the same closure**, so there
+is no ABI drift. `rv2dda5j…` (unpatched nixpkgs Hyprland, a transitive dependency)
+is present in both and unchanged.
+
+### Protected-state closure proof — verified in the built output
+
+| Item | Method | Result |
+|---|---|---|
+| T2 Broadcom firmware | `nix-store -qR` | present |
+| TV firewall rule | read the actual script: `--mac-source 40:2f:86:81:26:3e` | present; `firewall-start` path is **byte-identical to generation 31** |
+| Xbox BT tuning | `etc/bluetooth/main.conf` | `MinConnectionInterval=7`, `MaxConnectionInterval=9` |
+| VA-API / iHD | `nix-store -qR` | `intel-media-driver` present |
+| `vainfo` | `nix-store -qR` | `libva-utils` now present — gate row 36 becomes testable |
+| DWT hwdb entry | binary search of `hwdb.bin` | `v05acp0280` present |
+| grim | `nix-store -qR` | present — all three capture paths depend on it |
+
+Two of these initially appeared missing and were **not** reported as such:
+`firewall-start` is a package directory rather than a file, and `hwdb.bin` is a
+binary that `strings` does not usefully index. Both were re-checked with a correct
+method before any claim was made.
+
+### Claim classification for this closure
+
+- **closure-verified:** every row in the two tables above; both build exits; the
+  compositor/plugin identities; HM evaluation of the PATH change.
+- **source-reviewed:** all nine correction items, at the depth recorded in §3–§4.
+- **physically verified:** *nothing yet.* That is what the gate is for.
+
+### Note on the pin
+
+The closure is built from commit `6805009`. Documentation commits after it
+(`21b22c1` and later) do not enter the system closure and deliberately did **not**
+trigger a rebuild — reusing a good closure rather than rebuilding for bookkeeping.
