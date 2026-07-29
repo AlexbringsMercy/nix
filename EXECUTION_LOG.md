@@ -2550,3 +2550,32 @@ the earlier plan to solve the no-Print-key problem with a replacement bind.
 identify, so the screenshot session must give every shell-owned ephemeral surface a
 stable, unambiguous namespace/objectName and list them; the PM hands those
 identifiers to the rail session, which owns the filtering.
+
+**Boot-readiness clarification (operator, 2026-07-29) — corrects failure 8's
+framing.** The resume harness **did not fail**. It resumed correctly and displayed
+its message; the API error came **afterward**, when the resumed agent made its first
+outbound request before time and/or network readiness had stabilised.
+
+The PM's original brief to the diagnosing session was wrong on this point — it
+would have delayed the whole harness, including the local window restore the
+operator wants prompt. Corrected requirement:
+
+- the harness restores **locally** and promptly;
+- it waits for **trustworthy synchronised time and usable network** before allowing
+  **outbound agent/API calls** — a different moment from local restore, and the fix
+  must separate the two;
+- it **retries a transient first request safely** rather than terminating or
+  corrupting the resumed session;
+- any wait is **bounded with a visible message and timeout** — a machine that never
+  syncs must still return the operator's terminals.
+
+Chrome sits on the gated side too: restoring tabs is outbound activity, and its
+failure mode was a TLS/clock error that invalidated an auth session.
+
+**Correlation must be proven, not assumed:** the clock-synchronisation jump, the
+harness's first failed API call, and Chrome's clock/auth error must be shown from
+journal entries to fall on the wrong side of the sync event. If they do not
+correlate, that means two problems rather than one and must be reported as such —
+a false single root cause is worse than an unresolved one. The T2 RTC skew caveat
+applies: `systemctl`/`uptime` timestamps are unreliable here, so the correlation is
+anchored on journal entries around the sync event itself.
