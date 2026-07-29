@@ -1,0 +1,50 @@
+--- a/src/managers/input/InputManager.cpp
++++ b/src/managers/input/InputManager.cpp
+@@ -827,9 +827,14 @@
+     const auto  PASS              = g_pKeybindManager->onMouseEvent(e, mouse);
+     static auto PFOLLOWMOUSE      = CConfigValue<Config::INTEGER>("input:follow_mouse");
+     static auto PRESIZEONBORDER   = CConfigValue<Config::INTEGER>("general:resize_on_border");
+-    static auto PBORDERSIZE       = CConfigValue<Config::INTEGER>("general:border_size");
+     static auto PBORDERGRABEXTEND = CConfigValue<Config::INTEGER>("general:extend_border_grab_area");
+-    const auto  BORDER_GRAB_AREA  = *PRESIZEONBORDER ? *PBORDERSIZE + *PBORDERGRABEXTEND : 0;
++    // The grab band is measured outwards from the window's *reserved* box (the border plus any
++    // reserved decoration, e.g. a plugin titlebar or the groupbar) instead of from the client
++    // surface, so the band sits around the decoration rather than underneath it. For a window whose
++    // only reserved decoration is the border this reproduces the previous band exactly: the reserved
++    // extents already contain getRealBorderSize(), so reservedBox.expand(extend) is identical to
++    // surfaceBox.expand(border_size + extend).
++    const auto BORDER_GRAB_AREA = *PRESIZEONBORDER ? *PBORDERGRABEXTEND : 0;
+ 
+     if (!PASS && !*PPASSMOUSE)
+         return;
+@@ -845,9 +850,17 @@
+     if (*PRESIZEONBORDER && !g_pSessionLockManager->isSessionLocked() && !m_lastFocusOnLS && e.state == WL_POINTER_BUTTON_STATE_PRESSED && (!w || !w->isX11OverrideRedirect())) {
+         if (w && !w->isFullscreen()) {
+             const CBox real = {w->m_realPosition->value().x, w->m_realPosition->value().y, w->m_realSize->value().x, w->m_realSize->value().y};
+-            const CBox grab = {real.x - BORDER_GRAB_AREA, real.y - BORDER_GRAB_AREA, real.width + 2 * BORDER_GRAB_AREA, real.height + 2 * BORDER_GRAB_AREA};
++            const CBox grab = w->getWindowBoxUnified(Desktop::View::RESERVED_EXTENTS).copy().expand(BORDER_GRAB_AREA);
+ 
+-            if ((grab.containsPoint(mouseCoords) && (!real.containsPoint(mouseCoords) || w->isInCurvedCorner(mouseCoords.x, mouseCoords.y))) && !w->hasPopupAt(mouseCoords)) {
++            // A decoration that accepts mouse input owns its own area and must not have clicks
++            // stolen from it by the resize band. Same predicate setCursorIconOnBorder already uses,
++            // so the click band and the hover cursor agree by construction.
++            const bool ON_INPUT_DECO = std::ranges::any_of(w->m_windowDecorations, [&](const auto& wd) {
++                return (wd->getDecorationFlags() & DECORATION_ALLOWS_MOUSE_INPUT) && g_pDecorationPositioner->getWindowDecorationBox(wd.get()).containsPoint(mouseCoords);
++            });
++
++            if (!ON_INPUT_DECO && (grab.containsPoint(mouseCoords) && (!real.containsPoint(mouseCoords) || w->isInCurvedCorner(mouseCoords.x, mouseCoords.y))) &&
++                !w->hasPopupAt(mouseCoords)) {
+                 g_pKeybindManager->resizeWithBorder(e);
+                 return;
+             }
+@@ -2057,8 +2070,8 @@
+     const auto           mouseCoords      = getMouseCoordsInternal();
+     CBox                 box              = w->getWindowMainSurfaceBox();
+     eBorderIconDirection direction        = BORDERICON_NONE;
+-    CBox                 boxFullGrabInput = {box.x - *PEXTENDBORDERGRAB - BORDERSIZE, box.y - *PEXTENDBORDERGRAB - BORDERSIZE, box.width + 2 * (*PEXTENDBORDERGRAB + BORDERSIZE),
+-                                             box.height + 2 * (*PEXTENDBORDERGRAB + BORDERSIZE)};
++    // Keep the hover band identical to the click band computed in processMouseDownNormal.
++    CBox                 boxFullGrabInput = w->getWindowBoxUnified(Desktop::View::RESERVED_EXTENTS).copy().expand(*PEXTENDBORDERGRAB);
+ 
+     if (w->hasPopupAt(mouseCoords))
+         direction = BORDERICON_NONE;

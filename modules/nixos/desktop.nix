@@ -48,6 +48,21 @@
     AttrKeyboardIntegration=internal
   '';
 
+  # The T2 trackpad presents over USB, and udev's default for USB touchpads is
+  # "internal only when on a PCB port, external otherwise" — so this one lands
+  # on external (confirmed: udevadm info /dev/input/event7 reports
+  # ID_INPUT_TOUCHPAD_INTEGRATION=external). libinput will not offer
+  # disable-while-typing on a touchpad it believes is external, which is why it
+  # reports "Disable-w-typing: n/a" and why input.lua's disable_while_typing has
+  # been an inert no-op. Reclassifying the device restores the feature.
+  # Match/attribute form: systemd 260.1 lib/udev/hwdb.d/70-touchpad.hwdb:8-45
+  # ("touchpad:<subsystem>:v<vid>p<pid>:name:<name>:", vid/pid 4-digit hex
+  # lowercase, property lines indented one space).
+  services.udev.extraHwdb = ''
+    touchpad:usb:v05acp0280:*
+     ID_INPUT_TOUCHPAD_INTEGRATION=internal
+  '';
+
   hardware.graphics = {
     enable = true;
     extraPackages = [ pkgs.intel-media-driver ];
