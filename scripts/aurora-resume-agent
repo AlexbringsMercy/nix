@@ -3,12 +3,35 @@
 # writeShellApplication (set -euo pipefail and PATH come from the wrapper).
 #
 # A planned reboot arms the flag below; this script, run once per Hyprland
-# start, consumes it and relaunches the build agent in a terminal with its
-# conversation resumed. An un-armed boot does nothing — no surprise agents.
+# start, consumes it and brings the operator's working set back. An un-armed
+# boot does nothing — no surprise agents, no surprise windows.
+#
+# Wayland/Hyprland has no session manager: windows do not survive a reboot and
+# there is nothing to "restore". This script relaunches them instead, which is
+# why each entry names its own working directory — that is what decides which
+# conversation `claude --continue` resumes.
 
 flag="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-build/resume-armed"
 [ -f "$flag" ] || exit 0
 rm -f "$flag"
+
+# Chrome first: it is the slowest to paint and its own "continue where you left
+# off" preference restores the tabs, so starting it early lets it settle while
+# the terminals come up. Failure here must not abort the terminals below, hence
+# the guard — a missing browser is an annoyance, a missing agent terminal loses
+# the thread.
+if command -v google-chrome-stable >/dev/null 2>&1; then
+    google-chrome-stable --ozone-platform-hint=auto >/dev/null 2>&1 &
+fi
+
+# The concurrent Media Center / seedbox lane. Its conversation lives in
+# ~/Media-Center, so the terminal must start there for --continue to find it.
+# Backgrounded, not exec'd, so this script still reaches the build terminal.
+if [ -d "$HOME/Media-Center" ]; then
+    kitty --hold --directory "$HOME/Media-Center" \
+        fish -lc 'claude --dangerously-skip-permissions --continue "Reboot complete — the session harness relaunched you. Re-establish your working state and continue where you left off."' \
+        >/dev/null 2>&1 &
+fi
 
 # --directory "$HOME": the build conversation belongs to the home project dir
 # (already trusted); starting in ~/nix hits a first-run trust prompt and finds
