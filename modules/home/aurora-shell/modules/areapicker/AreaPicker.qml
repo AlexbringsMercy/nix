@@ -1,6 +1,7 @@
 // Vendored from caelestia-dots/shell — modules/areapicker/AreaPicker.qml. Aurora build; local changes tracked in git.
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -15,6 +16,13 @@ Scope {
         property bool freeze
         property bool closing
         property bool clipboardOnly
+
+        function start(shouldFreeze: bool, clipOnly: bool): void {
+            root.freeze = shouldFreeze;
+            root.closing = false;
+            root.clipboardOnly = clipOnly;
+            root.activeAsync = true;
+        }
 
         Variants {
             model: Screens.screens
@@ -48,33 +56,33 @@ Scope {
         }
     }
 
+    // Aurora: region requests from a shell surface (the utilities Screenshot
+    // card) arrive here, so the mouse path and the keyboard path share one owner.
+    // Full-screen never reaches the picker — it has no selection step, so
+    // Screenshotter captures it directly with grim and byte-exactly.
+    Connections {
+        function onRequested(freeze, clipboardOnly): void {
+            root.start(freeze, clipboardOnly);
+        }
+
+        target: Screenshotter
+    }
+
     IpcHandler {
         function open(): void {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
+            root.start(false, false);
         }
 
         function openFreeze(): void {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
+            root.start(true, false);
         }
 
         function openClip(): void {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
+            root.start(false, true);
         }
 
         function openFreezeClip(): void {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
+            root.start(true, true);
         }
 
         target: "picker"
@@ -85,12 +93,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshot"
         description: "Open screenshot tool"
-        onPressed: {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
-        }
+        onPressed: root.start(false, false)
     }
 
     // qmllint disable unresolved-type
@@ -98,12 +101,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshotFreeze"
         description: "Open screenshot tool (freeze mode)"
-        onPressed: {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
-        }
+        onPressed: root.start(true, false)
     }
 
     // qmllint disable unresolved-type
@@ -111,12 +109,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshotClip"
         description: "Open screenshot tool (clipboard)"
-        onPressed: {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
-        }
+        onPressed: root.start(false, true)
     }
 
     // qmllint disable unresolved-type
@@ -124,11 +117,6 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshotFreezeClip"
         description: "Open screenshot tool (freeze mode, clipboard)"
-        onPressed: {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
-        }
+        onPressed: root.start(true, true)
     }
 }

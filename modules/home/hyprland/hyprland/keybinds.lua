@@ -143,11 +143,16 @@ for workspace = 1, 5 do -- Aurora: expose the five persistent daily workspaces.
     })
 end
 
-hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("screenshot-area"), {
+-- Aurora: both capture paths run inside the shell (modules/areapicker), which
+-- hides its selection UI and waits for a fresh frame before saving, so no
+-- selector overlay can be baked into the output. The shell registers these
+-- names as global shortcuts, the same route the launcher, dashboard and nexus
+-- binds already use.
+hl.bind("SUPER + SHIFT + S", hl.dsp.global("caelestia:screenshot"), {
     locked = true,
     description = "Utilities: Select screenshot to file and clipboard"
 })
-hl.bind("Print", hl.dsp.exec_cmd("screenshot-full"), {
+hl.bind("Print", hl.dsp.global("caelestia:screenshotFull"), {
     locked = true,
     description = "Utilities: Full screenshot to file and clipboard"
 })

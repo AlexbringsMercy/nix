@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-if pgrep -x rofi >/dev/null; then
-  pkill -x rofi
-  exit 0
-fi
-
-exec rofi -show drun -config "${HOME}/.config/rofi/config.rasi"

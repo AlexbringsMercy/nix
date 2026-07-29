@@ -33,38 +33,12 @@ let
     text = builtins.readFile ../../../scripts/window-minimize; # Aurora: keep the community-derived behavior reviewable in scripts/.
   }; # Aurora: finish the minimize helper package.
 
-  screenshotArea = pkgs.writeShellApplication {
-    name = "screenshot-area";
-    runtimeInputs = with pkgs; [
-      coreutils
-      grim
-      jq
-      libnotify
-      slurp
-      wl-clipboard
-    ];
-    text = builtins.readFile ../../../scripts/screenshot-area;
-  };
-
-  screenshotFull = pkgs.writeShellApplication {
-    name = "screenshot-full";
-    runtimeInputs = with pkgs; [
-      coreutils
-      grim
-      libnotify
-      wl-clipboard
-    ];
-    text = builtins.readFile ../../../scripts/screenshot-full;
-  };
-
-  rofiToggle = pkgs.writeShellApplication {
-    name = "rofi-toggle";
-    runtimeInputs = with pkgs; [
-      procps
-      rofi
-    ];
-    text = builtins.readFile ../../../scripts/rofi-toggle;
-  };
+  # Aurora: the interim screenshot-area / screenshot-full wrappers are retired.
+  # Both capture paths now live in the shell (aurora-shell modules/areapicker),
+  # bound through caelestia:screenshot and caelestia:screenshotFull, so no
+  # slurp-selection overlay can be composited into a saved frame.
+  # Aurora: the rofi-toggle wrapper is retired with rofi itself; every launcher
+  # bind has run through caelestia:launcher since 29fedce.
 
   # Build-period scaffolding — removed at Stage 10 together with
   # modules/nixos/build-harness.nix.
@@ -77,9 +51,6 @@ in
 {
   home.packages = [
     auroraResumeAgent
-    rofiToggle
-    screenshotArea
-    screenshotFull
     windowMinimize # Aurora: place minimize/restore on PATH for hyprbars and keybinds.
   ];
 

@@ -144,6 +144,25 @@ Scope {
         target: "nexus"
     }
 
+    // Aurora: the Print bind. Full-screen has no selection step, so it lives with
+    // the shell-wide shortcuts rather than in modules/areapicker — Screenshotter
+    // captures it with grim and the picker is never opened.
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "screenshotFull"
+        description: "Take a full screen screenshot"
+        onPressed: Screenshotter.capture("full")
+    }
+
+    IpcHandler {
+        function full(): void {
+            Screenshotter.capture("full");
+        }
+
+        target: "screenshot"
+    }
+
     IpcHandler {
         function info(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Info);

@@ -22,6 +22,7 @@ Item {
         property bool recordingListExpanded: false
         property string recordingConfirmDelete
         property string recordingMode
+        property string screenshotMode // Aurora: remembered default action on the Screenshot card.
 
         reloadableId: "utilities"
     }
