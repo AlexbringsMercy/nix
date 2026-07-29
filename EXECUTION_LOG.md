@@ -1597,3 +1597,322 @@ Documentation-only session. Actions taken:
 `nix build`, no `nixos-rebuild`, no Home Manager activation, no profile set, no
 compositor or shell reload/restart, no plugin load/unload, no reboot, no Stage 2
 implementation, no Stage 3 work, no old thread resumed.
+
+---
+
+# ═══════════════════════════════════════════════════════════════════
+## STAGE 2 CLOSE-OUT — 2026-07-28 (evening) — ACTIVE GENERATION 26
+# ═══════════════════════════════════════════════════════════════════
+
+**Ground truth confirmed by the PM at session start (read-only):** branch
+`codex/macbook-desktop`, HEAD `fa23198`, clean tree, 0 ahead / 0 behind
+`origin/codex/macbook-desktop`. `/run/current-system` = `/run/booted-system` =
+`/nix/var/nix/profiles/system` → `system-26-link`. **Active generation =
+default boot generation = 26.** 0 failed system units, 0 failed user units,
+Hyprland 0.55.4 running with hyprbars loaded. All three match the work order's
+documented baseline.
+
+Implementation session against `STAGE2_CLOSEOUT_WORK_ORDER.md`.
+
+---
+
+### Decision 19 — Corner resize is fixed compositor-side, not in Hyprbars
+
+**Date/time:** 2026-07-28 22:20 CDT
+**Active generation:** 26  (`readlink -f /nix/var/nix/profiles/system`)
+**Stage:** 2 close-out, workstream C
+**Status:** APPROVED — BINDING
+
+**Original requirement:** `STAGE2_CLOSEOUT_WORK_ORDER.md` §2 C directed the fix
+to "extend the carried Hyprbars patch narrowly". Operator decision #11 (binding)
+requires ordinary corner resize on all four corners of a floating window, both
+directions.
+
+**Operator decision (Alex, in his words):** *"Approve the second narrow Hyprland
+compositor patch. The required outcome is reliable ordinary corner resizing; the
+earlier Hyprbars-only direction was a proposed implementation path, not a
+constraint. Keep the patch isolated to decoration/corner hit-testing, preserve
+normal border resize, titlebar drag, buttons, floating drag, snap, and Super+RMB,
+and document why Hyprbars cannot own the fix. Build both compositor patches and
+ABI-matched Hyprbars in the same final closure. Record this decision in
+EXECUTION_LOG.md with date and active generation."*
+
+**Reason — why Hyprbars provably cannot own the fix (PM-verified against the
+pinned sources, not inherited):**
+
+1. `CInputManager::onMouseButton` (`InputManager.cpp:715`) emits the plugin event
+   bus **first** and returns on `info.cancelled` (`:717-719`), before dispatching
+   to `processMouseDownNormal` (`:735`, defined `:823`). `CHyprBar::handleDownEvent`
+   sets `info.cancelled = true` unconditionally for any press inside the bar
+   (`hyprbars/barDeco.cpp:221`). So `extend_border_grab_area` **cannot** reach
+   through the bar at any value — the resize code is never reached there.
+2. `processMouseDownNormal` measured the grab band outwards from the **client
+   surface** (`m_realPosition`/`m_realSize`, `:847-848`), i.e. `C ± (border_size +
+   extend)` = `C ± 14`. Hyprbars declares `edges = DECORATION_EDGE_TOP`,
+   `priority = 10005` (precedence over border), `reserved = true`,
+   `desiredExtents = {{0, 30}, {0,0}}` (`hyprbars/barDeco.cpp:56-66`), so the
+   visible top corners sit ~32 px above the client box — **18 px outside the
+   band**. Both top corners were therefore unreachable; bottom corners already
+   worked.
+3. The visible top corners lie **outside** hyprbars' own decoration box
+   (`[X, X+W] × [Y-30, Y]`), so a plugin patch cannot place a grab zone there at
+   all; and the only place inside the bar where a top-right corner zone could live
+   is directly on top of the carried close/maximize/minimize buttons
+   (`hyprbars.lua.in`, three size-24 right-aligned buttons). No ordering in
+   `handleDownEvent` yields both a corner zone and a working close button.
+
+**On the "only works in one direction" framing (MASTER §5):** the floating resize
+math in `DragController.cpp:305-345` was read end to end and is **symmetric**;
+`drag_threshold` and `resize_corner` both default to 0. No literal expand/shrink
+asymmetry was found and none was invented. The reported symptom is explained by
+both top corners being unreachable, so every successful resize was anchored
+top-left. **Flagged for explicit re-check at gate rows F3/F6/F9/F12** — if
+one-directionality survives the patch, this explanation is wrong and the item
+reopens.
+
+**Upstream status:** `hyprwm/hyprland-plugins#355` is **open, filed by fufexan,
+no PR, no commit**. Both hyprbars `main` and Hyprland `main` were fetched and the
+causing code is unchanged. **There is nothing to backport** — this is genuinely
+ours to carry.
+
+**Plan impact:** A second compositor patch,
+`modules/nixos/patches/hyprland-deco-border-grab.patch`, is carried alongside
+`hyprland-drag-anchor.patch` in the same `hyprlandOverlay` in `flake.nix`. Three
+hunks, one file (`src/managers/input/InputManager.cpp`). Zero hyprbars lines
+changed, so the hover patch and `patchedHyprbars` are byte-identical and **no
+plugin ABI surface moves**. Recorded in `SOURCES.md`.
+
+**PM verification performed before landing it** (authority rule 1 — verify, do
+not inherit): every cited line range was read directly in the pinned trees;
+`patch -p1 --dry-run --fuzz=0` applies clean; `<ranges>` and `<algorithm>` are
+already included in `InputManager.cpp` (`:6-7`) with `std::ranges::` already used
+4× in-file; `g_pDecorationPositioner` is already used in the same file (`:2075`);
+`Desktop::View::RESERVED_EXTENTS` exists (`Window.hpp:61`); `CBox::copy()` and
+`CBox::expand()` exist (hyprutils 0.13.1 `Box.hpp:105,108`); and
+`getWindowBoxUnified(Desktop::View::RESERVED_EXTENTS)` — the exact idiom the patch
+adopts — is already used in-tree at `src/layout/LayoutManager.cpp:226`.
+**Not yet compiled** — that is the remaining risk and it is resolved by the build.
+
+**Revisit trigger:** upstream shipping a real fix for #355, or a compositor
+version bump (both patches must be re-verified at the bump).
+
+**Acceptance condition:** all four corners of a **floating** window expand *and*
+shrink reliably, with titlebar drag, titlebar buttons, hover highlight,
+double-click, ordinary border resize and `Super+RMB` all unregressed. Tiled
+windows are excluded — dwindle one-directionality there is expected
+(`GRAND_PLAN.md` §6.2) and is not a failure.
+
+---
+
+### Finding 19a — Decision 15's observed facts are partly corrected; its requirement is not reduced
+
+**Date/time:** 2026-07-28 22:25 CDT
+**Active generation:** 26
+**Stage:** 2 close-out, workstream D
+**Status:** FINDING — recorded, requirement unchanged
+
+**Decision 15 recorded:** *"Both region **and** full-screen screenshots contain a
+uniform mauve/pink cast"*, and bound the diagnosis to not assume an
+overlay-only cause.
+
+**Measured root cause:** `slurp`'s selection overlay is baked into the captured
+frame. `scripts/screenshot-area:18` passes `-s "${tertiary}55"` and
+`-c "${primary}ff"`. `#f1b5db` = (241,181,219) at alpha `0x55` (= 85 = 255/3)
+over black predicts a floor of exactly **(80.33, 60.33, 73.00)**; real
+screenshots measure **(80,60,73)**. Top-left border pixel measures
+**(194,192,247)** against slurp's `-c #c3c1f8` = **(195,193,248)** — off by one
+compositing rounding step.
+
+**PM re-verification, independent of the agent** (ImageMagick 7 over
+`~/Pictures/Screenshots`, 29 files): the (80,60,73) floor and the ~(194,192,247)
+border reproduce across the tinted set. A clean `Print` capture reaches **true
+0,0,0 and true 255,255,255** — no cast at all.
+
+**The correction:** the tinted 2560×1600 files **carry slurp's border**, so they
+were whole-screen *region drags*, not `Print` captures. No tinted file lacks a
+slurp border; no clean `Print` file is tinted. **The full-screen path was never
+defective.**
+
+**Both of decision 15's forbidden assumptions are correctly excluded by
+measurement, not by assertion:** the palette is not the cause (a 12-swatch
+known-colour chart through `grim -o eDP-1` returned **0 error on all 36 channel
+values**; no screen shader, no gamma client, no ICC, XRGB8888/sRGB), and the
+physical display is **not** tinted. **Alex's eyes are not needed for this** — the
+measurement resolves it.
+
+**Plan impact — none to scope.** The requirement is **not** narrowed by the
+smaller root cause. Per decision 15 and MASTER §1.6 the **final** `GRAND_PLAN.md`
+§5.12 architecture still ships: the carried `modules/areapicker/` picker (whose
+hide → `hasContent` → save handshake makes overlay contamination structurally
+impossible), clipboard + timestamped PNG, `Print` full-screen mode, a clickable
+System/bar path, visible errors on failure, and deletion of the interim scripts.
+Patching the slurp flags and stopping is explicitly **not** an acceptable close.
+
+**Operator interference during measurement, disclosed:** Alex minimized the
+agent's fullscreen colour reference mid-run. The agent caught it from impossible
+deltas (a `#FFFFFF` swatch reading 25,25,24), discarded that capture set before
+interpreting it, added a uniformity gate, and re-ran — 1 capture passed, 2 failed
+and were discarded. The contaminated file is retained for audit. **No
+contaminated measurement reached a conclusion.**
+
+**Carried forward, not absorbed** (§13 — log, do not fix):
+- `getWindowExtentsUnified(RESERVED|INPUT)` **double-counts** hyprbars' 30 px
+  (62 instead of 32), inflating every hyprbars window's hit box 30 px above
+  itself and skewing top-edge snapping. Changes hit resolution globally; needs
+  its own test pass. **Not fixed in this batch.**
+- `modules/home/lock/default.nix:37` still consumes the now-stale theming cache.
+- If Stage 4 revives `scripts/apply-wallpaper`, `awww` must return.
+
+**Coverage gaps honestly recorded (corner-resize research):** `code.hyprland.org`
+returned HTTP 403, so pre-0.55 hyprbars revisions could **not** be
+source-verified — **no claim is made** about whether a regression commit exists.
+`Sevenings/hyprland-plugins-more-bars` returned no README body — **unread, not
+absent**. Neither gap is load-bearing for the selected fix, which is argued from
+the pinned source we actually build.
+
+---
+
+### Build and deployment mechanics — corrections to the inherited machinery
+
+- **Codex CLI path is stale in the archived handoff.** It is no longer at
+  `/home/alex/.npm-global/bin/codex`; it now lives at `/home/alex/.local/bin/codex`.
+- **`path:/home/alex/nix#…` is a disk hazard on this machine.** The path fetcher
+  copies the whole worktree including the gitignored 11 GB `repos/`, with only
+  ~15 GB free. A **bare-path flakeref** (`/home/alex/nix#…`) resolves to
+  `git+file:///home/alex/nix`, is git-aware (honours `.gitignore`), includes the
+  dirty working tree, and cost **15 MB**. Same evaluated configuration.
+  Consequence to remember: **new files must be `git add`-ed before they are
+  visible to the build** — an untracked patch fails eval with "not tracked by Git".
+- **`--max-jobs 1 --cores 2`, not 2/2.** Machine evidence at session start: 1.7 GB
+  available RAM (dropping to ~1.0 GB under compile), load ~1.9 on 4 cores, disk
+  87% full, operator actively using the machine, and a second agent lane running
+  concurrently. §8 of the work order permits a safer value on current evidence.
+
+---
+
+### Workstream status at time of writing — generation 26 still active, nothing deployed
+
+| Workstream | Written | Built | Installed | Activated | Tested |
+|---|---|---|---|---|---|
+| A — drag-anchor patch | Y (pre-existing, `df37152`) | in progress | N | N | N |
+| B — DWT hwdb reclassification | **Y** | in progress | N | N | N |
+| C — corner resize compositor patch | **Y** | in progress | N | N | N |
+| D — screenshot final architecture | in progress | N | N | N | N |
+| Cleanup — retired packages | in progress | N | N | N | N |
+
+**Workstream B pre-verification (before any build, so a failed match cannot cost
+a reboot):** the hwdb rule compiles clean under `systemd-hwdb update --strict`,
+and `systemd-hwdb query` against the device's **actual composed key** —
+`touchpad:usb:v05acp0280:name:Apple Inc. Apple Internal Keyboard / Trackpad:`,
+built per `70-touchpad.rules` from live sysfs values (`ID_BUS=usb`,
+`id/vendor=05ac`, `id/product=0280`) — returns
+`ID_INPUT_TOUCHPAD_INTEGRATION=internal`, with a negative control returning
+nothing. Root cause re-confirmed live this session:
+`udevadm info /dev/input/event7` → `ID_INPUT_TOUCHPAD_INTEGRATION=external`,
+libinput → `Disable-w-typing: n/a`. Device path shows `apple-bce`/`bce-vhci`, a
+virtual USB host bridge, which is why udev's PCB-port heuristic classifies it
+external.
+
+**Stage status: `STAGE 2 — OPEN`.** Nothing is built, installed, activated or
+tested yet. No profile has been set, no reboot has occurred, generation 26 remains
+active and remains the fallback.
+
+---
+
+### Finding 19b — Region capture resamples; pre-existing, mitigated not solved
+
+**Date/time:** 2026-07-28 23:10 CDT
+**Active generation:** 26
+**Stage:** 2 close-out, workstream D
+**Status:** FINDING — mitigation applied, full fix OWED (not deferred silently)
+
+**What was found.** `QQuickItemGrabResult` sizes its render target as
+`int(logicalSize) * devicePixelRatio`. This output is **1707×1067 logical at dpr
+1.5** (confirmed from `hyprctl layers`, not assumed), and **1707 is odd**, so a
+2560×1600 capture is bilinearly stretched onto **2561×1601**. The sampling phase
+drifts linearly and wraps exactly once, so the blur is worst in the **middle** of
+the frame — where windows are — and sharp at the edges.
+
+Measured magnitude (from Qt source, `qquickitemgrabresult.cpp`):
+
+| | horizontal 2560→2561 | vertical 1600→1601 |
+|---|---|---|
+| max neighbour blend weight | 0.5000 | 0.5000 |
+| destination lines with weight > 0.25 | 1281 (**50%**) | 801 (**50%**) |
+
+A one-pixel black stem on white goes 0 → 128: **127/255 worst-case error, half
+the contrast of a thin feature**.
+
+**This is NOT a regression.** The retired `screenshot-area` resampled too —
+`grim -g "300,5 400x30"` returned **599×44** where 600×45 was expected. The new
+path is no worse, and `Print` is now strictly better (see below).
+
+**The colour gate cannot detect this.** Averaging two identical pixels returns
+that pixel, so flat swatches report 0/36 error while thin features blur.
+**Consequence for the gate: the screenshot fidelity row must be tested with a
+one-pixel checkerboard or text, not colour swatches.** A swatch-only pass is a
+false pass and must not be recorded as `PASS`.
+
+**Mitigation applied this session:** `smooth: false` on the `ScreencopyView` in
+`modules/home/aurora-shell/modules/areapicker/Picker.qml`. If the type honours
+it, sampling becomes nearest-neighbour and every pixel except one duplicated
+column and row is bit-exact. If it ignores it, behaviour is exactly today's.
+**The failure mode is benign in both directions**, which is why it was taken
+without operator escalation (decision 14 — routine implementation choice).
+
+**OWED, with a revisit trigger — this is not closed.** The proper fix is to pad
+the grab to an even logical width (1708×1068) and size the `ScreencopyView` to
+`sourceSize/dpr` — roughly six lines. It was **not** taken this session because
+it depends on `ScreencopyView` stretching its texture across the full item rect
+with no aspect-fit letterboxing, and that is **unverified**: Quickshell's source
+is not on disk (build outputs only) and the type carries a `constraintSize`
+property that exists precisely for fitting. Shipping an unverified geometry
+change into a one-reboot batch was judged the worse risk.
+**Revisit trigger:** the gate's checkerboard test. If region capture is still
+soft after `smooth: false`, the padding fix is implemented in the next batch with
+Quickshell source in hand.
+
+---
+
+### Finding 19c — `Print` moved to grim; PM rejected a proposed quality regression
+
+**Date/time:** 2026-07-28 23:10 CDT
+**Active generation:** 26
+**Stage:** 2 close-out, workstream D
+**Status:** FINDING — resolved in implementation
+
+The first implementation routed `Print` through the QML picker, which by the
+mechanism in 19b would have produced a resampled **2561×1601** full-screen
+capture. It was reported to the PM as *"a resample, colour-neutral, and
+expected."*
+
+**Rejected.** Finding 19a established — and the PM re-verified with ImageMagick
+over `~/Pictures/Screenshots` — that the full-screen path was **never defective**:
+`grim -o eDP-1` is byte-exact, 0 error across all 36 channel values of the
+reference chart, true 0,0,0 and true 255,255,255. Accepting the resample would
+have taken the one capture path that provably worked and made it measurably
+worse, inside a change whose stated purpose was fixing screenshots. That is
+narrowing intended quality and governance rule 4.1 forbids it.
+
+**Resolution:** `Print` now captures via `grim` invoked from the shell's
+`Screenshotter` service against `Hypr.focusedMonitor.name` (follows focus rather
+than hardcoding `eDP-1`), with a non-zero exit or zero-byte file raising a red
+error toast. This matches `GRAND_PLAN.md` §5.12's own wording — *"capture happens
+via grim after geometry"* — and is **not** a return to the interim path: the
+standalone `writeShellApplication` scripts stay deleted and the service still
+owns naming, clipboard, toasts, the keybind and the utilities card. It also
+deleted the invisible-mapped-layer-window, the `keyboardFocus: None`/`mask:
+empty` special-casing and a 4-second timeout, so the design got smaller.
+
+**Honest limitation recorded:** the grim path's success toast reports the
+compositor's output geometry, not a read-back of the saved file. Region measures
+the file; `Print` does not. Exit code plus `test -s` are the real signal.
+
+**Carried forward, not absorbed:** `grim` resolves through the inherited PATH
+rather than the shell's `propagatedBuildInputs`. This is **consistent with the
+existing vendored design** — the shell tree already execs `sh` (×11),
+`notify-send` (×2) and `wl-copy` (×1) the same way — and `packages.nix:15` now
+carries a "Do not remove" annotation. Hardening it into
+`aurora-shell/nix/default.nix` would touch a vendored subflake and its lock
+mid-batch, which §3 of the work order warns against. **Owed as a later low-risk
+change.**
