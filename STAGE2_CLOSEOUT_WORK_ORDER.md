@@ -317,10 +317,11 @@ skipped item becomes an implied pass.**
 | 20 | Left rail — no duplicated workspace/tray/calendar/network/Bluetooth/audio/battery stack present | |
 | 21 | DWT objective libinput state — `Disable-w-typing: enabled` for `/dev/input/event7` | |
 | 22 | Real typing with palms resting naturally — the cursor does not jump | |
-| 23 | All four floating-window corners, **both directions** (expand and shrink) | |
+| 23 | **Tiled** corner resize — all four corners, **both axes**, expand *and* shrink, in 3- and 4-window layouts, **without floating the window first and without a hotkey** | |
+| 23b | Floating corner resize still works (incidental regression check — **not** the acceptance target) | |
 | 24 | `Super+RMB` redundant resize still works | |
 | 25 | Region screenshot — `Super+Shift+S`, adjustable selection, clipboard + PNG | |
-| 26 | Full screenshot — `Print` | |
+| 26 | Full screenshot — reachable by **one click on the visible Full screen button**; no Print key involved | |
 | 27 | Screenshot colour fidelity — sampled pixels match the displayed test image | |
 | 28 | Held-backspace repeat — controlled and progressive, not runaway | |
 | 29 | Pinch zoom — already physically passed and not touched by this batch; confirm still working, but this is not a functional retest of new code (`GRAND_PLAN.md` §10.2 item 13) | |
@@ -332,9 +333,53 @@ skipped item becomes an implied pass.**
 | 35 | Xbox controller pairing (Stage 0 debt) | |
 | 36 | VA-API / iHD encode verification (Stage 1 debt — `vainfo` is not in the closure; add `libva-utils` or verify by another route) | |
 
-Note on item 23: on a **tiled** window, one-directional corner behaviour is
-expected from dwindle tree math (`GRAND_PLAN.md` §6.2) — do not report that as a
-failure. The requirement is the **floating** window case.
+**Rows added 2026-07-29** for the correction batch and operator decisions 24 and 27.
+They are gate rows, not a second gate — the same single sitting.
+
+| # | Test | Result |
+|---|---|---|
+| 37 | Rail hover preview, **single window** — hovering a single-window app shows a live preview (this failed globally at gen 31; Thunar only proved *restore*, never *preview*) | |
+| 38 | Rail hover preview, **grouped app** — two Kitty windows show two distinct exact previews, not one group icon | |
+| 39 | Rail grouped restore — clicking a specific thumbnail focuses/restores **that exact window address** | |
+| 40 | Rail minimized members visibly **dimmed** yet still selectable, current workspace only | |
+| 41 | Rail hover/scroll **never** changes brightness (gen-31 blocker: brightness fell to zero) | |
+| 42 | Status controls elsewhere still respond to their own scroll — the rail fix did not kill legitimate scrolling | |
+| 43 | Floating window hover — pointer scroll works while keyboard focus **stays on the last clicked window** until a click | |
+| 44 | DWT recovery — measure how quickly pointer control returns after typing stops. **Normal libinput DWT delay is not a defect**; record the measurement | |
+| 45 | Screenshot toolbar — appears **top-centred** with Region · Window · Full screen, active mode visually obvious | |
+| 46 | Screenshot toolbar **absent from captured output** (the pink-film defect class — structural exclusion, not timing) | |
+| 47 | Screenshot focus — **cancel** restores the exact prior focus owner and typing works without an extra click | |
+| 48 | Screenshot focus — **completion** restores the exact prior focus owner; the capture target did not permanently steal focus | |
+| 49 | Screenshot — **no ghost image/screenshot utility icon** in the app rail | |
+| 50 | Boot readiness — no Chrome clock/auth failure after reboot; no premature first-post-resume API failure. Terminals still return promptly even if sync is slow | |
+| 51 | **Agent persistence — Claude:** `claude --version` resolves the canonical `~/.local/bin/claude` (2.1.220 or newer) in (a) the resumed shell, (b) a fresh terminal, (c) a fresh graphical login, (d) after reboot. No older duplicate wins | |
+| 52 | **Agent persistence — Codex:** same four contexts resolve `~/.local/bin/codex` → the standalone lane (0.145.0 or newer) | |
+| 53 | Agent state intact — Claude and Codex configuration, credentials and resumable sessions survive the generation | |
+| 54 | Boot default (decision 23) — during this reboot, select NixOS in Apple Startup Manager **while holding Control**. **Verified only on the NEXT cold boot**, not this one | |
+
+**Non-blocking, recorded, not gating this closure:** the wallpaper picker has no
+ordinary mouse path. Operator ruling — temporary debt until Stage 4 installs the
+final skwd workflow. Do not build throwaway wallpaper UI to clear it.
+
+**Note on item 23 — REVERSED BY THE OPERATOR, 2026-07-29.** This work order
+previously said one-directional corner behaviour on a *tiled* window was expected
+dwindle-tree math and should not be reported as a failure, and that "the
+requirement is the **floating** window case." **That is now wrong and is
+superseded.** At the generation-31 runtime gate Alex ruled, verbatim: *"Floating
+corner resize: PASS, incidental and not the acceptance target. Tiled corner
+resize: FAIL, Stage 2 blocker."* and *"Do not treat working floating resize as
+resolution, and do not introduce 'float first' as the workflow. Alex does not
+ordinarily use floating windows and does not want floating behavior elevated into
+a prerequisite or primary window-management model."*
+
+The accepted requirement is ordinary mouse resizing on **normal tiled windows** —
+grabbing any corner resizes both applicable axes wherever neighbouring layout
+space permits, with no float-first preparation and no memorized hotkey. The
+one-directional behaviour that this note previously excused is the **root cause
+that `hyprland-dwindle-resize-workarea.patch` exists to fix**: dwindle measured
+its edge-stick flags against the un-inset monitor box instead of
+`space()->workArea()`, so with any `gaps_out >= 2` all four `DISPLAY*` flags were
+permanently false and a corner grab on a work-area edge contributed no axis.
 
 ---
 
