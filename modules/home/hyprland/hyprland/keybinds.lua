@@ -473,9 +473,18 @@ local function reconcile_pair(ws_id)
     local surplus_returned = false
     for addr in pairs(s.surplus) do
         local win = hl.get_window(addr)
-        if not win or not win.hidden then
+        if not win then
+            -- Aurora: the surplus window itself closed while still minimized --
+            -- it can never "come back", so drop only the stale bookkeeping.
+            -- This is NOT a restore and must not dissolve a pair nobody
+            -- touched: a closed, unrelated minimized window is not one of
+            -- the documented dissolution triggers (restoring a surplus
+            -- window, or dragging/unsnapping/maximizing/closing a PAIR
+            -- MEMBER -- GRAND_PLAN.md §6.2). Setting an existing key to nil
+            -- mid-`pairs()` traversal is explicitly safe per the Lua manual.
+            s.surplus[addr] = nil
+        elseif not win.hidden then
             surplus_returned = true
-            break
         end
     end
 
@@ -596,7 +605,19 @@ local function half_snap(side)
     -- transitional one.
     local actions = {
         hl.dsp.window.float({ action = "on", window = win }),
-        hl.dsp.window.resize({ x = geometry.width, y = geometry.height, "exact", window = win }),
+        -- Aurora: `relative = false`, matching window.move below -- not the
+        -- bare "exact" positional marker the citation above (end-4/dots-
+        -- hyprland keybinds.lua:359) uses. Verified against this engine's own
+        -- parser (Config::Lua::Bindings::hlWindowResize,
+        -- src/config/lua/bindings/LuaBindingsDispatchers.cpp): it reads only
+        -- named x/y/relative/window fields and never a positional element, so
+        -- that marker was silently ignored, not selecting a mode -- omitting
+        -- `relative` already defaults to false (absolute) there, matching
+        -- caelestia's own resize_by_screen/move_actions forms
+        -- (hypr/hyprland/functions.lua:52-75, cited above). This was already
+        -- an exact resize; the change only removes a dead table entry whose
+        -- citation does not apply to this binding.
+        hl.dsp.window.resize({ x = geometry.width, y = geometry.height, relative = false, window = win }),
         hl.dsp.window.move({ x = geometry.x, y = geometry.y, relative = false, window = win })
     }
     for _, action in ipairs(actions) do

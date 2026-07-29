@@ -113,6 +113,11 @@
     adwaita-icon-theme
     google-chrome
     kitty
+    # Aurora: ships `vainfo`, which is how the Stage 1 VA-API/iHD debt is actually
+    # verified (close-out gate row 36). It was never in the closure, so that row
+    # could not be tested at all. Tooling only — iHD remains the driver set in
+    # hardware.graphics above.
+    libva-utils
     papirus-icon-theme
     thunar
   ];
