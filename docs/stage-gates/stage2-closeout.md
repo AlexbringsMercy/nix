@@ -186,3 +186,41 @@ Alex's own words at the gate sitting, not from PM inference.
 
 Stage 2 remains `OPEN` until every row above reads `Tested: PASS` / `Passed: Y`
 and Alex accepts the gate in his own words.
+
+---
+
+## Post-reboot runtime verification — generation 31, 2026-07-29
+
+**Booted generation 31**; `booted == current`. These rows were verified by the PM
+**without operator hands** and are recorded as `PASS` on machine evidence. Everything
+not listed here still requires Alex's physical test.
+
+| Requirement | Result | Evidence |
+|---|---|---|
+| Patched compositor is what runs | **PASS** | PID 1706 = `wrz9r718…-hyprland-0.55.4/bin/Hyprland` |
+| `aurora-minimize` plugin loads | **PASS** | `hyprctl plugin list` → "Plugin aurora-minimize by Aurora" |
+| hyprbars still loads (ABI intact) | **PASS** | same listing; no SIGSEGV, no safe mode |
+| Zero Hyprland config errors | **PASS** | `hyprctl configerrors` empty |
+| Zero failed units (system + user) | **PASS** | `systemctl --failed` both empty |
+| **DWT available** | **PASS** | `libinput list-devices` event7 → `Disable-w-typing: enabled` (was `n/a`) |
+| udev touchpad reclassification | **PASS** | `ID_INPUT_TOUCHPAD_INTEGRATION=internal`, `ID_INTEGRATION=internal` |
+| Minimize: window leaves render/layout | **PASS** | live round trip, `hidden: false → true` |
+| Minimize: **original workspace retained** | **PASS** | workspace `id 1` before **and** after minimize |
+| Restore: unhides and focuses in one call | **PASS** | `hidden → false`, `activewindow` = the restored address |
+| **No minimize workspace ever exposed** | **PASS** | `hyprctl workspaces` shows no `special`/`min` entry during minimize |
+| Dashboard global unregistered | **PASS** | `caelestia:dashboard` absent from `hyprctl globalshortcuts` |
+| Dashboard dropped from `showall` | **PASS** | global now reads "Toggle launcher, osd and utilities" |
+| `Super+K` unbound | **PASS** | absent from `hyprctl binds` |
+| Screenshot globals registered | **PASS** | `caelestia:screenshot`, `caelestia:screenshotFull` present |
+| Shell runs without QML errors | **PASS** | journal clean but for pre-existing benign portal warnings |
+| Working set relaunched after reboot | **PASS** | both terminals + Chrome back; Chrome restored its tab; armed flag consumed |
+
+**Unexpected benefit, measured:** `aurora-shell` resident memory is **0.6 GB**,
+against **2.8 GB** recorded in the pre-batch audit. Retiring the dashboard UI removed
+a large standing allocation on an 8 GB machine.
+
+**Still `UNVERIFIED` — needs Alex's hands:** drag anchor, corner resize both
+directions, snap determinism and pair dissolution, rail click-to-restore and grouped
+previews, `follow_mouse = 2` feel, DWT palm suppression while typing, screenshot
+colour/clipboard/error paths, wallpaper smoke row, and the Stage 0/1 debts
+(TV, controller, VA-API).
