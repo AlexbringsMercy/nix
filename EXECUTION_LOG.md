@@ -2579,3 +2579,41 @@ correlate, that means two problems rather than one and must be reported as such 
 a false single root cause is worse than an unresolved one. The T2 RTC skew caveat
 applies: `systemctl`/`uptime` timestamps are unreliable here, so the correlation is
 anchored on journal entries around the sync event itself.
+
+---
+
+### Decision 23 — Persistent NixOS default boot selection pulled forward to the next reboot
+
+**Date/time:** 2026-07-29
+**Active generation:** 31
+**Status:** APPROVED / BINDING — scope pulled forward from Stage 7
+
+**Operator decision:** *"Pull persistent NixOS default selection forward from Stage 7
+to the next reboot. During Apple Startup Manager, select the NixOS volume while
+holding Control to make it the persistent default. Confirm the following cold reboot
+enters NixOS without Option or manual reselection. Stage 7 still owns Plymouth,
+quiet boot, greeter and lock-screen polish."*
+
+**Nature of the change — this is an operator physical action, not a configuration
+change.** Apple's Startup Manager sets the persistent startup disk when the
+selection is made with **Control** held. It is performed by Alex at the firmware
+boot picker; the PM cannot execute it, and **no NixOS configuration change
+implements it.** The standing T2 constraint `boot.loader.efi.canTouchEfiVariables =
+false` remains correct and untouched — this decision does **not** authorise writing
+EFI variables from the OS.
+
+**Procedure, at the next reboot:**
+1. Hold **Option (⌥)** at power-on to reach Apple Startup Manager.
+2. Select the **NixOS** volume **while holding Control**.
+3. The system boots NixOS and that choice becomes the persistent default.
+
+**Verification spans two boots and must not be claimed early.** Step 3 happens at
+the correction-batch reboot. The acceptance test is the **next cold boot after
+that**: the machine must enter NixOS **without** holding Option and without manual
+reselection. Recording this as passed on the same reboot that performs it would be
+a false pass — it is a distinct gate row, verified later.
+
+**Scope fence:** Stage 7 retains Plymouth, quiet boot, the greeter and lock-screen
+polish. Only the persistent default-volume selection moves forward.
+
+**Acceptance condition:** a cold boot with no key held enters NixOS directly.
