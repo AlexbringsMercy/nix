@@ -13,15 +13,14 @@ hl.bind("SUPER + D", hl.dsp.global("caelestia:launcher"), { description = "Deskt
 
 hl.bind("SUPER + Space", hl.dsp.global("caelestia:launcher"), { description = "Shell: Open launcher" }) -- Aurora: make Cmd+Space the headline caelestia launcher path.
 hl.bind("SUPER + N", hl.dsp.global("caelestia:sidebar"), { description = "Shell: Notification history" }) -- Aurora: open caelestia's notification sidebar.
--- Aurora: the dashboard UI is retired architecture (GRAND_PLAN.md §10.2 item 19),
--- but it is retired on paper only so far -- modules/dashboard/ is still 24 QML
--- files in the shell and caelestia:dashboard is still a live registered global.
--- The replacement widgets (calendar/media/weather/resources) arrive with the
--- Stage 3 top bar. Removing this bind now would delete the only access path to a
--- surface that still exists, with nothing in its place -- the same error the
--- operator caught when hiding special:min-* before the taskbar shipped would have
--- made minimize a one-way trip. It retires WITH the Stage 3 top bar, not before.
-hl.bind("SUPER + K", hl.dsp.global("caelestia:dashboard"), { description = "Shell: Dashboard" }) -- Aurora: retained until Stage 3 ships the replacement widgets.
+-- Aurora: Super+K is deliberately unbound. The dashboard UI is retired
+-- (GRAND_PLAN.md §10.2 item 19) and every entry path to it is disabled by
+-- operator decision 22, 2026-07-29 -- an explicit approved EXCEPTION to the
+-- replacement-before-removal rule (decision 21), granted because the dashboard is
+-- unwanted duplication rather than a capability needing temporary preservation.
+-- The "caelestia:dashboard" global is no longer registered by the shell, so this
+-- bind would dispatch a name that does not exist. Its backend services still run;
+-- the Stage 3 ilyamiro widgets consume them.
 hl.bind("SUPER + U", hl.dsp.global("caelestia:utilities"), { description = "Shell: Utilities" }) -- Aurora: expose the utilities drawer directly.
 hl.bind("SUPER + Comma", hl.dsp.global("caelestia:nexus"), { description = "Shell: Nexus settings" }) -- Aurora: use the familiar Cmd+, settings chord for Nexus.
 

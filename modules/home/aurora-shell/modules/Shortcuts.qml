@@ -25,27 +25,28 @@ Scope {
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "showall"
-        description: "Toggle launcher, dashboard and osd"
+        // Aurora: dashboard dropped from the set — decision 22 disables every
+        // dashboard entry path. The other three drawers are unaffected.
+        description: "Toggle launcher, osd and utilities"
         onPressed: {
             if (root.hasFullscreen)
                 return;
             const v = ShellState.forActive();
-            v.launcher = v.dashboard = v.osd = v.utilities = !(v.launcher || v.dashboard || v.osd || v.utilities);
+            v.launcher = v.osd = v.utilities = !(v.launcher || v.osd || v.utilities);
         }
     }
 
-    // qmllint disable unresolved-type
-    CustomShortcut {
-        // qmllint enable unresolved-type
-        name: "dashboard"
-        description: "Toggle dashboard"
-        onPressed: {
-            if (root.hasFullscreen)
-                return;
-            const screenState = ShellState.forActive();
-            screenState.dashboard = !screenState.dashboard;
-        }
-    }
+    // Aurora: the "dashboard" global shortcut is deliberately NOT registered
+    // (decision 22, 2026-07-29 — operator-approved exception to the
+    // replacement-before-removal rule; the dashboard is unwanted duplication, not
+    // a capability needing temporary preservation). Removing the registration is
+    // what makes the entry path genuinely absent rather than merely inert: an
+    // unregistered global cannot be reached by a keybind, by `hyprctl`, or by any
+    // clickable surface that dispatches it. The top-edge hover reveal dies with
+    // Config.dashboard.showOnHover=false, and Config.dashboard.enabled=false keeps
+    // Wrapper.qml's shouldBeActive false even if some path is missed. The dashboard
+    // BACKEND SERVICES under services/ still run — Stage 3's ilyamiro widgets
+    // consume them.
 
     // qmllint disable unresolved-type
     CustomShortcut {

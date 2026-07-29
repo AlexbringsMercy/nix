@@ -25,8 +25,17 @@ class DashboardConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
-    CONFIG_PROPERTY(bool, enabled, true)
-    CONFIG_PROPERTY(bool, showOnHover, true)
+    // Aurora: the dashboard UI is retired (GRAND_PLAN.md §10.2 item 19) and its
+    // every entry path is disabled by operator decision 22, 2026-07-29 — an
+    // explicit approved exception to the replacement-before-removal rule, because
+    // the dashboard is unwanted duplication rather than a capability needing
+    // temporary preservation. `enabled=false` makes Wrapper.qml's shouldBeActive
+    // false regardless of screenState, so no entry path can raise the surface even
+    // if one is missed; `showOnHover=false` kills the top-edge hover reveal in
+    // Interactions.qml. The BACKEND SERVICES under services/ are untouched and
+    // still run — the Stage 3 ilyamiro widgets consume them.
+    CONFIG_PROPERTY(bool, enabled, false)
+    CONFIG_PROPERTY(bool, showOnHover, false)
     CONFIG_PROPERTY(bool, showDashboard, true)
     CONFIG_PROPERTY(bool, showMedia, true)
     CONFIG_PROPERTY(bool, showPerformance, true)

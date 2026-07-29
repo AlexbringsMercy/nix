@@ -2330,3 +2330,58 @@ removal case by case, accepting the interim loss knowingly.
 **Acceptance condition:** the concrete test, applied before any removal ships:
 **after this closure boots, can the user still do the thing the removed surface
 did?** If not, it stays.
+
+---
+
+### Decision 22 — Dashboard UI entry paths disabled (approved exception to decision 21)
+
+**Date/time:** 2026-07-29
+**Active generation:** 26
+**Status:** APPROVED / BINDING — **explicit operator exception to decision 21**
+
+**Operator decision, in his words:** *"Disable every dashboard entry path now —
+Super+K, top-edge hover/swipe and any clickable trigger. Backend services may remain
+because future ilyamiro widgets need them, but the dashboard UI must not open. This
+is an explicit operator-approved exception to the replacement-before-removal rule
+because the dashboard itself is unwanted duplication, not a capability that needs
+temporary preservation."*
+
+**Why this is an exception and not a breach of decision 21.** Decision 21 exists to
+stop a *capability* disappearing before its replacement is live. The dashboard is
+judged by the operator to be **duplication rather than capability** — its content
+(calendar, media, performance, weather) is being rebuilt as independent Stage 3 top
+bar widgets, and its removal costs nothing that needs bridging. Decision 21 already
+reserved this: *"the operator may still direct a specific early removal case by
+case, accepting the interim loss knowingly."* This is that case, exercised
+explicitly. **This reverses finding 20c**, which retained `Super+K` on
+decision-21 grounds; that retention was correct under the rule and is now
+superseded by the operator's exception.
+
+**Four entry paths found and closed** — the search was exhaustive rather than
+stopping at the obvious one:
+
+1. **`Super+K` keybind** — removed from `keybinds.lua`.
+2. **`caelestia:dashboard` global shortcut** — **registration removed** from
+   `modules/Shortcuts.qml`. This matters more than unbinding: an unregistered global
+   cannot be reached by a keybind, by `hyprctl`, or by any clickable surface that
+   dispatches it.
+3. **`caelestia:showall`** — previously toggled `v.dashboard` alongside launcher/osd/
+   utilities; the dashboard term is dropped, the other three are unaffected.
+4. **Top-edge swipe** (`drawers/Interactions.qml`) — **the one path neither
+   `showOnHover` nor `enabled` reached**, because it sets `screenState.dashboard`
+   directly on drag. Now gated on `Config.dashboard.enabled`.
+
+**Plus two defence-in-depth defaults**, so a missed path still cannot raise the
+surface: `Config.dashboard.enabled = false` (makes `dashboard/Wrapper.qml`'s
+`shouldBeActive` false regardless of `screenState`) and
+`Config.dashboard.showOnHover = false` (kills the hover reveal).
+
+**Backend services untouched and still running.** `services/` was not modified —
+verified by `git status` — so `Players.qml`, `Weather.qml`, `NetworkUsage.qml`, the
+CPU/memory/storage services and the rest continue to run for the Stage 3 ilyamiro
+widgets, exactly as the operator required. Only the UI surface and its entry paths
+are dead; `modules/dashboard/` remains in the tree as a component source.
+
+**Acceptance condition:** after reboot, `Super+K` does nothing, no top-edge hover or
+swipe raises the dashboard, no clickable path opens it, and the Stage 3 widgets can
+still read live media/weather/resource data when they arrive.

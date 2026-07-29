@@ -220,7 +220,13 @@ CustomMouseArea {
         }
 
         // Show/hide dashboard on drag (for touchscreen devices)
-        if (pressed && inTopPanel(panels.dashboard, dragStart.x, dragStart.y) && withinPanelWidth(panels.dashboard, x, y)) {
+        // Aurora: gated on Config.dashboard.enabled by operator decision 22,
+        // 2026-07-29. This top-edge swipe was the one dashboard entry path that
+        // neither showOnHover nor enabled reached — it sets screenState.dashboard
+        // directly. Config.dashboard.enabled=false already makes Wrapper.qml's
+        // shouldBeActive false, so the surface could not appear, but the operator
+        // asked for the entry paths themselves disabled rather than merely inert.
+        if (Config.dashboard.enabled && pressed && inTopPanel(panels.dashboard, dragStart.x, dragStart.y) && withinPanelWidth(panels.dashboard, x, y)) {
             if (dragY > Config.dashboard.dragThreshold)
                 screenState.dashboard = true;
             else if (dragY < -Config.dashboard.dragThreshold)
