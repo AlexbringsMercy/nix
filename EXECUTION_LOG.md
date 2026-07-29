@@ -34,10 +34,23 @@
 > 2. The handoff's "gen 25 booted, gen 26 staged and NEVER TESTED" is stale. The
 >    machine has since **booted into gen 26**. The 2D half-snap rework is
 >    activated — but still not live-tested.
-> 3. **Generation 26 is the active and default boot generation** (confirmed
->    2026-07-28). Any generation number stated earlier in this file is historical.
-> 4. **Corner resize is non-negotiable and unresolved** — no implementation, no
->    research artifact (operator decision #11).
+> 3. **Generation 31 is the active and default boot generation** (re-confirmed
+>    from the machine 2026-07-29 afternoon: `/run/current-system`,
+>    `/run/booted-system` and `/nix/var/nix/profiles/system` all resolve to
+>    `wirdp0v9…`, and `loader.conf` defaults to the generation-31 entry).
+>    **Generation 26 remains the fallback.** Any generation number stated earlier
+>    in this file is historical — including the former "generation 26 is active"
+>    correction this line replaces.
+> 4. **Corner resize is non-negotiable.** A dwindle work-area patch is now
+>    **written and committed** (`fc78ebe`) but is **not built, not activated and
+>    not tested** — it postdates generation 31. Tiled corner resize remains a
+>    Stage 2 blocker (operator decision #11); working *floating* corner resize is
+>    incidental and is explicitly not the acceptance target.
+> 5. **A prior session's "the build has started" is never evidence that a build
+>    finished.** The 2026-07-29 morning session closed by reporting a correction
+>    build under way; it never completed or staged. Verify against a live process,
+>    the generation list, the boot entries, and store validity of the current
+>    source's closure.
 >
 > **Stage 2 is NOT closed.** Conditional pass only. Report it as `STAGE 2 — OPEN`
 > until its full close-out gate passes and Alex accepts it.
@@ -2617,3 +2630,246 @@ a false pass — it is a distinct gate row, verified later.
 polish. Only the persistent default-volume selection moves forward.
 
 **Acceptance condition:** a cold boot with no key held enters NixOS directly.
+
+---
+
+# ═══════════════════════════════════════════════════════════════════
+## 2026-07-29 (afternoon) — SESSION RE-GROUNDING, PLAN REVISION ADOPTED
+# ═══════════════════════════════════════════════════════════════════
+
+### State reconciliation — the correction build never ran
+
+The previous session ended by reporting that a correction build had started after
+the Stage 2 runtime fixes were committed. **It did not complete, did not stage, and
+was not running.** Established from the machine, not inherited:
+
+- No `nixos-rebuild`/`nix build` process alive (`ps aux`).
+- **Generation 31 is still the newest** generation, the active one, and the
+  bootloader default (`loader.conf` → `nixos-94a953e9…conf`, written 06:06).
+- All five Nix temporary-GC-root holder PIDs are dead — stale leftovers, not a
+  live build.
+- The current source evaluates to `dw6iv3h1…drv`, whose output
+  `sscnkxwacl30fnvm13szywd877v7pdl8-nixos-system-macbook` **is not in the store**.
+- Generation 31 was built at **06:06**; every correction commit lands **06:53–07:23**
+  and therefore postdates it.
+
+**Consequence:** the nine correction items are **written and committed only**. There
+is no post-generation-31 closure to reuse. Generation 26 remains the fallback.
+
+**The compositor output cannot be reused either.** Generation 31 carries
+`wrz9r718…-hyprland-0.55.4` built from two patches. `flake.nix` now declares
+**three** — `hyprland-dwindle-resize-workarea.patch` was added at 07:16 (`fc78ebe`)
+to fix tiled corner resize. The patch list genuinely changed, so Hyprland rebuilds
+and hyprbars rebuilds against it in the same closure. This is an hour-class build
+and runs detached in a `systemd-run --user` unit.
+
+### Grand Plan revision adopted — operator-approved, verified before use
+
+Alex supplied a replacement `GRAND_PLAN.md` plus its unified diff. Verified rather
+than trusted:
+
+| Artifact | SHA-256 | Result |
+|---|---|---|
+| Supplied revised plan | `f4c34ab4591dbbd685c4537a799d07573d8cf878ae7331fef78d141164b0f627` | matches the stated hash |
+| Supplied unified diff | `dce34ed00b071ed051e9d492e29125f6c1952df883a36d50ada48b610d009d65` | matches the stated hash |
+| Committed on-disk plan at `HEAD` (`de96b77`) | `2be250aa0cdfbc3146c8ad806fbeee0a43c8b8a1bae6479c4a8bc60a93ea7bc8` | **matches the supplied baseline exactly** |
+
+Because the committed baseline matched byte for byte, this was a **clean
+replacement — no three-way reconciliation was required and no unrelated newer work
+existed to preserve.** The working tree showed `GRAND_PLAN.md` deleted, which was
+the operator staging the revision, not a competing edit.
+
+**Packet self-consistency was proven before the file was installed:** applying the
+supplied diff to the committed baseline reproduces the supplied revised file byte
+for byte. The installed `GRAND_PLAN.md` hashes to `f4c34ab4…` (+98 / −16).
+
+The revision adds, as binding plan text: native in-app application updating as the
+minimum standard; a graphical fallback only for proven no-native-updater apps;
+current-plus-two app version retention; Claude/Codex rebuild persistence; actionable
+writing suggestions; and the top-centred screenshot mode toolbar. Requirements
+**M28** and **M29** are added to the plan's requirement table.
+
+Traceability recorded in `MASTER_REQUIREMENTS.md` at §4.2 (app install/update),
+§4.5 (text input intelligence), §5 Capture & keys, and §11 (working today — do not
+regress), each marked *corrected 2026-07-29 — daily-QoL plan revision*.
+
+**Scope fence, stated explicitly:** adopting the plan is **not** implementing it.
+No updater bridge and no writing-assistance work enters the Stage 2 closure. Only
+the live Claude/Codex resolution regression is pulled forward.
+
+---
+
+### Decision 24 — Claude Code and Codex must survive Nix generations without shadowing or downgrade
+
+**Date/time:** 2026-07-29
+**Active generation:** 31 (`readlink -f /nix/var/nix/profiles/system` → `system-31-link`)
+**Stage:** pulled forward into the next compatible Stage 2 closure
+**Status:** APPROVED — BINDING
+
+**Original requirement:** `MASTER_REQUIREMENTS.md` §11 listed "Claude Code and Codex
+execution" as working-today state that must not regress. `GRAND_PLAN.md` §8.8
+previously made the npm-global lane the durable agent path.
+
+**Operator decision:** the newer self-managed Claude Code 2.1.220 still existed, but
+the rebuilt environment made the stale npm-global 2.1.211 win PATH resolution. *From
+the operator's perspective that is a rollback and it is forbidden.* Canonical Claude
+ownership is the self-managed `~/.local/bin/claude` lane backed by
+`~/.local/share/claude/versions/`, preserving `claude update`. `~/.local/bin` must
+**deterministically** precede `~/.npm-global/bin` in interactive and graphical
+sessions. Nix/Home Manager may own Node/runtime/environment declarations only; it may
+not pin, shadow, replace or downgrade either agent.
+
+**Live evidence gathered this session (not assumed):**
+
+- `claude` → `/home/alex/.local/bin/claude` → `versions/2.1.220`.
+- `/home/alex/.npm-global/bin/` is now **empty** — the stale shim is gone (dir mtime
+  16:07). The `@anthropic-ai` and `@openai` `node_modules` trees remain on disk.
+- **Codex's canonical lane, read from the machine:** `~/.local/bin/codex` →
+  `~/.codex/packages/standalone/current` → `releases/0.145.0-x86_64-unknown-linux-musl`,
+  a self-managed standalone release tree with an `install.lock`. Config, credentials
+  and history live in `~/.codex/`. **Nixpkgs does not own Codex.**
+
+**Root cause — the invariant was never declared, and one source actively inverts it:**
+
+| Source | Effect | Managed by |
+|---|---|---|
+| `home.sessionPath` (`home/alex/default.nix`) | prepended **`.npm-global/bin` only** | Nix/HM |
+| `~/.profile` Codex-installer block | prepends `.local/bin` *before* HM, so HM's prepend lands on top | installer |
+| `~/.config/fish/fish_variables` `fish_user_paths` | prepends `.local/bin` | mutable fish state |
+| `~/.bashrc` (42 bytes, not HM-managed) | prepends `.npm-global/bin` **last** — wins in bash | leftover |
+
+Measured: the graphical session resolved `.npm-global/bin` first while a fresh
+`fish -l` resolved `.local/bin` first. The correct order was an accident, not a
+declaration — which is precisely why an activation could invert it.
+
+**Correction implemented (written; HM eval passes; not yet built or activated):**
+
+- `home/alex/default.nix` — `sessionPath = [ "$HOME/.local/bin" "$HOME/.npm-global/bin" ]`,
+  in that order, so the self-managed lane wins by declaration.
+- `modules/home/fish.nix` — an idempotent re-assert at the end of interactive init, so
+  neither a stale `fish_user_paths` nor an installer prepend can invert it.
+- `home/alex/default.nix` — an idempotent activation step that normalizes the single
+  stray `~/.bashrc` line, keeping a one-time `.pre-aurora` backup. Nix owns PATH
+  order; it still does not own the agent binaries.
+
+**Preservation:** credentials, configuration, sessions and resumable state are
+untouched and are protected state under `GRAND_PLAN.md` §8.7. The npm-global package
+trees are **not** deleted — per this decision, duplicates are neutralized only after
+the canonical path is proven live in current shell, fresh terminal and fresh
+graphical login.
+
+**Plan impact:** folded into the already-required Stage 2 correction closure. **It
+does not justify a standalone generation or reboot.**
+
+**Acceptance condition:** `claude` and `codex` resolve to their canonical user-owned
+binaries with unchanged versions in (1) the resumed shell, (2) a fresh terminal,
+(3) a fresh graphical login and (4) after reboot; config and session state intact;
+no older duplicate wins.
+
+---
+
+### Decision 25 — Application updates: Windows-equivalent native app experience is the minimum
+
+**Date/time:** 2026-07-29
+**Active generation:** 31
+**Stage:** **Stage 6** (mechanics) and **Stage 9** (surfaces) — **not Stage 2**
+**Status:** APPROVED — BINDING
+
+**Operator decision:** when an application's native Linux build actually has an
+updater UI, its own standard **Update / Install / New version available / Relaunch**
+control is the required and primary visible path. The backend adapts Nix/vendor
+package state invisibly so that native UI works, and the app updates only itself —
+without a full NixOS rebuild, system activation, or reboot.
+
+**Not accepted as substitutes where native updater UI exists:** a browser extension,
+an injected replacement button, an Aurora titlebar control, a universal update UI, a
+global app-update notification, a terminal command, a software-center detour, or a
+Nexus detour.
+
+**Chrome's explicit bar:** stage the newer installed version where Chrome expects it;
+Chrome itself must expose its native top-right/menu update/relaunch state; clicking
+it must restart into the new version with tabs and profile intact. The same
+app-owned-UI standard applies to Spotify, Discord, VS Code, Claude Desktop and every
+other app whose Linux build ships a real updater.
+
+**Fallback is an exception, not a design:** permitted only after source inspection,
+runtime tracing and package/build inspection prove the native build genuinely has no
+updater UI or callable updater path. *"Nix usually updates centrally" is not proof.*
+The proven-exception fallback must be graphical and click-driven — app-specific where
+practical, otherwise Nexus › Applications & updates — must never open a terminal, and
+must not use global app-update notifications.
+
+**Retention:** current + **two** previous app binary versions maximum. After a
+successful launch of the new version, prune older app versions/profile generations.
+App rollback is app-local and does not roll back the OS.
+
+**Plan impact:** `GRAND_PLAN.md` §8.8 rewritten; new requirement **M28**; Nexus gains
+an **Applications & updates** fallback page (§5.8) while the System page narrows to
+OS generations only.
+
+**Revisit trigger:** none — final as a standard. Per-application adapter choices are
+recorded individually before implementation.
+
+**Acceptance condition:** the Stage 6 proof set — Chrome, Spotify, Discord, VS Code,
+Claude Code, Codex, and one application proven to lack native updater UI — each
+recording native-UI presence, adapter method, versions, restart behaviour, data and
+session preservation, rollback, three-version retention, and proof that no NixOS
+rebuild or reboot occurred.
+
+---
+
+### Decision 26 — Writing and typo suggestions: red underlines alone are not acceptance
+
+**Date/time:** 2026-07-29
+**Active generation:** 31
+**Stage:** **Stage 6** (integration) and **Stage 9** (Nexus controls) — **not Stage 2**
+**Status:** APPROVED — BINDING
+
+**Operator decision:** existing red underlines work but are insufficient without
+replacement suggestions. Stage 6 must preserve app-native correction menus **and**
+integrate the broadest practical standard input-method candidate layer, after
+evaluating **Fcitx5 versus IBus/Typing Booster on the physical machine** rather than
+on reputation.
+
+Suggestions must be actionable by **mouse and keyboard**, support custom
+dictionaries, and stay **disabled in passwords and secure fields**. Automatic
+replacement remains **off by default** — Alex chooses a suggestion.
+
+**Coverage gate:** prove *replacement suggestions*, not only underlines, in Chrome,
+Discord/Electron, VS Code, GTK, Qt/KF6, Dolphin rename, and another ordinary daily
+text field. Fish command autosuggestions are a separate terminal feature.
+
+**Honesty clause, both directions:** do not claim literal coverage of every custom
+editor, and do not use one unsupported widget to narrow the practical system-wide
+target. Real exclusions are recorded from actual app testing.
+
+**Plan impact:** `GRAND_PLAN.md` §8.4 replaces the old "no system-wide autocorrect
+exists on Linux" framing; new requirement **M29**; Stage 9 exposes language,
+dictionary, candidate behaviour and per-app exclusions in Nexus.
+
+**Acceptance condition:** the seven-surface coverage gate passes with actionable
+replacement suggestions, secure fields excluded, and documented exclusions.
+
+---
+
+### Decision 27 — Screenshot mode toolbar is final architecture, not optional polish
+
+**Date/time:** 2026-07-29
+**Active generation:** 31
+**Stage:** Stage 2 correction batch (already written), plan text now binding
+**Status:** APPROVED — BINDING
+
+The requirement recorded earlier today under *"Requirement addition — screenshot
+capture toolbar"* is now binding plan text in `GRAND_PLAN.md` §5.12 and is **final,
+not optional polish**. Whenever screenshot mode opens, a compact Windows-style
+toolbar appears **centred at the top** with **Region · Window · Full screen**.
+
+**Alex has no Print key.** `Print` may exist only as optional redundancy and is
+never the required full-screen path. Mode is visually obvious; Window captures exact
+bounds; Full screen captures the active display in one click; cancel or completion
+restores the exact prior focus owner; the toolbar and picker never enter the capture
+or the application rail.
+
+**Acceptance condition:** the runtime gate rows for focus restoration on cancel and
+completion, exact window bounds, the full-screen button, toolbar absent from output,
+and no ghost screenshot icon in the rail.

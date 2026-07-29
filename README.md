@@ -3,14 +3,12 @@
 Declarative NixOS, Home Manager, Hyprland Lua, and QuickShell setup for
 Alex's 2020 Intel/T2 MacBook Air.
 
-> **Status note (2026-07-28).** The "Desktop architecture" section below describes
-> the **retired** 2026-07-16 Waybar-era desktop and is kept only as history. The
-> current architecture is `GRAND_PLAN.md` — caelestia forked as `aurora-shell`
-> under QuickShell, with Waybar, Rofi and SwayOSD retired. For verified machine
-> state read `CURRENT_STATE_AUDIT.md`; for the build's current status and rules
-> read `EXECUTION_LOG.md`, `PM_OPERATING_RULES.md`, and
-> `STAGE2_CLOSEOUT_WORK_ORDER.md`. The build/deploy instructions in this file
-> remain accurate.
+> **Status note (2026-07-29).** `GRAND_PLAN.md` is the only current design
+> authority. For verified machine state read `CURRENT_STATE_AUDIT.md`; for the
+> build's current status and rules read `EXECUTION_LOG.md`,
+> `PM_OPERATING_RULES.md`, and `STAGE2_CLOSEOUT_WORK_ORDER.md`. The
+> build/deploy instructions in this file remain accurate and are the supported
+> path. **Stage 2 is OPEN.**
 
 The MacBook uses the pinned public flake in this repository plus a machine-local
 wrapper at `/home/alex/.config/nixos-local`. The wrapper supplies proprietary
@@ -19,16 +17,19 @@ to Git.
 
 ## Desktop architecture
 
-- Hyprland 0.55 native Lua, two workspaces, tiling, touchpad gestures, function
-  keys, screenshots, and pointer-driven move/resize controls.
-- A permanent glass Waybar with launcher, pinned applications, running tasks,
-  media, hardware status, clock, tray, and notification controls.
-- Independent QuickShell Wi-Fi, Bluetooth, volume, power, notification,
-  music/EQ, and calendar/weather surfaces opened from Waybar.
-- Matugen, Waypaper, and awww for atomic wallpaper-adaptive colors and animated
-  background changes.
-- Hyprlock/Hypridle, PipeWire, SwayOSD, EasyEffects, Cava, Dunst fallback, and
-  native Wayland application defaults.
+Hyprland 0.55 native Lua with narrow carried compositor patches, plus caelestia
+forked as **`aurora-shell`** — one systemd-supervised QuickShell instance owning
+a top widget bar and a left application rail, with a wallpaper-derived light/dark
+semantic palette. See **`GRAND_PLAN.md`** for the authoritative architecture,
+surface ownership, and stage sequence; it is the only design authority.
+
+> **Historical note.** Earlier revisions of this file described a Waybar-era
+> desktop — a permanent glass Waybar owning launcher/tasks/status, independent
+> QuickShell dropdowns opened from it, and Matugen/Waypaper/awww theming. That
+> architecture is **retired**: Waybar, Rofi, SwayOSD, Matugen-as-authority,
+> Waypaper and awww are all superseded. The description is preserved only in
+> `archive/superseded-docs/` and `archive/superseded-handoffs/`. Do not resume
+> from it or cite it as current.
 
 ## Validate and build
 
@@ -73,7 +74,10 @@ first activation.
 - `PM_OPERATING_RULES.md` — operating contract for the project-manager session
 - `STAGE2_CLOSEOUT_WORK_ORDER.md` — the current open work order
 - `SESSION_PREAMBLE.md` — mandatory reading for every session and subagent
+- `visual-design-reference.md` — visual *intent* only; subordinate to `GRAND_PLAN.md`
+- `macbook-build-spec.md` — machine, build, and deployment constraints
 - `archive/superseded-handoffs/` — retired handoffs and plans (history only)
+- `archive/superseded-docs/` — superseded audits and references (history only)
 - `docs/controls.md` — pointer paths and optional shortcuts
 - `docs/wallpapers.md` — local collection and adaptive-color pipeline
 - `docs/recovery.md` — symlink-safe dotfile restore and generation rollback

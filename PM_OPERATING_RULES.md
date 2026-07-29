@@ -1,7 +1,10 @@
 # PM OPERATING RULES — Aurora
 
 **The incoming project manager's operating contract.** Compact by design. Written
-2026-07-28, active generation 26, branch `codex/macbook-desktop` @ `6486742`.
+2026-07-28; **metadata refreshed 2026-07-29 — active generation 31, branch
+`codex/macbook-desktop` @ `39a5285`, Stage 2 OPEN.** The rules themselves are
+unchanged and remain binding; only stale state metadata and the read list were
+corrected.
 
 This file tells you how to work. It does not tell you what is true about the
 machine — `CURRENT_STATE_AUDIT.md` does that — and it does not tell you what to
@@ -24,8 +27,13 @@ When two sources disagree, the higher-ranked one wins. Say which one you used.
 5. **`MASTER_REQUIREMENTS.md`** — the requirements ledger the plan answers to,
    including **§ EXECUTION GOVERNANCE — 2026-07-28**.
 6. **`SESSION_PREAMBLE.md`** — binds you and every agent you spawn. No exceptions.
-7. **Archived material** (`archive/superseded-handoffs/`) — historical provenance
-   only. Never an active instruction.
+7. **`visual-design-reference.md`** — visual *intent* only (mood, quality bar,
+   motion feel, typography). Explicitly subordinate to `GRAND_PLAN.md`; it is
+   never architecture, surface-ownership, or palette authority.
+8. **Archived material** (`archive/superseded-handoffs/`,
+   `archive/superseded-docs/`) — historical provenance only. Never an active
+   instruction. `ISSUE_LOG.md` and the pre-Grand-Plan `visual-design-reference.md`
+   live here now; both are dated audits of the retired Waybar/Rofi-era system.
 
 Two things sit outside the ranking because they are absolute:
 
@@ -183,9 +191,24 @@ generation from the machine — never copy a number from a document.
    `CURRENT_STATE_AUDIT.md` · `STAGE2_CLOSEOUT_WORK_ORDER.md` · `GRAND_PLAN.md` ·
    `MASTER_REQUIREMENTS.md` · `macbook-build-spec.md` · the `EXECUTION_LOG.md`
    current-authority header, the operator decisions registers, and every entry
-   from `## Stage 0` forward · `ISSUE_LOG.md` · `SOURCES.md`. State the list to
+   from the current Stage 2 correction work forward · `SOURCES.md`.
+   **`ISSUE_LOG.md` is no longer on this list** — it is an archived dated audit of
+   the retired Waybar/Rofi-era system; its still-live items were migrated into the
+   current gate (see `docs/issue-log-migration-2026-07-29.md`). State the list to
    Alex with a few plain sentences on where the build stands.
 2. Confirm ground truth yourself before quoting it: branch, HEAD, tree state,
-   `readlink -f /run/current-system`, and the profile default generation.
+   `readlink -f /run/current-system`, and the profile default generation. **Never
+   inherit a generation number, a build outcome, or a "the build started" claim
+   from a prior session's closing message** — a build that was launched is not a
+   build that completed, staged, or booted. Check for a live process, a newer
+   generation link, a newer boot entry, and whether the current source's closure is
+   actually valid in the store.
 3. Report the stage status honestly. Today that is **`STAGE 2 — OPEN`**.
 4. Start on `STAGE2_CLOSEOUT_WORK_ORDER.md`. Do not start Stage 3.
+
+**Latest binding operator decisions** (full text in `EXECUTION_LOG.md`):
+decisions 20–23 (frozen manifest, no-premature-removal, dashboard entry paths,
+persistent NixOS default boot) and **decisions 24–27** of 2026-07-29 — agent CLI
+persistence/PATH ownership (pulled into the next compatible closure), native in-app
+application updates with three-version retention (Stage 6/9), actionable writing
+suggestions (Stage 6/9), and the final screenshot mode toolbar.

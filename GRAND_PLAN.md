@@ -7,6 +7,8 @@
 
 **Architecture revision:** 2026-07-29, after Alex re-opened the bar/window split against the original agridyne, caelestia, and ilyamiro visual references. This revision corrects source-role drift, removes duplicate app/status surfaces, replaces the special-workspace minimize model, defines deterministic two-pane snap behavior, and records the approved parallel/batched execution workflow.
 
+**Daily-QoL revision:** 2026-07-29, after operator review of Nix application lifecycle. This revision makes Windows-equivalent native in-app updating the minimum for applications whose Linux builds actually expose an updater, defines the strictly graphical fallback for the proven no-native-updater case, caps retained application versions, protects Claude Code and Codex from rebuild-time shadowing/downgrades, and promotes broad correction suggestions from passive spellcheck to a Stage 6 acceptance requirement.
+
 **Naming boundary:** **Aurora is the project/shell codename, not a color scheme.** References to the teal/purple/green aurora-borealis look use **Northern Lights**. The product theme is wallpaper-agnostic: glass is persistent, while light/dark mode, surface colors, text colors, accents, gradients, bars, panels, applications, and the lock screen all adapt coherently to the active wallpaper.
 
 ---
@@ -19,11 +21,12 @@
 4. **[GATE] markers are live test gates.** Work stops at a gate until the listed checks pass on the physical machine, with Alex present for anything visual or feel-based.
 5. **Report honestly.** If a test fails, the log says it failed. If a step was skipped, the log says so. If a source file turned out different from this plan's description, flag it — do not silently improvise.
 6. **Do not regress §11 of MASTER_REQUIREMENTS** (font rendering, cursor states, tap-to-click, two-finger scroll, boot WiFi, Kitty Ctrl+C/V, dual-boot rollback, agent execution, Chrome Wayland).
-7. **Protected state (never clobber):** see §8.7. The Media Center stack, the TV firewall rule, the Xbox controller Bluetooth tuning, Bluetooth pairings in `/var/lib/bluetooth`, `/etc/nixos/firmware/brcm`, and the T2 invariants of MASTER §10.
+7. **Protected state (never clobber):** see §8.7. The Media Center stack, the TV firewall rule, the Xbox controller Bluetooth tuning, Bluetooth pairings in `/var/lib/bluetooth`, `/etc/nixos/firmware/brcm`, the T2 invariants of MASTER §10, and the user-owned Claude Code and Codex installations/config/session state. A Nix activation may provide runtimes and PATH ordering; it may not silently replace, shadow, or downgrade an agent binary.
 8. **Source-role fidelity is binding.** A donor may supply structure, behavior, visuals, motion, or a backend only in the role assigned by this plan. Do not preserve a donor's unrelated modules merely because they ship together, and do not make a secondary donor the owner of a surface without Alex's explicit approval.
 9. **Freeze expensive batches before compiling.** Before a Hyprland/plugin or other hour-class build, publish a compact manifest showing every intended item is code-complete, reviewed, and included. A validation build may run early only for a stated technical reason; it is not an intermediate deployment. Coherent closure = one build, one boot-only deployment, one reboot, one gate unless Alex approves otherwise.
 10. **Parallel future-stage work is allowed and expected.** During builds, reboots, operator waits, or current-stage testing, later-stage implementation may proceed in an isolated branch/worktree when dependencies permit. Keep commits and build inputs stage-pure; do not merge or deploy future-stage work into the current gate until intended.
 11. **Ordinary UI actions require ordinary UI paths.** Hotkeys are optional shortcuts, never the only practical way to minimize/restore, switch windows, open controls, or recover state.
+12. **Native application behavior is the update UX contract.** When an application's native Linux build has its own update/check/install/relaunch UI, that exact in-app path is the required primary experience and the invisible backend adapts to it. No extension, injected replacement button, global app-update notification, terminal command, or central updater is an accepted substitute. A separate graphical updater path is allowed only after source/runtime/package evidence proves the native Linux build truly has no updater UI.
 
 ---
 
@@ -499,9 +502,10 @@ Two ported behaviors + one bespoke: **iNiR's noncritical ingress cap** (20/s) an
 4. **Notifications** — per-app rules + DND + the semantic filter's UI.
 5. **Display** *(new page)* — DMS DisplayConfig front (§5.2) + night light schedule + brightness.
 6. **Default apps** *(§4.1 MIME map made visible)* + **Startup apps** *(new, small)*.
-7. **System** *(new page — the capstone)* — generation list, **Check for updates → `nh os build` diff view → Update / Update-at-boot**, **Roll back** buttons (`nixos-rebuild {switch,boot} --rollback`), disk/GC status + "Review generations" + known-good pin control, backup status line (restic last-run), health events (§8.4). The single strongest better-than-Windows/macOS statement in the OS.
-8. **Language & region** (weather location UI) + **About**.
-9. **Bluetooth** page (carried: pairing, device info, battery).
+7. **Applications & updates** *(new fallback page)* — shown only for applications whose native Linux build is **proven** to have no updater UI. It provides graphical Check / Update / Restart / Hold / Skip / Roll back actions per app, never opens a terminal, and never replaces an application's own updater when one exists. It does not emit universal app-update notifications; the page is the least-resistance fallback, not the normal path.
+8. **System** *(new page — the capstone)* — **operating-system generations only**: generation list, **Check for system updates → `nh os build` diff view → Update / Update-at-boot**, **Roll back** buttons (`nixos-rebuild {switch,boot} --rollback`), disk/GC status + "Review generations" + known-good pin control, backup status line (restic last-run), health events (§8.4). Ordinary app updates do not require a NixOS rebuild and are not funneled through this page.
+9. **Language, region & writing** — weather/location plus dictionaries, correction-suggestion language, candidate behavior and per-app exclusions; **About**.
+10. **Bluetooth** page (carried: pairing, device info, battery).
 
 Retheme: Blobs window chrome → plain glass container (keep the window factory); tokens ride the scheme. Nexus opens from: System surface, launcher "settings," System/top-bar settings action, `aurora shell ipc call nexus open`.
 
@@ -539,7 +543,7 @@ Power-on → **no Option hold** (one-time t2linux Startup-Manager procedure: Opt
 ### 5.12 Screenshots & recording (§4.10)
 
 **Source: carried** `modules/areapicker/` (live region / frozen region / straight-to-clipboard modes) + `services/Recorder.qml` + utilities Record card + CLI `screenshot.py`/`record.py`.
-- **Bindings:** `Cmd+Shift+S` → region picker (adjustable, **overlay-tinted only** — capture happens via grim after geometry, so the §5 purple-film bug is structurally gone); `Print` → full screen. Region output: clipboard **and** timestamped PNG in `~/Pictures/Screenshots`. Buttons: System surface + bar.
+- **Capture entry and mode selection:** `Cmd+Shift+S`, System → Screenshot, and the visible capture action all open one Windows-style top-centred toolbar with **Region · Window · Full screen** buttons and an obvious active mode. Alex's keyboard has no Print key, so `Print` is optional redundancy only and is never the required full-screen path. Region output goes to clipboard **and** a timestamped PNG in `~/Pictures/Screenshots`; Window captures the exact chosen window bounds; Full screen captures the entire active display with one click. The toolbar/picker are excluded from captures and the app rail, and cancel/completion restores the exact previously focused window rather than leaving focus on the capture target.
 - **Recorder backend: `gpu-screen-recorder` with VA-API H.264** (`intel-media-driver`/iHD; `LIBVA_DRIVER_NAME=iHD`) driven by caelestia's Recorder. Any region fallback consumes geometry from the final Areapicker; **`slurp` is forbidden in the final capture/recording path** because its overlay caused the proven pink-film defect. **[GATE]** `vainfo` shows iHD encode; 10s recording stays low-CPU and smooth.
 - **OCR (C6):** "Copy text" mode on the picker toolbar → tesseract → clipboard + toast.
 
@@ -709,7 +713,8 @@ UPower owns thresholds/action: `PercentageLow=20, PercentageCritical=10, Percent
 - **Health (B13):** `OnFailure=notify-failure@%n` template on user-relevant units (aurora-shell, skwd-daemon, restic, easyeffects, hypridle) → journal excerpt → **systembus-notify** bridge → notification history. The shell's own unit hardening (§2.2) makes "watchdog gave up" legible. restic failures ride the same channel.
 - **Captive portals (B11):** NetworkManager connectivity check (plain-HTTP probe, single named setting) + `connectivity-change` dispatcher → user-unit handler → one actionable "This network needs a sign-in" notification (opens the probe URL); PORTAL ≠ LIMITED in the network panel.
 - **System sounds (§4.9):** freedesktop sound theme, played by a small hook in the Notifs service, off by default, Nexus toggle.
-- **Spellcheck (§4.5), honest scope:** hunspell dictionaries + Chrome spellcheck + gspell-capable GTK apps; **no system-wide autocorrect exists on Linux** — stated in the plan and in Nexus, not half-promised. Fish accept keys = Right-Arrow/Ctrl-F (defaults, documented; 2-minute live check).
+- **Writing assistance (§4.5) — suggestions, not merely red underlines:** Hunspell dictionaries and every application's native correction menu remain the first layer. Stage 6 also selects and integrates one standard input-method candidate service (evaluate Fcitx5 versus IBus/Typing Booster against the physical coverage gate) so ordinary text fields that lack a useful native suggestion surface still receive spelling/completion candidates. Suggestions must be reachable by mouse and keyboard, support a custom dictionary, and remain disabled in passwords/secure fields. Automatic replacement stays off by default; Alex chooses a suggestion.
+- **Coverage gate:** prove replacement suggestions—not only underlines—in Chrome, Discord/Electron, VS Code, a GTK text field, a Qt/KF6 text field, Dolphin rename, and another ordinary daily text field. Record real exclusions where a custom editor refuses standard input-method protocols; do not use that limitation to narrow coverage elsewhere. Fish command autosuggestions are a separate terminal feature with Right-Arrow/Ctrl-F acceptance and their own live check.
 - **Printing (§4.14):** `services.printing` + hplip; test page at acceptance.
 
 ### 8.5 Lid, suspend, and wake (open question #3 — resolved)
@@ -742,16 +747,85 @@ Located and inventoried (verified this session):
 | **TV firewall rule** (LG TV MAC-accept) | **channel `/etc/nixos/configuration.nix`** — *not in the flake* | **Stage 0: read it (sudo), port the exact rule into `modules/nixos/media-center.nix`**, plus any other post-Jul-16 additions found in the same diff |
 | BT pairings, keyring, Jellyfin ServerId | `/var/lib/bluetooth`, `~/.local/share/keyrings`, mediacenter data | State, not config — no rebuild touches them; do not regenerate machine identity |
 | Bluetooth QML + `equalizer-state` edits | uncommitted in the repo | Commit; carry the equalizer-state backend into §5.9; port any BT panel improvements' *behavior* into the new BT popout before deleting the old tree |
+| **Claude Code + Codex binaries/config/session state** | Claude currently has competing `~/.npm-global/bin/claude` and `~/.local/bin/claude`; Codex ownership must be verified live | **Immediate correction in the next compatible closure:** canonical Claude is the self-managed `~/.local/bin/claude` lane used by `claude update`; `~/.local/bin` wins before `~/.npm-global/bin`. Determine Codex's canonical user-owned lane from live evidence. Nix owns runtime/PATH declarations only and may never shadow, pin, replace, or downgrade either agent. Preserve credentials, settings and resumable sessions; neutralize stale duplicates only after the canonical command resolves correctly in current shell, fresh terminal and fresh login. |
 
 **Stage 0 exists because of this table:** the machine currently has two config lineages (flake + channel edits) and pending work in the tree. Until they're reconciled into the flake, nothing else ships.
 
-### 8.8 App lifecycle (§4.2/§13/C3)
+### 8.8 App lifecycle — native in-app updates, invisible Nix bridge (§4.2/§13/C3)
 
-- **Two lanes:** GUI apps default **declarative** (`modules/nixos/apps.nix`; picked via tuxmate's catalog UX or nix-software-center's "System" mode; activated by `nh os switch` — one command, diff shown automatically). **Imperative lane** for click-and-have-it-now: nix-software-center in `nix profile` mode (pin a known-good rev; verify its declarative writer against our flake layout before ever enabling that mode).
-- **Agents:** the npm-global lane, durable (`NPM_CONFIG_PREFIX=~/.npm-global` + sessionPath + `.npmrc` + pinned nodejs_22 — already working; make it declarative). `npm install -g @anthropic-ai/claude-code@latest @openai/codex@latest` and `claude update` keep working; agents never go through nixpkgs.
-- **Updates & rollback (C3):** `programs.nh` (`flake = "/home/alex/nix"`); Nexus › System fronts `nh os build` (check + diff) / `switch` / `boot` / `--rollback` — the diff-and-undo superpower as a page, per §5.8. `nvd`/`nix store diff-closures` are the parse targets.
-- **§13 apps** all land in `apps.nix` at Stage 6 (VS Code, Spotify+spicetify, Discord, mpv, btop, fastfetch, cava, OBS, Audacity, Python/pip, Rust, Docker, gh) — each opened once at the gate ("install path works" acceptance).
-- **Bonus affordances:** launcher "Run once" (`nix run nixpkgs#`), `nixos-rebuild build-vm` "test this update in a VM" (cut-list).
+**The visible minimum is Windows-equivalent application behavior.** For every application whose native Linux build actually exposes update/check/install/relaunch UI, Alex remains inside that application and uses its own standard control. The backend adapts to the app; the app is not forced into a distro-shaped workflow.
+
+#### Ownership lanes
+
+- **System-coupled packages and low-churn utilities** remain declarative in the NixOS/Home Manager closure and update with the operating-system generation.
+- **Fast-moving user applications** with independent release cadence use stable per-app launch paths plus versioned app roots/profiles. Updating one app may fetch/build/package that app only; it must not require a full NixOS rebuild, system activation, or reboot.
+- The bridge may stage a vendor artifact into a new immutable store path or a controlled versioned user-app root, whichever preserves the application's native updater semantics. It **never mutates an existing `/nix/store` object in place**.
+- App data, credentials, extensions, profiles and sessions remain outside disposable binary slots and survive update/rollback.
+
+#### Native updater contract — primary and mandatory where it exists
+
+For each app, inspect its Linux source/runtime/package behavior and implement the adapter it actually expects:
+
+1. preserve or re-enable its native update detector and UI when packaging disabled it;
+2. feed the native updater the vendor/package-manager/install state it expects;
+3. let the application's own **Update / Install / New version available / Relaunch** control initiate or complete activation;
+4. update only that application;
+5. restart or relaunch only when Alex uses the application's normal control.
+
+Background release checking, download or pending-slot staging may occur only to the same extent the application's normal updater requires. The currently running executable remains usable until its native flow performs the approved switch/relaunch.
+
+**Not accepted when native Linux updater UI exists:** a browser extension, injected replacement control, Aurora titlebar button, global notification, terminal command, Nexus detour, software-center detour, or “run a system rebuild” instruction.
+
+**Chrome acceptance is explicit:** a newer Chrome is staged where Chrome expects the installed version; Chrome itself shows its normal top-right/menu **new version available / Relaunch** state; clicking that native control restarts into the new version with tabs/profile intact. No Aurora-owned substitute UI.
+
+The same bar applies app-by-app to Spotify, Discord, VS Code, Claude Desktop and every other GUI application that ships a real native Linux updater interface. “Nix normally updates packages centrally” is never evidence that an application's own UI cannot work.
+
+#### Proven no-native-updater exception
+
+A fallback is permitted only when source inspection, runtime tracing and package/build inspection establish that the native Linux build genuinely contains no updater UI or callable updater path.
+
+Then use the next path of least resistance:
+
+- a graphical app-specific updater surface where practical, otherwise Nexus › Applications & updates;
+- Check / Update / Restart / Hold / Skip / Roll back by click;
+- no terminal window and no command-copy workflow;
+- no global app-update notification;
+- no claim that the fallback is equivalent to a missing native UI.
+
+The evidence and fallback choice are recorded per application before implementation.
+
+#### Activation, rollback and retention
+
+- User approval through the app's own native control—or the proven-exception graphical fallback—is required before the pending version becomes the version used on restart.
+- After the new version launches successfully, retain **current + two previous versions maximum** for that app. Three binary versions total is an absolute default cap; older app profile generations/store roots are removed.
+- Rollback is app-local and does not roll back the operating system.
+- Hold/pin and skip-one-release state are app-local. A held current version still counts as the current slot; retention does not grow without an explicit named operator exception.
+- Failed launch automatically leaves/reinstates the previous working slot and does not prune it.
+
+#### Agent CLIs — native self-update and rebuild persistence
+
+- **Claude Code:** canonical command is `~/.local/bin/claude` → the self-managed version tree under `~/.local/share/claude/versions/`; `claude update` remains the normal updater.
+- **Codex:** retain its own supported user-owned update lane, determined from live command/path/version evidence. Do not assume nixpkgs ownership.
+- Home Manager/Nix supplies Node/runtime/environment and deterministic PATH only. `~/.local/bin` precedes `~/.npm-global/bin`; a Nix rebuild may not make an older duplicate win.
+- Gate current shell, fresh terminal, fresh graphical login and post-reboot resolution for both tools. Installed versions, credentials, config and resumable sessions persist.
+
+#### System updates remain separate
+
+`programs.nh` (`flake = "/home/alex/nix"`) and Nexus › System handle the operating system: check/build diff, Update, Update-at-boot and generation rollback using `nvd`/`nix store diff-closures`. That page does not become the normal updater for independent applications.
+
+#### Stage 6 proof set
+
+At minimum, complete the native/fallback determination and end-to-end update path for:
+
+- Chrome;
+- Spotify;
+- Discord;
+- VS Code;
+- Claude Code;
+- Codex;
+- one application proven to lack native Linux updater UI, exercising the graphical fallback.
+
+Each gate records: native UI present? adapter method; current/available/resulting version; restart behavior; data/session preservation; rollback; three-version retention; and proof that no NixOS rebuild or reboot occurred.
 
 ---
 
@@ -788,6 +862,8 @@ Everything below is development or substantial adaptation. Unlisted development 
 | M25 | DMS DisplayConfig adaptation | M | §5.2 |
 | M26 | Sudo session switch | S–M | §7.5 |
 | M27 | Deterministic two-pane snap orchestration, surplus minimization, pair dissolution/restoration | M | §6.2 |
+| M28 | Native application update bridge: stable per-app roots/profiles, vendor/package adapters, native updater handoff/detection, app-local activation/rollback and three-version retention | **L** | §8.8 |
+| M29 | Broad writing-suggestion layer: native spell menus + selected standard input-method candidate service, secure-field exclusion, custom dictionary and per-app controls | **M** | §8.4/§5.8 |
 
 Explicitly **not built as final architecture:** DMS as the primary rail; iNiR/top-bar task buttons; top-bar pinned/running/minimized apps; Caelestia duplicate rail status stack; omarchy `special:min-*`; a second palette authority; a QuickShell per-window-button overlay; `slurp` capture/record geometry; drag-to-edge Aero glue unless separately approved.
 
@@ -803,10 +879,10 @@ Each stage ends at a gate; later-stage work may proceed in isolated worktrees, b
 - **Stage 3 — Ilyamiro top widget bar + independent expansions.** M1–M4 and M8: nearly source-faithful top composition, workspace 3+ model, media/EQ, clock/weather, system widgets/panels. At this gate Alex views completed top+left together and chooses the default rail visibility; persistent and immediate hover-reveal remain configurable.
 - **Stage 4 — Wallpaper & theme pipeline.** skwd, SkwdBridge, palette transaction/templates, imports, and the explicitly moved glass A/B gate.
 - **Stage 5 — Desktop layer + clipboard + polkit + switcher.** M15–M16, desktop menu, Hyprexpo and supporting surfaces. The rail app stack is no longer deferred here.
-- **Stage 6 — Files & apps.** Dolphin suite, apps, portals, MIME, install/update lanes.
+- **Stage 6 — Files, apps, native updates & writing assistance.** Dolphin suite, apps, portals and MIME; M28's Windows-equivalent native in-app update bridge and proven-exception graphical fallback; app-local rollback/three-version retention; M29's broad replacement-suggestion layer and physical coverage gate. Ordinary app updates must not require a NixOS rebuild, reboot, terminal, global notification or central updater when native UI exists.
 - **Stage 7 — Boot & lock.** Plymouth, greeter/keyring, composite lock and suspend/lid gates.
 - **Stage 8 — Dev workspace & agents.** Full agent workspace and responsiveness gate.
-- **Stage 9 — Guardrails & Nexus completion.** System guardrails and Nexus pages. No dashboard UI is built; resource/calendar/weather depth already lives in approved top expansions, Nexus, and sysmon.
+- **Stage 9 — Guardrails & Nexus completion.** System guardrails and Nexus pages, including the OS-generation updater/rollback page, writing-assistance settings and the graphical Applications & updates fallback **only** for apps proven to lack native Linux updater UI. No dashboard UI is built; resource/calendar/weather depth already lives in approved top expansions, Nexus, and sysmon.
 - **Stage 10 — Hardware truth & polish.** Remaining hardware/bonus acceptance and known-good pin.
 
 **Batch rule:** before every expensive build the PM publishes the closure manifest. Build time is used for compatible work in the current stage and isolated later-stage work. Gen 27 from the 2026-07-29 session is a valid compile/staging milestone but not the final Stage 2 candidate because it predates the approved snap/minimize/rail/focus decisions.
@@ -830,6 +906,7 @@ summaries plus the testable specifics, which must not be lost in condensation.
   `false`; the optional `decoration:glow` rim accent; actual wallpaper visibility
   through the surfaces; and Alex's physical visual approval. Stage 4 cannot close
   without it.
+- **Agent CLI ownership/PATH persistence is pulled into the next compatible closure.** The live evidence shows Claude Code 2.1.220 still installed under `~/.local`, while the rebuilt environment resolves the older npm-global 2.1.211 first. Correct deterministic ownership now; do not wait for Stage 6 or Stage 8. This correction shares the next already-required build/reboot and adds current-shell/fresh-terminal/fresh-login/post-reboot version checks to its gate; it does not justify a standalone generation.
 - **Clipboard surface remains Stage 5**, placement unchanged, and is committed
   scope — `cliphist` + `wl-clipboard` ingestion, the iNiR service/panel, the ilyamiro
   grid/morph presentation, `Super+V`, a clickable bar/System entry, and persistent
@@ -856,6 +933,9 @@ Record in `EXECUTION_LOG.md` with the active generation and operator-decision nu
 14. Four-finger up opens Hyprexpo Overview; the Caelestia dashboard UI and its edge/gesture triggers are retired.
 15. Aurora is the project/shell codename, not a palette; the teal/purple/green preset is named Northern Lights.
 16. Auto theme is dark-preferred but switches to light for clearly light wallpapers; the entire semantic palette and every supported consumer recolor coherently.
+17. Native Linux updater UI is the primary and required app-update surface wherever it exists; the invisible bridge adapts Nix/package state to that UI. A graphical fallback is allowed only for a proven no-native-updater application, never a terminal.
+18. Independent apps retain current + two previous binary versions maximum and update/roll back without a NixOS rebuild or reboot.
+19. Writing assistance requires actionable replacement suggestions across standard daily text fields; passive red underlines alone do not satisfy Stage 6.
 
 ---
 
@@ -885,6 +965,8 @@ Optional layer (in the plan, first to cut):
 6. **Minimize/snap:** same-workspace minimized state, left-rail recovery, deterministic two-pane pair with surplus minimize.
 7. **Lock:** agridyne visual direction + Vast engine + selected ilyamiro interaction/motion + DMS lifecycle/status donors.
 8. **Lid, agents, protected state:** existing §8 decisions remain unchanged.
+9. **Application updates:** native app-owned UI first, invisible per-app Nix/vendor bridge underneath, graphical fallback only after proving no native Linux updater, three-version cap.
+10. **Writing assistance:** native replacement menus plus one standard input-method candidate layer for broad practical coverage; secure fields excluded and limitations documented by actual app testing.
 
 ---
 
@@ -939,7 +1021,7 @@ Optional layer (in the plan, first to cut):
 
 ### 13.4 Named utility layer
 
-nix-software-center/`nh`/`nvd`, restic, udiskie, systembus-notify, gpu-screen-recorder, t2fanrd, hyprsunset, hyprpicker, tesseract, zellij, fzf/bat/fd, Starship, LazyVim, regreet/tuigreet and plocate keep only the roles assigned in their sections; no utility becomes a surface owner by convenience.
+nix-software-center/`nh`/`nvd`, the invisible per-app update bridge and its app-specific adapters, the selected input-method candidate service, restic, udiskie, systembus-notify, gpu-screen-recorder, t2fanrd, hyprsunset, hyprpicker, tesseract, zellij, fzf/bat/fd, Starship, LazyVim, regreet/tuigreet and plocate keep only the roles assigned in their sections; no utility becomes a surface owner by convenience. The app-update bridge is backend infrastructure, never a universal replacement UI.
 
 **Palette-specific ownership:** patched caelestia engine = semantic authority; skwd = wallpaper/trigger; iNiR + agridyne = consumer mapping/cohesion donors; Hellwal = fallback; Matugen = not system authority. Aurora is only the project codename; Northern Lights is one optional preset.
 
@@ -951,7 +1033,7 @@ A1→§2.1/§5.1 · D1→§2.1 (comparison run, drawers win) · D2→§5.9 (stag
 
 ## 15. BUG LOG TRACEABILITY (§5 of MASTER → where it dies)
 
-Input: DWT→§6.2 hwdb · repeat/scroll→§6.2 · pointer-scroll focus→§6.2 `follow_mouse=2` · gestures/pinch→§6.2. Windows: drag jump→§6.2 patch · corner resize→§6.2 mandatory patch · third-window/two-pane behavior→§6.2 deterministic pair · minimize/recovery→§5.3/§6.2 same-workspace rail · workspace bloat→§5.1 dynamic 3+ · move-between-workspaces→§5.1/§6.2 cross-surface drag. Bars/panels: app duplication→§5.1 removed · rail status duplication→§5.1 removed · ilyamiro source fidelity→§5.1–§5.2/§5.9 · calendar/dashboard duplication→§5.1/§5.4 retired · CPU/RAM distinction→§5.1 · capture actions→§5.7. Visual: glass→§3.2/Stage4 · full wallpaper-derived light/dark palette→§3–§4 · lock source ownership→§5.10 · motion→§3.3. Capture: pink film/slurp→§5.12 · region/full paths→§5.12. Launcher/files/notifications remain in their existing sections.
+Input: DWT→§6.2 hwdb · repeat/scroll→§6.2 · pointer-scroll focus→§6.2 `follow_mouse=2` · gestures/pinch→§6.2. Windows: drag jump→§6.2 patch · corner resize→§6.2 mandatory patch · third-window/two-pane behavior→§6.2 deterministic pair · minimize/recovery→§5.3/§6.2 same-workspace rail · workspace bloat→§5.1 dynamic 3+ · move-between-workspaces→§5.1/§6.2 cross-surface drag. Bars/panels: app duplication→§5.1 removed · rail status duplication→§5.1 removed · ilyamiro source fidelity→§5.1–§5.2/§5.9 · calendar/dashboard duplication→§5.1/§5.4 retired · CPU/RAM distinction→§5.1 · capture actions→§5.7. Visual: glass→§3.2/Stage4 · full wallpaper-derived light/dark palette→§3–§4 · lock source ownership→§5.10 · motion→§3.3. Capture: pink film/slurp→§5.12 · region/window/full toolbar and focus restoration→§5.12. Lifecycle/QoL: agent version shadowing→§8.7–§8.8/Stage2 clarification · native app updates and three-version retention→§8.8/Stage6 · actionable typo suggestions→§8.4/Stage6/Stage9. Launcher/files/notifications remain in their existing sections.
 
 ---
 
