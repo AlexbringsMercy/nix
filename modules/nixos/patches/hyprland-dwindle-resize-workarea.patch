@@ -1,0 +1,19 @@
+--- a/src/layout/algorithm/tiled/dwindle/DwindleAlgorithm.cpp
++++ b/src/layout/algorithm/tiled/dwindle/DwindleAlgorithm.cpp
+@@ -310,8 +310,14 @@
+     static auto PSMARTRESIZING = CConfigValue<Config::INTEGER>("dwindle:smart_resizing");
+ 
+     // get some data about our window
+-    const auto PMONITOR         = m_parent->space()->workspace()->m_monitor;
+-    const auto MONITOR_WORKAREA = PMONITOR->logicalBoxMinusReserved();
++    // The dwindle node tree tiles CSpace::workArea(), which is the monitor's logicalBoxMinusReserved()
++    // *inset by general:gaps_out* (CSpace::recheckWorkArea). Measuring the edge tests against the
++    // un-inset monitor box makes every STICKS() comparison miss by exactly gaps_out, so with any
++    // gaps_out >= 2 all four DISPLAY* flags are permanently false. That silently disables the
++    // "this edge is a work-area edge, so use the opposite border instead" fallbacks below, and a corner
++    // grab whose side lies on the work-area boundary then contributes no axis at all.
++    // CWindowTarget::updatePos already measures the identical flags against space()->workArea().
++    const auto MONITOR_WORKAREA = m_parent->space()->workArea();
+     const auto BOX              = target->position();
+     const bool DISPLAYLEFT      = STICKS(BOX.x, MONITOR_WORKAREA.x);
+     const bool DISPLAYRIGHT     = STICKS(BOX.x + BOX.w, MONITOR_WORKAREA.x + MONITOR_WORKAREA.w);

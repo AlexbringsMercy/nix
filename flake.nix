@@ -37,6 +37,7 @@
           patches = (old.patches or [ ]) ++ [ # Aurora: retain any nixpkgs patches before applying the local compositor fixes.
             ./modules/nixos/patches/hyprland-drag-anchor.patch # Aurora: preserve the normalized grab anchor when a tiled window floats on pickup.
             ./modules/nixos/patches/hyprland-deco-border-grab.patch # Aurora: measure the resize band from the reserved box so corners outside a reserved decoration stay grabbable.
+            ./modules/nixos/patches/hyprland-dwindle-resize-workarea.patch # Aurora: measure dwindle's edge-stick flags against the work area the nodes actually tile, so tiled corner grabs move both axes.
           ]; # Aurora: finish the additive Hyprland patch list.
         }); # Aurora: finish the patched Hyprland derivation.
       }; # Aurora: share one compositor override across standalone Home Manager and NixOS evaluation.
