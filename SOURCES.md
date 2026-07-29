@@ -10,6 +10,17 @@ upstream repository plus path. Reconciled against GRAND_PLAN.md §13 on 2026-07-
 | aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim; aurora scheme defaults (ladder pinned, dark default, accent families); Stage 1C cutover — HM module renamed to `programs.aurora-shell` + unit `aurora-shell` (§2.2 hardening, `KillMode=process`), dunst fallback keeper carried with a static `assets/fallback-dunstrc`, write-if-absent `assets/aurora-scheme.json` state seed. <!-- # Aurora: Stage 1B/1C local delta. --> |
 | window-minimize | `github.com/OnlyLyan/omarchy-desktop-shell` | `05-hyprbars-titlebar/files/window-minimize` | `scripts/window-minimize` | Vendored **verbatim** (upstream now cloned to `repos/omarchy-desktop-shell`); only an attribution header added — runtime deps come from the `writeShellApplication` wrapper. The same repo's `hyprbars.conf` traffic-light button values (red/yellow/green ✗/⌄/◇) are used in `modules/home/hyprland/hyprbars.lua.in`, translated to the native-Lua `hl.plugin.hyprbars.add_button` API. (Stage 2A) |
 
+## Bespoke plugins
+
+| Plugin | Source | Built against | Why it exists |
+|---|---|---|---|
+| `aurora-minimize` | `modules/home/hyprland/aurora-minimize/` — written for this build, not adapted from an upstream | ABI-pinned via `pkgs.hyprlandPlugins.mkHyprlandPlugin` against the patched Hyprland 0.55.4; verified to consume the **same** `hyprland-0.55.4-dev` output as `hyprbars` | The final same-workspace minimize backend, replacing the rejected `special:min-<address>` approach (decision 20 item 13). It reuses the compositor's own primitives — `setHidden()` plus `CLayoutManager::removeTarget()`/`newTarget()`, exactly the pair `Actions::toggleSwallow()` already ships — so a minimized window leaves render/input/layout while **retaining its original workspace**, because `m_workspace` is read and never written. Registers three surfaces: Lua `hl.plugin.auroraminimize.minimize/restore` (consumed by `keybinds.lua`), `addDispatcherV2` entries, and — the form the shell actually uses — `registerHyprCtlCommand` for `hyprctl aurora:minimize [addr]` / `hyprctl aurora:restore <addr>`. The plain `hyprctl dispatch` route is unusable here: under native-Lua config `HyprCtl.cpp:1107-1109` rewrites `dispatch X` into `hl.dispatch(X)`, which needs a Lua callable, not a bare name. |
+
+Prior art note: every public Hyprland minimize tool surveyed (hych, minhypr, pyprland)
+uses the special-workspace trick this build rejects. The primitives here are
+long-standing compositor internals, but this composition of them is not
+community-proven and is treated as requiring a live-test pass.
+
 ## Carried compositor and plugin patches
 
 Narrow, isolated patches carried against pinned upstreams. Each is justified by a

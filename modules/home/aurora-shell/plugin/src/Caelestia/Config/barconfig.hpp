@@ -142,6 +142,11 @@ class BarConfig : public ConfigObject {
         {
             vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
+            // Aurora: the Stage 2 left-rail application slice — pinned apps plus
+            // current-workspace running/minimized windows with grouped previews.
+            // Sits directly under the launcher/workspaces so the app stack owns the
+            // upper rail and the spacers below push status to the bottom.
+            vmap({ { u"id"_s, u"appRail"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),

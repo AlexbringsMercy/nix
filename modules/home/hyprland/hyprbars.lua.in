@@ -1,3 +1,11 @@
+-- Aurora: load the same-workspace minimize/restore plugin (hl.plugin.auroraminimize.*,
+-- the aurora:minimize/aurora:restore dispatchers and hyprctl commands) before
+-- hyprbars, so the titlebar minimize button below can reference it. Loaded
+-- from this file rather than a new hyprland.lua require: hyprland.lua's own
+-- require("hyprbars") already reaches this file on every Hyprland (re)start,
+-- and hyprland.lua is outside this session's owned files.
+hl.plugin.load("@AURORA_MINIMIZE_PLUGIN@")
+
 -- Aurora: load hyprbars from its ABI-matched Nix store output before configuring it.
 hl.plugin.load("@HYPRBARS_PLUGIN@")
 
@@ -48,5 +56,13 @@ hl.plugin.hyprbars.add_button({
     fg_color = "rgb(aab6c8)",
     size = 24,
     icon = "󰖰",
-    action = "window-minimize" -- Aurora: the vendored omarchy script (its internals now use 0.55 lua dispatch).
+    -- Aurora: hyprbars button clicks always shell out (barDeco.cpp:
+    -- g_pKeybindManager->m_dispatchers["exec"](b.cmd), no address token/
+    -- substitution of any kind -- verified against source, buttons are a flat
+    -- global list shared by every titlebar). No address argument is needed
+    -- here regardless: barDeco.cpp's onMouseButton() focuses this bar's own
+    -- owner window (Desktop::focusState()->fullWindowFocus(...)) BEFORE
+    -- doButtonPress() runs the click, so "active window" (the omitted-address
+    -- default) is always this titlebar's own window at click time.
+    action = "hyprctl aurora:minimize"
 })

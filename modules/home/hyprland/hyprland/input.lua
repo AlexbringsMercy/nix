@@ -3,7 +3,7 @@ hl.config({
         kb_layout = "us",
         repeat_delay = 350, -- Aurora: slow the initial repeat to the Stage 2 input target.
         repeat_rate = 22, -- Aurora: keep held-key repeat controlled rather than runaway-fast.
-        follow_mouse = 0, -- Aurora: require a click so pointer travel cannot retarget window actions.
+        follow_mouse = 2, -- Aurora: pointer scroll/interaction goes to the hovered window; keyboard focus stays on the last clicked window and only a click moves it.
         focus_on_close = 2, -- Aurora: return focus to the most-recent window after a close.
         sensitivity = 0.05,
         accel_profile = "adaptive",

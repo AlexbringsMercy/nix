@@ -11,6 +11,19 @@ import Caelestia.Config
 import qs.components
 import qs.services
 
+// Aurora: the left rail carries the Stage 2 application slice (`appRail` —
+// pinned apps plus current-workspace running/minimized windows with grouped
+// previews, see components/AppRail.qml) ALONGSIDE the stock status entries.
+//
+// The end-state architecture moves workspaces/tray/clock/statusIcons/power to
+// the ilyamiro top bar (GRAND_PLAN.md §10.2 items 1-2), and the rail drops them
+// then. They are RETAINED here until that top bar actually ships, because it
+// lives on branch `stage3/topbar` and is deliberately not in the Stage 2
+// closure — removing them now would delete the only clock, tray, status and
+// power menu on the machine rather than de-duplicating anything. They retire
+// WITH the top bar, not before. Same rule that keeps special:min-* visible
+// until its replacement exists.
+
 ColumnLayout {
     id: root
 
@@ -128,6 +141,17 @@ ColumnLayout {
                     }
                 }
             }
+            DelegateChoice {
+                roleValue: "appRail"
+                delegate: EntryWrapper {
+                    AppRail {
+                        objectName: "taskbarAppRail"
+                        screen: root.screen
+                        bar: root
+                    }
+                }
+            }
+
             DelegateChoice {
                 roleValue: "workspaces"
                 delegate: EntryWrapper {

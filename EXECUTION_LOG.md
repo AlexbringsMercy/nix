@@ -2115,3 +2115,218 @@ will block the Stage 5 desktop-layer gate unless resolved. **Requires an operato
 decision before Stage 5**: adopt `hyprspace`, adopt `hycov`, source Hyprexpo from
 upstream outside nixpkgs, or drop the overview requirement. **No substitution has
 been made and none is implied.**
+
+---
+
+### Finding 20c — Stage 2 implementation calls, 2026-07-29
+
+**Active generation:** 26 (nothing built or deployed for this batch yet)
+
+**`Super+K` / dashboard binding — RETAINED, reversing an implementation session's
+removal.** The snap session removed `Super+K` → `caelestia:dashboard` on the grounds
+that the dashboard is retired architecture (decision 20 item 19), and correctly
+surfaced the conflict with `STAGE2_CLOSEOUT_WORK_ORDER.md`, which had logged that
+bind as "not fixed here". **PM verified the actual state of the machine rather than
+the paperwork:** `modules/home/aurora-shell/modules/dashboard/` still contains **24
+QML files** and `hyprctl globalshortcuts` still registers **`caelestia:dashboard`**
+— the surface is retired on paper only. Removing the bind now would delete the sole
+access path to calendar/media/performance/weather with **no replacement until the
+Stage 3 top bar ships**. That is the same class of error the operator caught when
+hiding `special:min-*` before the taskbar existed would have made minimize a one-way
+trip. **The bind is restored, with an in-file comment recording that it retires
+*with* the Stage 3 top bar, not before.** No requirement is narrowed; a functional
+regression is avoided.
+
+**Minimize interface contract — PM contract is authoritative.** The research report
+suggested `minimizewindow`/`restorewindow`; the PM instead fixed the contract as
+`hl.plugin.auroraminimize.minimize/restore` plus `aurora:minimize`/`aurora:restore`
+dispatchers, **before** launching the dependent sessions, so the snap and rail work
+could proceed in parallel instead of serialising behind the plugin. The snap session
+coded to the PM contract and guarded the calls so an unloaded plugin no-ops rather
+than erroring. The plugin session was given the same contract and instructed to stop
+and report rather than silently substitute. **If the delivered plugin differs, only
+two Lua functions need updating — the rest is decoupled.**
+
+**Snap poll cost — checked, acceptable.** The 400 ms repeat timer runs
+**in-process** (`hl.timer` → `reconcile_all_pairs`); it does not spawn `hyprctl`.
+With no active pair it iterates an empty table inside one `pcall`, so idle cost on
+this dual-core machine is negligible. No change made.
+
+**Known limitation, recorded not hidden:** snap pair bookkeeping lives in
+module-level Lua tables and **does not survive `hyprctl reload` or a Hyprland
+restart**. Physical windows are unaffected — minimized state lives in the compositor
+(`setHidden`), not in Lua — so **no window is stranded or lost**, and surplus windows
+remain restorable from the rail. What is lost is only the pair association, meaning
+a post-reload arrow press starts a fresh pair. **This becomes a gate row rather than
+a silent assumption.**
+
+**`follow_mouse = 2` verified from source, not from documentation habit.**
+`ConfigValues.cpp:294-295` maps the option
+`{disabled:0, follow:1, detached:2, separate:3}` — mode 2 is the named **detached**
+mode, which is exactly the required "pointer scroll follows hover, keyboard focus
+stays click-controlled" behaviour.
+
+**Build economy confirmed by evaluation, not assumption:** with the config changes
+applied, `nixosConfigurations.macbook.pkgs.hyprland.drvPath` still evaluates to
+`sga9ci25…-hyprland-0.55.4.drv`, whose output `wrz9r718…` is already valid in the
+store. **The final Stage 2 build will not recompile Hyprland or Hyprbars**, per
+decision 20 item 23.
+
+---
+
+### Finding 20d — Hyprexpo resolved: retired upstream, community continuation exists
+
+**Date/time:** 2026-07-29
+**Active generation:** 26
+**Status:** FINDING — the sourcing gap flagged three times is now explained
+
+Finding 20b recorded that Hyprexpo was absent from the pinned `hyprland-plugins`
+checkout, from `repos/` and from nixpkgs entirely, and that the gap had already been
+raised twice in earlier prompts without resolution.
+
+**Cause found:** Hyprexpo was **retired from upstream `hyprwm/hyprland-plugins`
+around May 2026** (tracked upstream as `hyprwm/hyprland-plugins#672`). The pinned
+checkout is commit `90e66ba` dated 2026-05-13, and its own README plugin list omits
+hyprexpo — only a stale example snippet still references it, which is why every
+previous search found the name but never the code. **It is not missing from our
+sources by mistake; it no longer exists there.**
+
+**A maintained community continuation exists** at `github.com/sandwichfarm/hyprexpo`,
+installable via `hyprpm add`.
+
+**Operator position, already given:** the requirement stands — four-finger-up opens
+Hyprexpo Overview, with a visible mouse path. That is not reopened.
+
+**Implementation status:** the Stage 3 top bar builds the **mouse entry point** (a
+`grid_view` button beside the workspace pills, with hover label) dispatching the
+plugin's real `hyprexpo:expo toggle` verb. It is **inert until a plugin build is
+added** and is deliberately **not wired to a substitute** — `hyprspace` and `hycov`
+exist in nixpkgs and were **not** silently swapped in.
+
+**Owed before the Stage 5 gate:** package the community continuation as an
+ABI-pinned plugin, exactly as `hyprbars` and `aurora-minimize` are built. This is a
+new third-party source and must be recorded in `SOURCES.md` when adopted. **Not
+Stage 2 scope; no substitution has been made.**
+
+---
+
+### Stage 3 progress — isolated worktree, stage-pure
+
+**Branch `stage3/topbar`**, worktree `/home/alex/aurora-stage3`, pushed. **Verified
+isolation:** the Stage 2 tree contains zero topbar files; the worktree diff is
+`shell.qml` (+5 lines) plus the new `modules/topbar/` tree. **Nothing from Stage 3
+enters the Stage 2 closure** (decision 20 item 24).
+
+23 QML files, 11 islands, 8 expanded panels, built after reading ilyamiro's
+`TopBar.qml` (1567 lines) and `Main.qml` (531 lines) in full and viewing all 16
+preview images **before** any composition decision — the discipline
+`SESSION_PREAMBLE.md` exists to enforce. Data is bound to caelestia's real services
+rather than stubs. **No app tasks on the top bar; no dashboard UI rebuilt.**
+
+Stubbed and flagged rather than silently dropped: the radial Bluetooth
+constellation, the battery-ring composite, media width-morph, workspace overflow.
+
+---
+
+### Finding 20e — rail status entries restored; a severe regression caught pre-build
+
+**Date/time:** 2026-07-29
+**Active generation:** 26 (nothing deployed)
+**Status:** FINDING — PM reversal, second of the same class today
+
+The rail implementation session pruned `Bar.qml`'s rendered entries to
+`logo` + `appRail`, **deleting the `DelegateChoice` blocks** for `workspaces`,
+`activeWindow`, `tray`, `clock`, `statusIcons`, `power` and `spacer`, and stubbing
+`closeTray()`/`checkPopout()` to no-ops. It was following its brief, which required
+the rail to carry no duplicated system-status stack.
+
+**That instruction was conditioned on the replacement existing. It does not.** The
+ilyamiro top bar lives on branch `stage3/topbar` in an isolated worktree and is
+**deliberately not in the Stage 2 closure** (decision 20 item 24). On the machine
+Alex would actually boot, this deleted the only copy rather than de-duplicating
+anything.
+
+**Concretely, deploying it would have cost, with nothing in their place:** the
+system tray and every tray application, the clock, network/Bluetooth/audio/battery
+status and their popouts, the workspace indicator, and **the power menu — no GUI
+logout, shutdown or reboot.**
+
+**This is the third instance of the same error class on this project**, and the
+second today: the operator caught it when hiding `special:min-*` before the taskbar
+existed would have made minimize a one-way trip; the PM caught it earlier today on
+the `Super+K` dashboard bind (finding 20c); and now here. **"Retired in the
+architecture" is not "replaced on the machine."**
+
+**Resolution.** Rather than patch the pruned file, `Bar.qml` was restored from
+`HEAD` — a known-good base — and the `appRail` delegate re-added additively, so the
+app rail now renders **alongside** the full status stack. `appRail` was added to the
+`entries` default in
+`modules/home/aurora-shell/plugin/src/Caelestia/Config/barconfig.hpp`, positioned
+directly under logo/workspaces so the app stack owns the upper rail and the existing
+spacers push status to the bottom. The in-file comment now states the truth: the
+status entries are **retained until the Stage 3 top bar ships and retire with it**,
+not before.
+
+**Nothing built by that session was discarded** — `AppRail.qml`, `RailTile.qml`,
+`RailGroupPreview.qml`, the `PopoutState.qml` properties and the `Content.qml`
+popout case all stand, including its correct handling of the mid-flight IPC
+correction and its visible-failure toast for a restore that returns
+`unknown request` while the plugin is unbuilt.
+
+**Verified after the reversal:** all eight entry ids have both a delegate and a
+default entry; `qmlformat` parses `Bar.qml`, `AppRail.qml`, `RailTile.qml`,
+`RailGroupPreview.qml`, `PopoutState.qml`, `Content.qml`, `Screenshotter.qml` and
+`Picker.qml` cleanly.
+
+**Consequence for the gate:** a row is added requiring that clock, tray, status
+icons and the power menu are all still present and working after the reboot. That
+check now exists precisely because this nearly shipped.
+
+---
+
+### Decision 21 — No surface is removed before its replacement is live
+
+**Date/time:** 2026-07-29
+**Active generation:** 26
+**Stage:** standing rule, applies to every stage
+**Status:** APPROVED / BINDING
+
+**Original requirement:** `GRAND_PLAN.md` describes end-state ownership — the top
+bar owns system status, the rail owns applications, the dashboard UI is retired,
+`special:min-*` is rejected. Those statements are about the finished desktop.
+
+**Operator decision:** *"yes thats corrrect"* — approving the PM's proposed standing
+rule: **no surface may be removed until its replacement is live in the same
+closure.** "Retired in the architecture" is not "replaced on the machine."
+
+**Reason.** Three separate sessions each deleted a still-load-bearing surface while
+**correctly following a brief that described the end state**:
+
+1. `special:min-*` workspace visibility, before the taskbar existed — would have made
+   minimize a one-way trip. **Caught by the operator.**
+2. The `Super+K` dashboard bind — the dashboard UI is retired on paper but is still
+   24 QML files with a live registered global, and the replacement widgets arrive
+   with the Stage 3 top bar. **Caught in PM review** (finding 20c).
+3. The rail's `workspaces`/`tray`/`clock`/`statusIcons`/`power` entries — the top bar
+   that replaces them is on branch `stage3/topbar` and is not in the Stage 2 closure.
+   Would have shipped a desktop with no tray, no clock, no status and **no GUI
+   shutdown**. **Caught in PM review** (finding 20e).
+
+The agents were not at fault. **The briefs were** — each stated the end state as
+though it were the current target. That is a PM defect and is now corrected at the
+source.
+
+**Plan impact:**
+- Recorded in `PM_OPERATING_RULES.md` §2 as a binding rule.
+- **Every agent brief must state the *current* target, not the end state**, and must
+  name explicitly what may not be removed yet.
+- Anything retained past its architectural retirement carries an in-file comment
+  naming the stage that retires it, so it is removed on schedule rather than
+  forgotten.
+
+**Revisit trigger:** none — final. The operator may still direct a specific early
+removal case by case, accepting the interim loss knowingly.
+
+**Acceptance condition:** the concrete test, applied before any removal ships:
+**after this closure boots, can the user still do the thing the removed surface
+did?** If not, it stays.

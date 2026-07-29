@@ -127,6 +127,17 @@ Item {
             sourceComponent: LockStatus {}
         }
 
+        Popout {
+            // Aurora: the left rail's grouped exact live-preview popout
+            // (GRAND_PLAN.md §5.3 requirement 6). Triggered locally by
+            // modules/bar/components/AppRail.qml, not by this Content's own
+            // hit-testing — see that file for the hover/click contract.
+            name: "railgroup"
+            sourceComponent: RailGroupPreview {
+                popouts: root.popouts
+            }
+        }
+
         Repeater {
             model: ScriptModel {
                 values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))

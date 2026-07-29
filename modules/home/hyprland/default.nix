@@ -14,24 +14,24 @@ let
     patches = [ ./patches/hyprbars-hover.patch ]; # Aurora: add the audited hover-highlight implementation.
   }); # Aurora: finish the ABI-matched patched hyprbars derivation.
 
-  hyprbarsLua = pkgs.writeText "aurora-hyprbars.lua" ( # Aurora: generate a Lua module containing the immutable plugin store path.
-    builtins.replaceStrings [ "@HYPRBARS_PLUGIN@" ] [ "${patchedHyprbars}/lib/libhyprbars.so" ] ( # Aurora: load the locally patched, ABI-matched hyprbars output.
+  patchedAuroraMinimize = pkgs.hyprlandPlugins.mkHyprlandPlugin { # Aurora: same ABI-pinned builder patchedHyprbars relies on (hyprlandPlugins.mkHyprlandPlugin links against topLevelArgs.hyprland's own stdenv/buildInputs), applied to our own bespoke source instead of an overridden upstream plugin.
+    pluginName = "aurora-minimize"; # Aurora: same-workspace minimize/restore dispatchers + Lua bindings; generalizes Hyprland's own toggleSwallow mechanism (see aurora-minimize/main.cpp).
+    version = "0.1";
+    src = ./aurora-minimize; # Aurora: bespoke Aurora glue, not vendored -- CMakeLists.txt mirrors hyprbars' own module list.
+    inherit (pkgs.hyprland) nativeBuildInputs; # Aurora: pin the build toolchain (cmake, ninja, ...) to the exact compositor build's own inputs, matching patchedHyprbars.
+    meta = with pkgs.lib; {
+      description = "Aurora same-workspace minimize/restore plugin for Hyprland";
+      platforms = platforms.linux;
+    };
+  }; # Aurora: finish the ABI-matched aurora-minimize derivation.
+
+  hyprbarsLua = pkgs.writeText "aurora-hyprbars.lua" ( # Aurora: generate a Lua module containing the immutable plugin store paths.
+    builtins.replaceStrings
+      [ "@HYPRBARS_PLUGIN@" "@AURORA_MINIMIZE_PLUGIN@" ]
+      [ "${patchedHyprbars}/lib/libhyprbars.so" "${patchedAuroraMinimize}/lib/libaurora-minimize.so" ] ( # Aurora: load both locally built, ABI-matched plugin outputs.
       builtins.readFile ./hyprbars.lua.in # Aurora: preserve the readable Lua source outside the recursively deployed tree.
     ) # Aurora: finish the template substitution input.
   ); # Aurora: publish the generated early-load module.
-
-  windowMinimize = pkgs.writeShellApplication { # Aurora: package the per-window special-workspace minimize helper.
-    name = "window-minimize"; # Aurora: give hyprbars and the restore bind one stable command name.
-    runtimeInputs = with pkgs; [ # Aurora: provide every external command used by the vendored behavior.
-      coreutils # Aurora: state-file creation and LIFO selection.
-      hyprland # Aurora: query clients and dispatch silent workspace moves.
-      jq # Aurora: parse active-window and live-client JSON.
-      gawk # Aurora: field extraction in the upstream LIFO restore path.
-      gnused # Aurora: strip blank lines when rewriting the store file.
-      gnugrep # Aurora: match minimized addresses against the live client set.
-    ]; # Aurora: close the minimize helper runtime set.
-    text = builtins.readFile ../../../scripts/window-minimize; # Aurora: keep the community-derived behavior reviewable in scripts/.
-  }; # Aurora: finish the minimize helper package.
 
   # Aurora: the interim screenshot-area / screenshot-full wrappers are retired.
   # Both capture paths now live in the shell (aurora-shell modules/areapicker),
@@ -51,7 +51,6 @@ in
 {
   home.packages = [
     auroraResumeAgent
-    windowMinimize # Aurora: place minimize/restore on PATH for hyprbars and keybinds.
   ];
 
   # systemd's graphical-session targets intentionally refuse direct manual

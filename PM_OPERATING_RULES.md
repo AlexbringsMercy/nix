@@ -57,6 +57,21 @@ Two things sit outside the ranking because they are absolute:
   (governance rule 2).
 - Do not proceed through a failed or incomplete gate.
 - Do not cut an intended feature to remove an error.
+- **No surface may be removed until its replacement is live in the same closure.**
+  (Decision 21, 2026-07-29 — operator-approved standing rule.) "Retired in the
+  architecture" is **not** "replaced on the machine." A plan can declare a surface
+  retired years before the thing that replaces it exists; deleting it early does not
+  de-duplicate anything, it deletes the only copy. This applies to keybinds, panels,
+  status entries, scripts and packages alike.
+  **When briefing any agent, state the *current* target, not the end state** — this
+  rule exists because three separate sessions each removed a still-load-bearing
+  surface while correctly following a brief that described the end state:
+  `special:min-*` before the taskbar (caught by the operator), the `Super+K`
+  dashboard bind, and the rail's tray/clock/status/power entries (both caught in
+  review). The agents were not at fault; the briefs were.
+  The test is concrete: **after this closure boots, can the user still do the thing
+  the removed surface did?** If not, it stays, with an in-file comment naming the
+  stage that retires it.
 - Investigate before declaring something impossible. Configuration, community
   implementations, older upstream behaviour, and narrow patches all get
   investigated first. A single-lane search is a coverage report, not a fact.
