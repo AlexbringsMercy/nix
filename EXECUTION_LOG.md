@@ -1916,3 +1916,202 @@ carries a "Do not remove" annotation. Hardening it into
 `aurora-shell/nix/default.nix` would touch a vendored subflake and its lock
 mid-batch, which §3 of the work order warns against. **Owed as a later low-risk
 change.**
+
+---
+
+# ═══════════════════════════════════════════════════════════════════
+## OPERATOR DECISIONS — 2026-07-29 — ACTIVE GENERATION 26
+# ═══════════════════════════════════════════════════════════════════
+
+**Ground truth confirmed by the PM (read-only):** branch `codex/macbook-desktop`,
+HEAD `04cab49`, 0 ahead / 0 behind upstream, tree clean except the replacement
+`GRAND_PLAN.md`. `/run/current-system` = `/run/booted-system` =
+`/nix/var/nix/profiles/system` → **generation 26**. Zero failed system units, zero
+failed user units, Hyprland 0.55.4 with hyprbars loaded, **zero config errors**.
+
+**Generation 27 is a compile/staging milestone, not the Stage 2 candidate.** It
+was built and staged boot-only on 2026-07-28, but it predates the architecture
+decisions below. Per operator instruction it must not be booted.
+
+**PM action taken on this basis, before any other work:** generation 27 was the
+default boot target and the armed-resume flag was set, so any unplanned reboot —
+including one initiated by the concurrent seedbox lane — would have booted it and
+bypassed the gate. The profile was switched back to generation 26
+(`nix-env --switch-generation 26` + `switch-to-configuration boot`) and the resume
+flag was removed. Generation 27 remains a numbered generation and its store
+outputs remain valid, so **the patched compositor and ABI-matched hyprbars will be
+reused rather than recompiled**.
+
+---
+
+### Decision 20 — Corrected architecture, 2026-07-29
+
+**Status:** APPROVED / BINDING
+**Applies from:** 2026-07-29, generation 26
+**Source:** operator architecture correction; `GRAND_PLAN.md` replaced the same day
+and is authoritative. The full decision list is `GRAND_PLAN.md` §10.2; it is
+recorded here because conversation memory is not a decision record (decision 13).
+
+**Naming and palette**
+
+1. **Aurora is the project/shell codename only — it is not a colour scheme.**
+2. The teal/purple/green aurora-borealis palette is named **Northern Lights** and is
+   one preset/result, **not** the system default.
+3. Glass, cohesion, readability, geometry and motion **persist**; light/dark mode and
+   the entire semantic colour system **follow the wallpaper**.
+4. Auto mode is **dark-preferred** for dark/evening/shadowed wallpapers and **light**
+   for clearly light/high-key wallpapers.
+5. A dark red wallpaper must produce a cohesive **burgundy/oxblood/crimson system** —
+   not black glass with a red outline. A light cream/yellow wallpaper must produce a
+   coherent light cream/gold system with dark readable foregrounds.
+6. Every supported consumer recolours: top bar, left rail, panels, notifications,
+   lock, application chrome, terminal, file manager, borders, gradients, supported
+   applications.
+7. User theme control: **Auto from wallpaper / Force dark / Force light**.
+
+**Palette ownership** — skwd-wall renders/applies and emits the apply event →
+SkwdBridge opens one palette transaction → the project's **patched caelestia
+semantic generator** chooses auto-dark/auto-light and derives the complete semantic
+role set → atomic templates publish every consumer → `Colours.qml` animates the
+shell scheme. iNiR and agridyne supply consumer mappings and cohesion patterns.
+**Matugen is not the system-wide authority** (skwd-internal use may remain scoped to
+the picker UI). **Hellwal is fallback only.** The generator must recolour real
+surfaces and foregrounds, not merely accents.
+
+**Surface ownership**
+
+8. **Top bar — ilyamiro, nearly 1:1**: independent widget islands; three visible
+   workspace pills plus `+`, active extras shown responsively; media/now-playing/EQ;
+   centred clock/date/weather; tray/language, network, Bluetooth, audio, battery;
+   approved resources/System additions. **No pinned, running or minimized
+   applications.**
+9. **Left rail — the caelestia app/window surface**: launcher; pinned applications
+   always visible; running/minimized windows **from the current workspace only**;
+   minimized entries dimmed; exact live previews for multiple windows; one-click
+   focus/restore. **No duplicate workspace/calendar/tray/network/Bluetooth/audio/
+   battery stack.**
+10. Rail persistence versus immediate hover-reveal is decided **only after** the
+    completed top and left surfaces are viewed together. Both remain configurable.
+
+**Window model**
+
+11. **`follow_mouse = 2`** — pointer scrolling follows the hovered window; keyboard
+    focus remains click-controlled; clicking transfers keyboard focus normally.
+12. Minimized windows **retain original workspace identity** and leave layout,
+    render and input.
+13. **`special:min-*` is rejected as the final backend.**
+14. The **left rail is the mandatory one-click restore surface**; a hotkey is
+    optional redundancy only.
+15. `Super+Left` / `Super+Right` **always** mean exact left/right halves, regardless
+    of window count or layout.
+16. Snapping onto an occupied side **minimizes the previous side occupant**.
+17. Completing a left/right pair **minimizes all surplus same-workspace windows**.
+18. Restoring a surplus window, or dragging/unsnapping/maximizing/closing a pair
+    member, **dissolves the pair** and returns to ordinary tiling, preserving prior
+    state where possible. **No silent close or window loss.**
+
+**Retired dashboard**
+
+19. The Caelestia **dashboard UI is removed**: no drawer, no top-edge hover/swipe, no
+    duplicate calendar/media/performance/weather tabs. Reusable data/services may
+    still feed approved independent widgets, Nexus and sysmon. **Retiring the
+    dashboard UI is not retiring caelestia as a donor.**
+20. **Four-finger up opens Hyprexpo Overview**; a visible mouse path must also exist.
+
+**Lock** — a deliberate multi-source composition: agridyne primary visual
+composition; Vast depth planes and gated cinematic unlock; selected ilyamiro
+clock/PIN/motion details; iNiR/DMS status; DMS lifecycle/safety; Hyprlock emergency
+fallback only. **This must not be collapsed to a single owner.**
+
+**Workflow**
+
+21. Expensive builds start **only after a published frozen batch manifest**.
+22. One coherent build, one boot-only deployment, one reboot, one gate, unless
+    explicitly approved otherwise. Do not compile or stage a generation per small
+    config/script/QML/doc fix. A validation-only compile must name the uncertainty it
+    resolves and why cheaper static checks are insufficient.
+23. **Reuse existing Hyprland/Hyprbars store outputs when the source patch set is
+    unchanged.** Never trigger a compositor/plugin recompile merely because unrelated
+    configuration or shell code changed.
+24. Later-stage work may proceed in **isolated worktrees** during build/reboot/
+    operator waits; deployed closures remain **stage-pure**.
+25. **Sonnet-first** for narrow diagnosis, source location and straightforward
+    implementation. The PM reviews the evidence and escalates only when justified.
+26. **Pinch zoom is already physically PASS** and is not retested unless touched.
+
+**Acceptance condition:** `GRAND_PLAN.md`, `MASTER_REQUIREMENTS.md`,
+`STAGE2_CLOSEOUT_WORK_ORDER.md`, `PM_OPERATING_RULES.md`, `SOURCES.md` and
+`docs/stage-gates/stage2-closeout.md` all reflect these decisions, and the
+documentation correction is committed and pushed **before** implementation resumes.
+
+---
+
+### Finding 20a — same-workspace minimize backend: the mechanism already ships
+
+**Date/time:** 2026-07-29 02:40 CDT
+**Active generation:** 26
+**Status:** FINDING — PM-verified; satisfies decision 20 items 12–14 without
+offscreen hiding and without a special workspace
+
+The compositor already contains the exact primitive pair, and it is not a novel
+hack: `Actions::toggleSwallow()` (`src/config/shared/actions/ConfigActions.cpp`,
+verified by direct read) hides a window with `setHidden(true)` +
+`g_layoutManager->removeTarget(…->layoutTarget())`, and restores it with
+`setHidden(false)` + `g_layoutManager->newTarget(…, pWindow->m_workspace->m_space)`.
+It **reads** `m_workspace` rather than writing it — which is precisely why workspace
+identity survives, and precisely how this differs from the rejected
+`special:min-<address>` approach in `scripts/window-minimize`, which really does
+move the window.
+
+**Verified live on this machine, not inferred:** `hyprctl clients -j` already emits
+`"hidden"` and the real per-window `"workspace"` for every client. **The rail needs
+no new IPC** for the minimum viable version.
+
+**Verified reachability** (this project has already paid for a dispatcher that
+parsed and then failed at runtime under native-Lua config): `HL.PluginNamespace` in
+the compositor's own installed stub `share/hypr/stubs/hl.meta.lua` is declared
+`[string] any`, and hyprbars registers `hl.plugin.hyprbars.add_button` through
+`LuaBindingsInternal.hpp` — so a plugin can expose Lua-callable functions by the
+same route. The shell's rail click can also reach it over IPC independently of Lua.
+
+**Chosen implementation:** an ABI-pinned plugin built exactly as hyprbars already
+is, exposing minimize/restore. **This requires no compositor recompile**, because
+the Hyprland patch set is unchanged and its built output is reused — which is what
+decision 20 item 23 requires.
+
+**Honest costs recorded, not buried:**
+- Detaching a layout target removes it from `CSpace::m_targets`, so the **aggregate**
+  `hyprctl workspaces -j` window count under-counts a workspace holding only
+  minimized windows. The per-window `clients -j` listing stays correct. **The rail
+  and the workspace pills must query `clients`, never the `workspaces` aggregate,
+  for occupancy.** This also constrains the Stage 3 workspace-pill logic.
+- This specific application is **compositor-source-native but not
+  community-proven**: every public Hyprland minimize tool uses the special-workspace
+  trick. The underlying primitives are old and stable, but the composition must get
+  a live-test pass before the snap-surplus-minimize orchestration is trusted on it.
+
+---
+
+### Finding 20b — Hyprexpo does not exist in any source we have
+
+**Date/time:** 2026-07-29 02:40 CDT
+**Active generation:** 26
+**Status:** FINDING — logged, **not absorbed**; not Stage 2 blocking
+
+Decision 20 item 20 names Hyprexpo Overview. **Hyprexpo is not available**:
+
+- not in the pinned `hyprland-plugins` v0.55.0 checkout (`90e66baf`), which contains
+  only `hyprbars`, `hyprfocus`, `borders-plus-plus`, `csgo-vulkan-fix`;
+- not anywhere under `repos/`;
+- **not in nixpkgs' `hyprlandPlugins` at all.** The overview-class plugins nixpkgs
+  does expose are **`hyprspace`** and **`hycov`**.
+
+This gap was already flagged independently in `codex-prompts/stage2a-window-model.md`
+and `research/window-input.md` and was never resolved. **This is the third time it
+has been found.** It is recorded here so it stops resurfacing.
+
+**Impact:** none on Stage 2 — Hyprexpo is Stage 5 scope (`GRAND_PLAN.md` §10). It
+will block the Stage 5 desktop-layer gate unless resolved. **Requires an operator
+decision before Stage 5**: adopt `hyprspace`, adopt `hycov`, source Hyprexpo from
+upstream outside nixpkgs, or drop the overview requirement. **No substitution has
+been made and none is implied.**

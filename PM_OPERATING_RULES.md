@@ -65,6 +65,25 @@ Two things sit outside the ranking because they are absolute:
   in `SOURCES.md`.
 - Batch compatible fixes: **one build + one reboot per batch** (standing operator
   directive). Rebuild-per-fix has already wasted his time.
+- **Publish a frozen batch manifest before any expensive build** (decision 20,
+  2026-07-29). The manifest lists every item with `Code complete` / `PM reviewed` /
+  `Included`. **No build starts until every blocking row is complete.** Do not
+  compile or stage a generation for each small config, script, QML, documentation or
+  shell fix — batch them, continue independent work in parallel, and take one
+  combined build → boot-only deploy → reboot → gate.
+- **A validation-only compile must name the uncertainty it resolves** and why
+  cheaper static or unit checks are insufficient. "It was ready" is not a reason to
+  boot a generation.
+- **Reuse existing Hyprland/Hyprbars store outputs when the source patch set is
+  unchanged.** Never trigger a compositor or plugin recompile merely because
+  unrelated configuration or shell code changed. Check the patch list in the
+  derivation, not the calendar.
+- **Later-stage work runs in isolated worktrees** during build, reboot and operator
+  waits. Deployed closures stay **stage-pure** — worktree work never enters the
+  current closure.
+- **Sonnet-first** for narrow diagnosis, source location and straightforward
+  implementation. The PM reads the evidence and escalates to a stronger model only
+  when source-level design ambiguity or patch risk justifies it.
 - Separate written / built / installed / activated / tested status in every
   sentence you write about progress.
 - Update `EXECUTION_LOG.md` as you go, same day.

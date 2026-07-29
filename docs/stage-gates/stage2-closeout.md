@@ -2,11 +2,21 @@
 
 **Status: `STAGE 2 — OPEN`.**
 
-**Generation staged:** 27 (`/nix/store/q9ms5jn9pashgi2vnxgaxz9rnz26917k-nixos-system-macbook-…`)
-**Generation running at time of writing:** 26 — deployment is **boot-only**; gen 27
-becomes active only after one clean reboot.
-**Fallback:** generation 26 remains selectable in the bootloader.
-**Branch / HEAD:** `codex/macbook-desktop` @ `754bf34`, pushed.
+**Generation running:** 26 — and it is also the **default boot target**.
+**Generation 27:** built on 2026-07-28 and briefly staged, then **deliberately
+un-staged on 2026-07-29**. It is a valid compile/staging milestone, **not** the
+Stage 2 candidate: it predates the approved snap, minimize, rail and pointer-focus
+decisions. Its store outputs remain valid and are **reused**, so the patched
+compositor and ABI-matched hyprbars are not recompiled.
+**Fallback:** generation 26 is what is running; nothing to roll back to yet.
+**Branch / HEAD:** `codex/macbook-desktop` @ `04cab49` plus the 2026-07-29
+documentation correction.
+
+**This gate is not yet reachable.** Four Stage 2 deliverables — `follow_mouse = 2`,
+the same-workspace minimize backend, the deterministic two-pane snap, and the
+minimum left-rail application slice — were added by the 2026-07-29 architecture
+correction and are not yet written. The batch is **not frozen** and no build has
+been started for it.
 
 `Tested` is `PASS` / `FAIL` / `UNVERIFIED`. **No row may be blank, and a check
 that was not run is `UNVERIFIED`, never an implied `PASS`.** Rows are filled from
@@ -88,6 +98,53 @@ Alex's own words at the gate sitting, not from PM inference.
 | Visible error on failure | Y | Y | Y | N | UNVERIFIED | N | Test by inducing failure, e.g. `chmod 500` the destination |
 | Region capture sharpness (fractional-scale resample) | — | — | — | — | UNVERIFIED | N | **Must be tested with a one-pixel checkerboard or text, NOT colour swatches** — averaging two identical pixels returns that pixel, so swatches give a false pass. Pre-existing, not a regression. Operator instruction: test first, decide after. |
 
+## Pointer scroll and keyboard focus (`follow_mouse = 2`)
+
+| Requirement | Written | Built | Installed | Activated | Tested | Passed | Evidence |
+|---|---|---|---|---|---|---|---|
+| Scroll mouse wheel over an unfocused window — that window scrolls | N | N | N | N | UNVERIFIED | N | Added 2026-07-29; currently `follow_mouse = 0` |
+| Scroll touchpad over an unfocused window — that window scrolls | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| The hovered window is the one that scrolls, not the focused one | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Typing still goes to the last **clicked** window while hovering elsewhere | N | N | N | N | UNVERIFIED | N | The whole point of mode 2 — keyboard focus stays click-controlled |
+| Clicking transfers keyboard focus normally | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+
+## Minimize and left rail
+
+| Requirement | Written | Built | Installed | Activated | Tested | Passed | Evidence |
+|---|---|---|---|---|---|---|---|
+| Minimize from the titlebar button | N | N | N | N | UNVERIFIED | N | Backend being replaced; `special:min-*` rejected |
+| The window leaves layout, render and input | N | N | N | N | UNVERIFIED | N | Mechanism: `setHidden` + `removeTarget` (finding 20a) |
+| The window retains its **original** workspace | N | N | N | N | UNVERIFIED | N | `m_workspace` is read, never written |
+| A dimmed rail entry remains visible for it | N | N | N | N | UNVERIFIED | N | Rail slice not yet written |
+| One click in the rail restores and focuses it | N | N | N | N | UNVERIFIED | N | Mandatory path; hotkey is optional redundancy |
+| Restore never requires visiting another workspace | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Multiple windows of one app — preview selects the **exact** window | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| A shell restart does not strand minimized windows | N | N | N | N | UNVERIFIED | N | Must survive reload without losing windows |
+| **No** minimize workspace ever appears in any switcher | N | N | N | N | UNVERIFIED | N | The specific failure of the rejected backend |
+| Pinned apps are always visible in the rail | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Rail shows running/minimized from the **current workspace only** | N | N | N | N | UNVERIFIED | N | No other-workspace clutter |
+| Rail carries **no** duplicate system-status stack | N | N | N | N | UNVERIFIED | N | No workspace/calendar/tray/network/BT/audio/battery duplication |
+
+## Deterministic two-pane snap
+
+| Requirement | Written | Built | Installed | Activated | Tested | Passed | Evidence |
+|---|---|---|---|---|---|---|---|
+| `Super+Left` = exact left half, with one window open | N | N | N | N | UNVERIFIED | N | Meaning must not depend on window count |
+| `Super+Right` = exact right half, with one window open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Same exact geometry with two windows open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Same exact geometry with three or more windows open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Snapping onto an **occupied** side minimizes the previous occupant | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Completing a pair minimizes all surplus same-workspace windows | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Minimized surplus remains represented in the rail | N | N | N | N | UNVERIFIED | N | Must stay recoverable |
+| Clicking a surplus task restores it **and dissolves the pair** | N | N | N | N | UNVERIFIED | N | Returns to ordinary tiling |
+| Dragging a pair member dissolves/reconciles the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Unsnapping a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Maximizing a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Closing a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Prior state/placement restored where possible | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| **No window is ever silently closed or lost** | N | N | N | N | UNVERIFIED | N | Hard requirement across every snap path |
+| App groups behave correctly through snap/minimize/restore | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+
 ## Existing Stage 2 regression checks
 
 | Requirement | Written | Built | Installed | Activated | Tested | Passed | Evidence |
@@ -106,7 +163,7 @@ Alex's own words at the gate sitting, not from PM inference.
 | Volume keys + single OSD | Y | Y | Y | N | UNVERIFIED | N | Awaiting reboot |
 | Screenshot keys | Y | Y | Y | N | UNVERIFIED | N | Awaiting reboot |
 | Controlled held-backspace repeat | Y | Y | Y | **Y (gen 26)** | UNVERIFIED | N | `repeat_delay 350` / `repeat_rate 22`; empirical check never run |
-| Pinch zoom | Y | Y | Y | **Y (gen 26)** | UNVERIFIED | N | Never exercised on the checklist |
+| Pinch zoom | Y | Y | Y | **Y (gen 26)** | **PASS** | **Y** | Alex, physical confirmation prior to 2026-07-29 (decision 20 item 26). **Not retested unless touched.** |
 | Workspace gestures (3-finger swipe) | Y | Y | Y | **Y (gen 26)** | UNVERIFIED | N | Do-not-regress item |
 | Zero Hyprland config errors | Y | Y | Y | N | UNVERIFIED | N | `hyprctl configerrors` after reboot |
 | Zero failed units | Y | Y | Y | N | UNVERIFIED | N | `systemctl --failed` + `--user --failed` after reboot |

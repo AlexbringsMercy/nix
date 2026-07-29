@@ -5,6 +5,10 @@
 
 **Author:** Fable, head designer. Written 2026-07-21 after full reads of MASTER_REQUIREMENTS, macbook-build-spec, SESSION_PREAMBLE, SYNTHESIS, GAP_REVIEW, caelestia-full-inventory, visual-design-reference, all ten research session outputs, the no-session list, EXECUTION_LOG, the relevant OVERHAUL_PLAN sections, and direct on-disk verification of the skwd-wall and caelestia repos.
 
+**Architecture revision:** 2026-07-29, after Alex re-opened the bar/window split against the original agridyne, caelestia, and ilyamiro visual references. This revision corrects source-role drift, removes duplicate app/status surfaces, replaces the special-workspace minimize model, defines deterministic two-pane snap behavior, and records the approved parallel/batched execution workflow.
+
+**Naming boundary:** **Aurora is the project/shell codename, not a color scheme.** References to the teal/purple/green aurora-borealis look use **Northern Lights**. The product theme is wallpaper-agnostic: glass is persistent, while light/dark mode, surface colors, text colors, accents, gradients, bars, panels, applications, and the lock screen all adapt coherently to the active wallpaper.
+
 ---
 
 ## 0. RULES OF ENGAGEMENT (for every execution session)
@@ -16,67 +20,87 @@
 5. **Report honestly.** If a test fails, the log says it failed. If a step was skipped, the log says so. If a source file turned out different from this plan's description, flag it — do not silently improvise.
 6. **Do not regress §11 of MASTER_REQUIREMENTS** (font rendering, cursor states, tap-to-click, two-finger scroll, boot WiFi, Kitty Ctrl+C/V, dual-boot rollback, agent execution, Chrome Wayland).
 7. **Protected state (never clobber):** see §8.7. The Media Center stack, the TV firewall rule, the Xbox controller Bluetooth tuning, Bluetooth pairings in `/var/lib/bluetooth`, `/etc/nixos/firmware/brcm`, and the T2 invariants of MASTER §10.
+8. **Source-role fidelity is binding.** A donor may supply structure, behavior, visuals, motion, or a backend only in the role assigned by this plan. Do not preserve a donor's unrelated modules merely because they ship together, and do not make a secondary donor the owner of a surface without Alex's explicit approval.
+9. **Freeze expensive batches before compiling.** Before a Hyprland/plugin or other hour-class build, publish a compact manifest showing every intended item is code-complete, reviewed, and included. A validation build may run early only for a stated technical reason; it is not an intermediate deployment. Coherent closure = one build, one boot-only deployment, one reboot, one gate unless Alex approves otherwise.
+10. **Parallel future-stage work is allowed and expected.** During builds, reboots, operator waits, or current-stage testing, later-stage implementation may proceed in an isolated branch/worktree when dependencies permit. Keep commits and build inputs stage-pure; do not merge or deploy future-stage work into the current gate until intended.
+11. **Ordinary UI actions require ordinary UI paths.** Hotkeys are optional shortcuts, never the only practical way to minimize/restore, switch windows, open controls, or recover state.
 
 ---
 
 ## 1. THE DESIGN
 
-One sentence: **a dark glass operating system where aurora light bleeds through every surface, driven entirely by clicking, built from the community code Alex already fell in love with — running smoothly on a two-core MacBook Air.**
+One sentence: **a cohesive glass operating system whose entire visual palette follows the active wallpaper, driven through visible UI first, built from the community code Alex selected, and kept smooth on a two-core MacBook Air.**
 
-The desktop is two surfaces and a wallpaper. A **top bar** that is a real taskbar — the Windows muscle-memory home, where Alex clicks running-app buttons to move between windows, watches his machine's vitals, and reaches every control. A **left dock** of frosted glass tiles that appears when he wants to launch something and retracts when a window needs the space. Between them, the wallpaper — the aurora — is the third character: every panel is translucent enough to let it through, and when it changes, the whole OS recolors in one smooth 300ms breath.
+**Aurora is the project codename only.** It does not prescribe teal, purple, green, darkness, or an aurora-borealis look. The specific teal/purple/green family is the **Northern Lights** palette/preset. A red wallpaper may produce a polished oxblood/crimson glass system; a cream/yellow wallpaper may produce a light ivory/gold glass system; a dark blue or green wallpaper remains richly blue or green rather than collapsing to black panels with a colored outline.
 
-Underneath the glass is one coherent machine, not a parts bin. One shell process owns every surface. One palette authority recolors everything. One wallpaper daemon renders every transition. One settings app configures it all. Every popup opens in ~260ms and closes when you click anywhere else. Nothing pops; everything slides, fades, or morphs. Cinema — the 700–1200ms choreography — is reserved for exactly two moments: the lock screen and the first expansion of a rich widget. Daily clicks are never slowed for beauty.
+The desktop is two complementary surfaces and a wallpaper:
 
-The win condition, walked end to end in §6: press power → aurora splash → a lock screen with real depth-of-field → click, type, you're in → everything from installing Spotify to checking why the fan spun up is one or two clicks away, discoverable, and gorgeous. At least as easy as Windows and macOS. More beautiful than either. Smooth on *this* hardware — every expensive effect in this plan is either GPU-cheap by construction or gated behind a measured test.
+- **The top information/widget bar** follows ilyamiro's top-bar composition nearly 1:1: independent glass islands for search/notifications, workspaces, now-playing/music+EQ, clock/date/weather, tray/language, network, Bluetooth, audio, battery, and the small approved system additions. It does **not** duplicate pinned, running, or minimized applications.
+- **The left application/work rail** follows caelestia's vertical app-rail model: launcher, pinned apps, current-workspace running windows, current-workspace minimized windows, previews/grouping, and optional app-centric visualizer/power affordances. It does **not** duplicate the top bar's network/Bluetooth/audio/battery/calendar/tray stack.
+- **The wallpaper** is the visual source of truth. It drives one coherent semantic palette across the top bar, left rail, panels, notifications, application chrome, terminal, file manager, lock screen, borders, icons, text, and effects. Glass remains the persistent material; no fixed hue family or fixed dark ladder is the product identity.
 
-### The four structural decisions (summary — full reasoning in §12)
+This is the governing division of labor: **top = system awareness and independent widgets; left = applications, windows, and work flow.** The same app never appears as a task on the top and again on the left. A minimized window stays part of its original workspace, disappears from layout, remains dimmed in the left rail, and returns with one click.
 
-1. **The shell chassis is caelestia.** We fork `caelestia-dots/shell` (57,875 lines, on disk, code-traced in `caelestia-full-inventory.md`) into our flake as **aurora-shell** and build the OS on its plugin, services, and surfaces. Alex's own screenshots — the live window previews, the nested tray menus, the tabbed dashboard — *are* caelestia surfaces. We stop extracting slices from the thing he wants and start living in it.
-2. **The wallpaper system is the full skwd-wall application, daemon included. awww is retired.** The daemon's 38 shader transitions are what Alex saw and approved; its socket API gives us wallpaper control and a broadcast `applied` event that the palette pipeline subscribes to with zero upstream patches.
-3. **The palette authority is caelestia's own scheme engine, patched to pin our surfaces.** Not Matugen, not an iNiR token transplant. One engine, native to the chassis, animating every recolor.
-4. **The window model is hyprbars + click-to-focus.** Every window gets real close/minimize/maximize buttons and a grab-anywhere titlebar; focus never moves unless you click. This single pair of decisions kills the worst daily frictions in the bug log.
+Underneath the glass is one coherent machine, not a parts bin. One shell process owns every surface. One semantic palette chain recolors everything. One wallpaper daemon renders every transition. One settings app configures it all. Every popup opens in ~260ms and closes when you click anywhere else. Nothing pops; everything slides, fades, or morphs. Cinema — the 700–1200ms choreography — is reserved for the lock screen and first expansion of a rich widget; daily clicks are never slowed for beauty.
 
----
+The win condition, walked end to end in §6: press power → Aurora-branded splash → a wallpaper-coherent lock screen with real depth-of-field → click, type, you're in → everything from restoring a minimized file manager to changing audio output is one or two visible clicks away. At least as easy as Windows and macOS; more cohesive than either; smooth on *this* hardware.
+
+### The five structural decisions (summary — full reasoning in §12)
+
+1. **The shell chassis is caelestia.** We fork `caelestia-dots/shell` into **aurora-shell** for its plugin, services, drawers, launcher, window previews, notifications, OSD, session, utilities, Areapicker, Nexus, CLI, and vertical rail foundation. The stock dashboard UI is disabled; reusable data/services may be retained.
+2. **The two visible bars have non-overlapping owners.** ilyamiro owns the top widget-bar structure and independent expanding widgets; caelestia owns the left application/work rail. Agridyne supplies major visual direction where specified, not the information architecture.
+3. **The wallpaper system is the full skwd-wall application and daemon.** Its apply event triggers the palette transaction; awww is retired.
+4. **The project palette chain is wallpaper-triggered, mode-aware, full-system, and atomic.** The patched caelestia scheme engine is the single semantic authority; skwd triggers it; iNiR/agridyne provide consumer mappings; Hellwal is fallback. It derives the complete light or dark color system—not merely accent colors. Matugen is not the system-wide authority.
+5. **The window model is mouse-first and workspace-coherent.** Hyprbars provides ordinary controls; keyboard focus changes on click while scrolling follows the pointer; exact left/right two-pane snap minimizes surplus same-workspace windows; minimize never creates a user-visible or conceptual workspace.
 
 ## 2. THE ARCHITECTURE
 
-### 2.1 The chassis decision (open question #2 — resolved)
+### 2.1 The chassis and source-role decision (open question #2 — resolved, corrected 2026-07-29)
 
-**Decision: carry caelestia's shell as the foundation of the one QuickShell instance, forked into `~/nix/modules/home/aurora-shell/`.**
+**Decision: carry caelestia's shell as the foundation of the one QuickShell instance, forked into `~/nix/modules/home/aurora-shell/`, while replacing its final bar information architecture with the explicit split in §1/§5.1.**
 
-What this means concretely: the shell that runs on this machine is caelestia's `shell.qml` composition — its C++ plugin (typed config, sensors, cava/beat-tracker, lyrics, appdb, qalculator, blob shaders), its 18 backend services, its shared component library, its drawer coordinator — with our scheme, our layout changes, and our grafted-in components. It is deployed through caelestia's own Home-Manager module pattern (`nix/hm-module.nix` → `programs.caelestia` — we vendor and rename to `programs.aurora-shell`), which handles the systemd user service, the `shell.json` settings attrset, and the CLI.
+The running shell remains caelestia's `shell.qml` composition: C++ plugin, typed config, sensors, cava/beat, lyrics, app database, calculator, shared components, drawer coordinator, services, and IPC. The fork is not permission to ship every stock surface unchanged. The final product uses each donor only for the role Alex approved.
 
-**Why this beats the alternative** (the existing aurora-shell skeleton absorbing per-repo slices):
+**Why the chassis still wins:**
 
-- **The surfaces Alex approved are caelestia surfaces.** The five screenshots he fought five sessions over — window-preview popouts, tray drill-in menus, the tabbed dashboard, the duration submenus — are `modules/windowinfo/`, `modules/bar/popouts/TrayMenu.qml`, `modules/dashboard/`. Extracting them means reimplementing their service wiring; carrying the shell means they simply run.
-- **The dependency economics inverted once the full inventory existed.** The shell-surfaces session recommended a "pure-QML launcher slice" to avoid compiling the C++ plugin — written when the shell repo wasn't yet on disk and the plugin looked like dead weight. But the plugin is also the sensors backend (CPU/GPU/memory/storage for the bar and dashboard), the audio visualizer, the lyrics service, the app-frequency ranking, and the calculator. We want all of those anyway. Once the plugin is resident, the "slice vs. shell" question dissolves: the full-fat launcher, Nexus, and the dashboard come nearly free. This is exactly the settings session's "Model A," and it called this correctly: *"the settings center comes almost for free — the single strongest argument for the packaged-shell path."*
-- **§15's panel-coordinator comparison comes out against the incumbent.** The existing `PanelCoordinator`/`PanelHost` implements mutual exclusion + focus-grab + staged animation — competently, but it fronts the from-scratch panel content that the whole overhaul exists to replace. Caelestia's `modules/drawers/` (`ContentWindow.qml` HyprlandFocusGrab click-away, `Interactions.qml` edge gestures, `Exclusions.qml`) does the same job, more maturely, already wired to every surface we're keeping. "It already works" was explicitly ruled insufficient; the drawers win on merit. The incumbent panels' *backends* that are genuinely good — the Open-Meteo weather cache pattern, the `equalizer-state` EasyEffects generator — are carried as backends (§5.9, §5.4).
-- **Independent-surface architecture is preserved where it matters.** MASTER §6 rejected *ilyamiro's single morphing hub* — one panel morphing between unrelated contents. Caelestia's drawers host **separate, independently-openable surfaces** (launcher, dashboard, sidebar, session, OSD, utilities) with per-surface state; the requirement's intent (no hub, click-away everywhere, progressive disclosure per panel) is satisfied. Nexus is a standalone `FloatingWindow`. The grafted components (dock, display panel) are their own `PanelWindow`s.
+- Caelestia already owns the mature services and surfaces Alex selected: launcher, notifications/history, OSD, session, utilities, Areapicker, Nexus, window previews, tray plumbing, and the vertical rail foundation. Dashboard data/services may be reused, but the stock dashboard UI is not a final surface.
+- Its plugin supplies the sensors, visualizer, lyrics, app ranking, and calculator required elsewhere, so keeping the complete chassis remains cheaper and safer than extracting slices.
+- Caelestia's drawer coordinator remains the one popup coordinator. Independent ilyamiro-style widgets are separate anchored surfaces on that coordinator, not one unrelated morphing hub.
+- **Correction:** carrying caelestia does not make its stock status-heavy rail the final rail, and ilyamiro geometry does not make the top bar a Windows taskbar. Those were synthesis errors now retired.
 
-**What we keep, change, disable, and replace** (the fork manifest — every execution session references this table):
+**Fork manifest — keep, change, disable, replace:**
 
-| caelestia module | Verdict | Notes |
+| caelestia module | Verdict | Final role / boundary |
 |---|---|---|
-| `plugin/` (C++, 15.8k lines) | **KEEP, build via its flake** | Config, sensors, cava/beat, lyrics, appdb, qalculator, blobs, lazylistview. No source changes at v1 except the scheme defaults. |
-| `services/` (18 singletons) | **KEEP** | Two patches: `Nmcli.qml` password path (§5.2), `NetworkUsage.qml` two bugs (§5.2). Weather → Austin. |
-| `components/` (60-file UI kit) | **KEEP** | Tokens restyled via scheme, not code edits. |
-| `modules/drawers/` | **KEEP** | The panel coordinator. Edge-gesture thresholds retuned for top-bar layout. |
-| `modules/bar/` | **KEEP vertical (the left rail)** + a new top taskbar module beside it | Layout revised with Alex 2026-07-21. Full spec §5.1. |
-| `modules/bar/popouts/`, `modules/windowinfo/` | **KEEP, re-anchor** | Popouts anchor below the top bar instead of beside a left rail. §5.2. |
-| `modules/dashboard/` | **KEEP** | Top-edge drawer, pairs naturally with the top bar. Calendar restyle per §5.4. |
-| `modules/launcher/` | **KEEP (full-fat)** | Drop `WallpaperList` mode (skwd-wall owns wallpapers). Bind Cmd+Space + Apps button. §5.5. |
-| `modules/sidebar/` (notif history) | **KEEP** | Right-edge drawer, bell + Super+N + edge swipe. §5.6. |
-| `modules/notifications/` | **KEEP** | + iNiR ingress cap + semantic filter (budgeted glue). §5.6. |
-| `modules/osd/`, `modules/session/` | **KEEP** | Restyle only. Session gets hold-to-confirm (§5.7). |
-| `modules/utilities/` | **KEEP, extend** | Becomes the System surface: keep-awake / recorder / toggles + our added action cards. §5.7. |
-| `modules/areapicker/` | **KEEP** | The screenshot region/freeze/clip tool. §5.12. |
-| `modules/nexus/` | **KEEP, prune + extend** | The Settings app. Page plan §5.8. |
-| `modules/lock/` | **REPLACE** | Our composite lock (ilyamiro × Vast × DMS) lives here instead. §5.10. |
-| `modules/background/` | **KEEP with `wallpaperEnabled = false`** | Verified: `backgroundconfig.hpp:73` is a stock flag. skwd-paper owns the wallpaper layer; this module keeps hosting the desktop clock/visualizer/right-click layer. §5.15. |
-| `Shortcuts.qml`, IPC | **KEEP, extend** | The 13-target IPC surface + 22 global shortcuts are the spine that makes every control both clickable and bindable. New IPC targets: `dock`, `displaypanel`, `switcher`. |
-| CLI (`caelestia` → `aurora` CLI) | **KEEP** | `toggle.py` (dev workspace spine), `screenshot`, `record`, `emoji`, `resizer`, scheme/theme fan-out. `wallpaper.py` re-pointed at the skwd socket. |
+| `plugin/` | **KEEP** | Config, sensors, cava/beat, lyrics, appdb, qalculator, blobs, lazy list. |
+| `services/` | **KEEP, patch as specified** | Backends for both bars and panels; weather Austin; network/password and usage fixes. |
+| `components/` | **KEEP** | Shared controls/tokens; retimed and restyled. |
+| `modules/drawers/` | **KEEP** | One panel coordinator for independent surfaces. |
+| `modules/bar/` | **KEEP as left app/work rail; substantially prune** | Launcher/pinned/current-workspace running+minimized apps/previews. Remove final network/BT/audio/battery/calendar/tray duplication. §5.1/§5.3. |
+| `modules/bar/popouts/` | **KEEP as backend/content donors; re-anchor** | System popouts move under corresponding top islands; app previews remain anchored to left-rail app entries. §5.2. |
+| `modules/windowinfo/` | **KEEP and extend** | Live previews, exact-window selection, context actions; used by rail groups and Alt+Tab. |
+| `modules/dashboard/` | **DISABLE final UI; retain reusable data/components only** | No dashboard drawer, hover trigger, swipe trigger, or duplicate tabs. Calendar/weather/media/resource backends feed independent top widgets, Nexus, and sysmon where useful. §5.4. |
+| `modules/launcher/` | **KEEP full-fat** | Search/app launcher; drop WallpaperList; visible entry on rail and top search island. |
+| `modules/sidebar/` | **KEEP** | Notification history; opened from top bell/gesture. |
+| `modules/notifications/` | **KEEP** | Notification server/cards plus iNiR policies. |
+| `modules/osd/`, `modules/session/` | **KEEP** | Restyle; hold-to-confirm destructive actions. |
+| `modules/utilities/` | **KEEP, extend** | System actions surface. |
+| `modules/areapicker/` | **KEEP** | Final region capture/OCR geometry source. |
+| `modules/nexus/` | **KEEP, prune + extend** | Settings app. |
+| `modules/lock/` | **REPLACE** | Composite in §5.10: agridyne visual direction + Vast depth/exit + selected ilyamiro interaction/motion + DMS lifecycle/status donors. |
+| `modules/background/` | **KEEP with `wallpaperEnabled = false`** | Desktop context layer; skwd renders wallpaper. |
+| `Shortcuts.qml`, IPC | **KEEP, extend** | Shared actions; add rail/app, display, switcher targets. |
+| CLI (`caelestia` → `aurora`) | **KEEP** | Toggle/dev, screenshot/record/emoji, scheme fan-out; wallpaper points to skwd socket. |
 
-**Grafted into the chassis from other repos** (each fully specified in §5): DMS dock (§5.3), DMS DisplayConfig (§5.2/§5.8), the composite lock (§5.10), the iNiR polkit dialog (§5.14), the iNiR clipboard panel + ilyamiro grid morph (§5.13), the iNiR desktop right-click menu (§5.15), ilyamiro's EQ subview (§5.9), the drag-to-workspace graft from DMS (§5.1), the QuickShell live cycler (§5.16).
+**Graft boundaries:**
+
+- **ilyamiro:** final top-bar structure and independent widgets, expanded music/EQ and system panels, motion/choreography, selected lock interaction details, clipboard presentation.
+- **agridyne:** major glass/negative-space/app-button visual direction, KDE mapping, visualizer reference, and lock visual composition.
+- **DMS:** DisplayConfig, drag/drop mechanics where needed, lock lifecycle, greeter/safety patterns; **not** primary owner of the rail.
+- **iNiR:** polkit, clipboard service, context menus, notification caps, theme writers, systemd/performance patterns; **not** top widget bar ownership.
+- **Vast:** lock depth planes and gated unlock engine.
+
+Any source-role change beyond those boundaries is a plan divergence requiring Alex's approval.
 
 ### 2.2 Process topology
 
@@ -120,7 +144,7 @@ The old `modules/home/{waybar,rofi,wallpaper,quickshell}` trees are deleted in S
 
 ### 2.4 The IPC map (how buttons and hotkeys stay redundant)
 
-Every action in this OS is reachable two ways, and both ways call the same function. The shell exposes it via `aurora shell ipc call <target> <fn>` (caelestia's IPC layer, renamed); Hyprland binds keys to the same globals; bar/dock/panel buttons call the same handlers internally. The 13 existing targets (mpris, brightness, notifs, audio, hypr, gameMode, idleInhibitor, wallpaper, lock, picker, drawers, nexus, toaster) plus our additions (dock, displaypanel, switcher) mean the keymap in §6.4 is *thin* — every bind is one IPC call, and deleting a bind never removes a capability.
+Every action in this OS is reachable through an ordinary UI and may also have a shortcut; both call the same function. The shell exposes actions via `aurora shell ipc call <target> <fn>`; Hyprland binds optional keys to the same globals; top widgets, left-rail entries, and panels call the same handlers internally. Existing targets plus `railapps`, `displaypanel`, `switcher`, and the snap/minimize state service keep the keymap thin — deleting a bind never removes a capability.
 
 ---
 
@@ -128,51 +152,89 @@ Every action in this OS is reachable two ways, and both ways call the same funct
 
 This section is the concrete answer to "what does it look like." Execution agents copy these values; they do not interpret adjectives.
 
-### 3.1 Palette — the fixed ladder and the adaptive accents
+### 3.1 Palette — wallpaper-derived semantic roles, usually dark, fully colored
 
-The mubin policy, implemented: **surfaces are pinned forever; only accents follow the wallpaper.** The ladder (from SYNTHESIS's reconciled values, which match the master glass RGB exactly):
+**Permanent identity:** glass, cohesion, readability, geometry, and motion. **Not permanent:** darkness, a fixed surface RGB, a teal/purple/green family, or black panels with colored trim.
 
-| Role | Value | Used for |
+The generator analyzes the active wallpaper and creates a complete semantic palette:
+
+- **Auto mode is dark-preferred, not dark-forced.** A wallpaper that is dark, evening-toned, richly colored, or predominantly shadowed produces a dark theme. A dark red wallpaper produces deep burgundy/oxblood/crimson surfaces and related foreground/accent roles—not generic black glass with a red border. Dark blue, green, purple, gold, and other wallpapers likewise retain their own color identity throughout the system.
+- **Clearly light wallpapers produce a light theme.** Cream, pale yellow, high-key white, and other clearly light images produce translucent ivory/cream/tinted-light surfaces with dark readable foregrounds. The system does not force a dark UI over a light composition.
+- **Mode is based on the wallpaper's luminance distribution and composition**, not hue alone and not a simplistic “colorful = light” rule. Exact thresholds are tuned at the Stage 4 palette gate against Alex's real wallpaper library.
+- **Every semantic family adapts:** background, surface ladder, foreground, muted foreground, borders, selection, error/warning/success, primary/secondary/tertiary, containers, gradients, window borders/glow, bars, rail, panels, notifications, application chrome, terminal, file manager, lock screen, and supported application themes.
+- **Cohesion means full tinting, not accent sprinkling.** A red theme must read as a polished red system; a blue theme as a polished blue system. “Black bar + colored border” is a failed result.
+- **Northern Lights** is one optional saved palette/preset for the teal/purple/green aurora-borealis family. **Aurora** remains only the project/shell codename.
+
+| Semantic role | Dark-auto behavior | Light-auto behavior |
 |---|---|---|
-| `background` | `#080b14` | Deepest base (lock scrim, bar end-caps) |
-| `surfaceLowest` | `#0a0e1a` | **The glass RGB.** Every translucent panel fill is this color at the alphas in §3.2 |
-| `surfaceLow` | `#0f1526` | First elevation (inner cards) |
-| `surface` | `#151d33` | Mid containers |
-| `surfaceHigh` | `#1c2742` | Selected/elevated states |
-| `onSurface` | `#e6edf7` | Primary text (never pure white) |
-| `onSurfaceMuted` | `#aab6c8` | Secondary text |
-| border | `rgba(255,255,255,0.08–0.12)`, 1px | Every panel edge |
-| `primary` / `secondary` / `tertiary` | **wallpaper-derived**, clamped | Teal/cyan (#00d4aa / #38bdf8 family), purple (#7c3aed family), seafoam/deep-green (#34d399 family) |
+| `background` | deepest wallpaper-related tone, near-black only when the source supports it | light wallpaper-related base, usually ivory/cream/pale-tinted rather than pure white |
+| `surfaceLowest` → `surfaceHigh` | a stepped, chromatically related dark ladder preserving the wallpaper's dominant family | a stepped, chromatically related light ladder preserving the wallpaper's dominant family |
+| `onSurface` / muted | high-contrast light foregrounds, gently tinted where readable | high-contrast dark foregrounds, gently tinted where readable |
+| border/divider | low-alpha light or complementary edge chosen from the generated scheme | low-alpha dark or complementary edge chosen from the generated scheme |
+| primary/secondary/tertiary | wallpaper-derived roles with contrast/chroma guards | wallpaper-derived roles with contrast/chroma guards |
+| semantic states | error/warning/success remain legible but harmonize with the generated family | same, with light-mode contrast targets |
 
-**The accent clamp is the pink/mauve fix** (accepted finding §9): the defect was tone-80 lightness destroying saturation, not hue. The scheme generator (§4) clamps accent tone into the 55–70 band and floors chroma before any hue decision. Accents must read as *luminous against near-black*, never pastel.
+**Contrast and quality guards:**
 
-Never use the word "navy" in any prompt, asset request, or comment. It reliably produces flat corporate output.
+1. Meet readable contrast for text/icons and preserve clear state differences.
+2. Preserve wallpaper hue identity unless doing so would make content unreadable.
+3. Avoid pastel washout on dark themes and muddy gray washout on light themes.
+4. Avoid forcing every wallpaper toward the Northern Lights family.
+5. On analysis failure, retain the previous coherent palette and report the failure; use a neutral fallback only for first boot/recovery.
 
-### 3.2 Glass — the recipe and the measurement gate
+**User-facing control:**
 
-The test is unchanged: **can you see the wallpaper through it? If no, too opaque.**
+```text
+Theme mode
+● Auto from wallpaper
+○ Force dark
+○ Force light
+```
 
-| Surface class | Fill | Where |
+Auto is the default. Force dark/light keeps wallpaper-derived color families while changing the semantic tone range; it does not switch to a fixed universal palette.
+
+### 3.2 Glass — persistent material, mode-aware color
+
+The invariant is: **the wallpaper remains perceptible through the surface, the content stays readable, and the glass belongs to the current palette.**
+
+| Surface class | Dark-auto starting point | Light-auto starting point |
 |---|---|---|
-| Bar / main panels | `#0a0e1a` @ **0.60** (`#990a0e1a`) | top bar, dock rail, dashboard, sidebar, launcher |
-| Popouts / history | @ 0.58 | bar popouts, notification cards |
-| Inner cards | `surfaceLow` @ 0.48, or `rgba(255,255,255,0.04)` fill, no border | cards inside panels |
-| Tooltips | @ 0.65 | |
-| Kitty | `background_opacity 0.88` (current, working — keep; tune 0.82–0.88 live) | |
-| Hover | brightness up (`+rgba(255,255,255,0.06)` layer, ~150–200ms), **never a color swap** | |
+| Top bar / left rail / main panels | generated `surfaceLowest` at ~0.52–0.64 alpha | generated `surfaceLowest` at ~0.38–0.54 alpha |
+| Popouts / history / notifications | slightly more opaque than their anchor | slightly more opaque than their anchor |
+| Inner cards | generated `surfaceLow` at ~0.40–0.52 or a low-alpha foreground wash | generated `surfaceLow` at ~0.28–0.44 or a low-alpha foreground wash |
+| Tooltips | enough opacity to stay legible over any wallpaper | same |
+| Kitty/app surfaces | mode- and palette-derived application theme; terminal opacity tuned physically | same |
+| Hover/selected | brightness/contrast/elevation change within the generated family—never a random fixed color swap | same |
 
-**Blur is compositor-owned, one scoped pass — never per-surface QML blur, never a full-screen FBO.** Hyprland Lua starting point, with the D7 reconciliation applied:
+These are starting ranges, not fixed colors. Stage 4 tests them against dark red, dark blue/green, Northern Lights, evening, cream/yellow, and other representative wallpapers from Alex's real library.
+
+**Blur is compositor-owned, one scoped pass — never per-surface QML blur, never a full-screen FBO.** Hyprland Lua starting point:
 
 ```lua
 decoration = { blur = {
   enabled = true, size = 12, passes = 1, xray = false,
-  contrast = 1.05, brightness = 1.0, vibrancy_darkness = 0,  -- 0 = maximum effect (accepted §9)
+  contrast = 1.05, brightness = 1.0, vibrancy_darkness = 0,
 }}
--- layerrules: blur only the named aurora-shell layer namespaces + skwd-wall's picker layer
--- ignore_alpha = 0.10  (overhaul-verified: higher thresholds pop blur in late in every fade-in)
+-- blur only named shell/picker layer namespaces
+-- ignore_alpha starts at 0.10; tune against animation pop-in
 ```
 
-**[GATE — glass A/B, one evening, Alex present]** `hyprctl` live comparison: (a) size 12/1-pass vs size 8/2-pass on the visible layers only; (b) `xray = true` vs `false` — xray is the decisive Iris Plus perf lever and its "windows don't show through panels" trade matches the aesthetic anyway; (c) `decoration:glow` rim accent (accepted §9: per-window rim glow, one draw per window) tinted to `primary` at low intensity — adopt if it reads as aurora rim-light, drop if gamer-y. The winning values become the shipped config; this gate settles D7 permanently.
+**[GATE — glass/palette A/B, Stage 4, Alex present]**
+
+Test at minimum:
+
+- size 12/1-pass vs size 8/2-pass;
+- `xray = true` vs `false`;
+- dark saturated red wallpaper;
+- dark blue/green wallpaper;
+- Northern Lights wallpaper;
+- dark/evening multicolor wallpaper;
+- clearly light cream/yellow wallpaper;
+- another clearly light wallpaper;
+- generated window rim/glow in the wallpaper family, kept only if polished rather than gamer-like;
+- top bar, left rail, popouts, notifications, lock, Kitty, Chrome frame, Dolphin and supported app themes all changing coherently.
+
+Failure conditions include opaque panels, unreadable light glass, generic black surfaces with token colored edges, forced Northern Lights hues, mixed stale consumers, or a theme that changes accents without recoloring the actual system.
 
 ### 3.3 Motion — the vocabulary
 
@@ -192,7 +254,7 @@ One token table, owned by the theme (caelestia's `tokens.hpp` anim tiers, values
 
 **The morph engine is ilyamiro's — everywhere, not just his widgets.** `morph` is his Main.qml master geometry/content pattern (x/y/w/h 210ms OutCubic; content enter opacity OutQuint + scale .98→1); `selectionStretch` is his leading/trailing catch-up; the card→detail shared-geometry morph (clipboard, device detail, album/EQ expansion) is his 250–300ms OutExpo pattern; the staged cinematic entrances are his choreography (full stagger on first open, ~900–1100ms; shortened on repeat). Caelestia-sourced surfaces are **retimed onto these tokens** — their stock 500ms springy drawer curve does not ship. This is a design invariant: ilyamiro's motion is the animation identity of the OS.
 
-**The boundary rule (operator design review, 2026-07-21 — this is what keeps it from getting funky):** *morphs happen within an anchor, never across anchors.* Three cases, spelled out: (1) **Within a popout family** — caelestia's rail popout sliding and resizing along the bar as you hover from network to bluetooth to battery is already morph grammar (one object, new anchor point, cross-fading content); it keeps exactly that mechanic, retimed to `morph`/`selectionStretch` — and the right-edge history/utilities background join retimes to `layout`. This is where caelestia's conjoined-small-popout design and ilyamiro's morph engine turn out to be the same idea at different sizes. (2) **Across anchors** — a rail popout followed by a top-bar popout is two different objects at two different homes: the first exits (`panelClose`), the second enters (`panelOpen`), and **nothing ever flies across the screen pretending to be continuous**. (3) **Compact → expanded** — a popout's click-through to its full ilyamiro panel is exit + the panel's own staged entrance (they are separate layer surfaces; a cross-window shared-geometry morph is a false continuity and technically fragile — the shared-geometry morph is reserved for elements *inside* one surface, like clipboard card→preview or album→EQ). Because every duration/curve lives in one token file, the **[GATE — bars]** includes a live motion-feel pass with Alex: popout slide timing, morph curves, and the rail↔top-bar handoff tuned on the spot until it reads as one system.
+**The boundary rule:** *morphs happen within an anchor, never across anchors.* Top-bar islands expand beneath themselves and may morph between their own compact/detail states. Left-rail app entries may expand into grouped live previews beside the rail. A rail app preview and a top system widget are separate homes: one closes and the other opens; nothing flies across the screen pretending to be continuous. Shared geometry remains inside one surface (album→EQ, clipboard card→preview, device row→detail). The bar gate includes motion-feel tuning with Alex.
 
 Hyprland-side window animations (Lua, from visual-design-reference): open = fade+scale .95→1 ~250ms ease-out; close = 150–200ms; workspace slide 300ms; `misc:animate_mouse_windowdragging = false` (drag latency on this GPU). QML bezier arrays must be length-multiple-of-6 ending `1,1` (overhaul §5.8a — silently discarded otherwise).
 
@@ -200,40 +262,74 @@ Performance rules that make this smooth on an i3: all continuous renderers (cava
 
 ### 3.4 Gradients, typography, icons
 
-- **Diffuse aurora, never sharp linear.** The ML4W technique, translated to QML as the standard treatment for hero surfaces (lock, session menu, expanded music, Nexus sidebar): two overlapping radial gradients of `secondary`/`primary` at 0.45–0.55 alpha, ellipse radii 100–180%, centers *off-canvas* (e.g. 30%/140% and 75%/−40%), over the 0.5-alpha surface fill. Everyday panels stay plain glass — the wallpaper itself carries the aurora field (Agridyne's negative-space lesson).
+- **Diffuse wallpaper-derived gradients, never sharp generic linear gradients.** The ML4W technique, translated to QML for hero surfaces (lock, session menu, expanded music, Nexus sidebar): overlapping radial gradients from generated semantic roles, with off-canvas centers and restrained alpha over the current mode-aware glass. The hue family follows the wallpaper. The Northern Lights preset may use teal/purple/green; red, gold, blue, green, monochrome, and light themes use their own generated families. Everyday panels stay restrained glass—Agridyne's negative-space lesson.
 - **Type:** Inter (UI), FiraCode Nerd Font (terminal/code), light-weight large numerals for hero clocks with `tnum` tabular figures. Base UI size 14–15 (caelestia's 13 is too small at 1.5×). `QT_SCALE_FACTOR=1` — logical sizing only, no double scaling.
-- **Icons:** Papirus everywhere (bar, dock, launcher, tray, Nexus), replaced centrally at the token layer.
+- **Icons:** Papirus everywhere (top bar, left rail, launcher, tray, Nexus), replaced centrally at the token layer.
 - **Hit targets:** ≥34px for any bar control (media buttons explicitly), 40×40 grid cells, 44px primary actions — independent of visual scale.
 - **Micro-status language (C17):** battery pill amber <20% + gentle charge pulse; network icon soft activity shimmer under real traffic; bell dot only for post-filter unread. Built once the services exist; cheap; exercises the motion vocabulary daily.
 
 ---
 
-## 4. THE THEMING PIPELINE — one authority, atomic, animated
+## 4. THE THEMING PIPELINE — one authority, full-system, atomic, animated
 
-**Decision (divergence from SYNTHESIS, stated):** the palette authority is **caelestia's own scheme engine** — `services/Colours.qml` (semantic palette + live `scheme.json` watch + `CAnim` 300ms animated propagation) fed by the aurora CLI's generator (`cli/utils/material/generator.py` + `theme.py` fan-out templates). SYNTHESIS recommended an extracted iNiR token slice with an ilyamiro alias facade; that architecture was designed for a bespoke shell assembled from parts. With caelestia as the chassis, its native engine is already wired into all 57k lines — transplanting a second authority would be integration work with negative value. The Matugen-verification question (accepted §9: v4.0 silently discards `custom_colors`) is **dissolved, not answered**: Matugen is no longer in the system pipeline at all. Hellwal remains the named fallback generator only if caelestia's generator fails acceptance. iNiR's contribution survives as *templates*, not authority.
+### 4.0 Ownership chain — wallpaper triggers a complete semantic theme
 
-**The patches to the engine (this is the mubin policy, enforced in code):**
-1. Scheme generation pins `background/surface*/onSurface*` to the §3.1 ladder — fixed roles never derive from the wallpaper.
-2. Accent roles (`primary/secondary/tertiary` + containers) derive from the wallpaper with the §3.1 tone/chroma clamps.
-3. Light mode is removed from the product (dark is the identity).
+```text
+skwd-wall applies wallpaper
+        ↓  `skwd.wall.applied`
+SkwdBridge starts the project palette transaction
+        ↓
+patched caelestia generator analyzes wallpaper
+and chooses Auto-dark or Auto-light semantic ranges
+        ↓
+it derives the complete surface/foreground/accent/state palette
+        ↓
+atomic fan-out writes every external consumer
+        ↓
+`services/Colours.qml` publishes/animates the shell palette
+```
 
-**Template/consumer inventory** — every surface that recolors on wallpaper change. Templates live in the aurora CLI's `data/templates/`; caelestia already ships the starred ones, the rest are ported in (iNiR `scripts/colors/targets/` is the donor for breadth):
+**Naming boundary:** Aurora is the project/shell codename. It is not a palette policy. The teal/purple/green aurora-borealis look is called **Northern Lights** and exists as one preset/result, never as a forced default.
 
-| Consumer | Source of template |
+**System-wide semantic authority:** the project's patched caelestia scheme engine: the CLI generator plus `services/Colours.qml`. It owns the final role values because the chassis already consumes that scheme everywhere.
+
+**Wallpaper authority:** skwd-wall/skwd-paper chooses and renders the wallpaper and emits the event. It influences the entire generated theme through image analysis, but it does not independently publish a competing system palette.
+
+**Consumer mapping donors:** caelestia's shipped templates, iNiR's GTK/Qt/Kitty breadth, agridyne's KDE/Chrome role mapping and visual cohesion, plus small project templates for missing consumers.
+
+**Fallback generator:** Hellwal only if the patched caelestia generator fails acceptance. A fallback must still feed the same semantic role contract and atomic transaction.
+
+**Matugen:** not the system-wide authority. It may remain an internal implementation detail inside skwd's own picker UI, which is pointed back at the published system scheme. Do not create a second independent Matugen fan-out.
+
+**Generator policy:**
+
+1. Analyze wallpaper luminance distribution, dominant/secondary hue families, chroma, and usable foreground contrast.
+2. Default to dark when the composition is dark/evening/shadowed; choose light when it is clearly high-key/light.
+3. Generate the **entire** semantic ladder—backgrounds, surfaces, foregrounds, borders, accents, containers and states—from the wallpaper family.
+4. Preserve strong color identity across actual surfaces. A dark red result must be a cohesive dark-red system, not black plus red trim.
+5. Apply contrast/chroma guards without forcing teal, purple, green, pastel, or a universal neutral ladder.
+6. Expose Auto / Force dark / Force light in Nexus. Forced modes retain wallpaper-derived color identity.
+7. Remove any rule that disables light mode globally.
+8. On generation/validation failure, keep the previous complete scheme and show a visible error.
+
+**Template/consumer inventory:**
+
+| Consumer | Source of mapping/template |
 |---|---|
-| aurora-shell (all QML) | native (`Colours.qml` + CAnim — animated) |
-| Hyprland (borders, glow tint) | caelestia★ |
-| Kitty | **iNiR target** (caelestia configures Foot — this is a known port) |
-| Fish/terminal 16-color, btop, cava, fastfetch | caelestia★ |
-| Starship | new small template writing the `[palettes.aurora]` block (§7.5) |
-| GTK3 (19 named colors) + GTK4/libadwaita (4 root vars) | **iNiR writers** — the accepted §9 finding, verbatim |
-| Qt6/KF6 + Kvantum (Dolphin, Ark, Gwenview, Okular) | iNiR Qt writers + agridyne KDE role mapping (§5.17) |
-| Chrome frame | one `BrowserThemeColor` enterprise-policy Nix line (accepted §9); content stays opaque (Agridyne chrome/content rule) |
-| Spotify (Spicetify), VS Code, Discord/Vesktop | caelestia★ integrations (SYNTHESIS's app-specific winners) |
-| hyprbars (`bar_color`, `col.text`) | new tiny template |
-| regreet CSS, skwd-wall UI scheme | new tiny templates (skwd reads a scheme file; point it at ours so the picker matches the OS) |
+| aurora-shell QML | native `Colours.qml` + animated propagation |
+| Hyprland borders/glow | caelestia template, extended for carried patches |
+| Kitty | iNiR target, adapted for generated light/dark roles |
+| Fish/terminal 16-color, btop, cava, fastfetch | caelestia |
+| Starship | project template |
+| GTK3 + GTK4/libadwaita | iNiR writers |
+| Qt6/KF6 + Kvantum | iNiR writers + agridyne KDE mapping |
+| Chrome frame | Nix `BrowserThemeColor`; content stays opaque per agridyne rule |
+| Spotify, VS Code, Discord/Vesktop | caelestia integrations, validated in both modes |
+| hyprbars | project template |
+| regreet, skwd UI, lock | project templates/semantic bindings |
 
-**The transaction** (the "no half-applied states" requirement, honestly scoped as bespoke glue — see §9): a wrapper around the fan-out that (1) generates every template output into a staging dir, (2) validates each (non-empty, parseable, required keys), (3) publishes all of them with atomic renames in one pass, (4) touches `scheme.json` **last** (the shell recolor is the visible commit), (5) on any failure keeps the previous coherent state and raises a `toaster` error naming the failed consumer. iNiR's `switchwall.sh` temp-and-rename flow is the pattern donor; the all-or-nothing boundary is ours.
+**Atomic transaction:** generate into a staging directory, validate every output, publish with atomic renames, and touch `scheme.json` last. Failure preserves the previous coherent state and raises a visible error. iNiR's temp-and-rename flow is the pattern donor; the all-or-nothing boundary is project glue.
+
 
 ### 4.1 The wallpaper system (open question #1 — resolved)
 
@@ -247,12 +343,12 @@ The reasoning, from on-disk verification (`~/nix/repos/liixini-skwd-wall/`):
 - With awww gone there is no daemon conflict to patch — the `awww kill` guard branch is unreachable. One renderer owns the wallpaper layer; aurora-shell's own background sets `wallpaperEnabled = false` (stock flag, verified).
 
 **Auto-cycling (C10):** use the daemon's native rotation — `wall.random_start` with interval + `favourites_only` (already exposed in skwd's own FilterBar UI). Every rotation apply emits `applied` → palette follows automatically; there is no second authority because *theming reacts to the renderer* rather than racing it. The **evening variant** (prefer dark wallpapers after night-light onset) is one small systemd user timer that sends a single `wall.apply` JSON-RPC line for a curated `dark/` subset pick — ~15 lines of glue, listed in §9.
-**Half-applied-state note:** wallpaper transitions (~600ms shader) and the palette commit (~1s later, animated 300ms) are deliberately sequential — the aurora "breath." Atomicity lives inside the palette fan-out (§4 transaction), which is where half-applied states actually hurt.
-**skwd's internal Matugen** themes only its own UI; execution confirms its template output is scoped to its config dir and additionally points its UI scheme at our generated palette so the picker itself wears aurora. `QSG_RHI_BACKEND=vulkan` default: verify on Iris Plus (ANV), override to `opengl` in the wrapper if it misbehaves. **[GATE — wallpaper]** picker click → shader transition plays → whole OS recolors within ~1.5s → no consumer left stale (checklist: bar, Kitty *new window*, Chrome frame, Dolphin, Spotify, hyprbars, lock).
+**Half-applied-state note:** wallpaper transitions (~600ms shader) and the palette commit (~1s later, animated 300ms) are deliberately sequential—the coordinated theme transition. Atomicity lives inside the palette fan-out (§4 transaction), which is where half-applied states actually hurt.
+**skwd's internal Matugen** themes only its own UI; execution confirms its template output is scoped to its config dir and additionally points its UI scheme at our generated palette so the picker follows the active system theme. `QSG_RHI_BACKEND=vulkan` default: verify on Iris Plus (ANV), override to `opengl` in the wrapper if it misbehaves. **[GATE — wallpaper]** picker click → shader transition plays → whole OS recolors within ~1.5s → no consumer left stale (checklist: bar, Kitty *new window*, Chrome frame, Dolphin, Spotify, hyprbars, lock).
 
 Entry points: System button → Wallpaper; desktop right-click → Change Wallpaper; launcher "wallpaper" action; `random_start` toggle inside skwd's own UI.
 
-**Library:** Alex's wallpapers currently live in `~/Downloads`. Stage 4 imports the collection into `~/Pictures/Wallpapers` (skwd's library dir) via skwd's own import (`wall.import`) — originals untouched, the curated `aurora-collection/` twelve stay, and a `dark/` subset gets tagged for the evening variant. **Any wallpaper works:** surfaces are pinned, so a red or gold image can never break the dark-glass identity — it only re-tints the accents (clamped), and gowall recolor-toward-palette remains the optional inverse for images that fight the mood.
+**Library:** Alex's wallpapers currently live in `~/Downloads`. Stage 4 imports the collection into `~/Pictures/Wallpapers` (skwd's library dir) via skwd's own import (`wall.import`) — originals untouched, the curated collection stays, and a `dark/` subset gets tagged for the evening variant. **Any wallpaper works:** the generator derives a complete light or dark color system from it. Red/gold/blue/green/monochrome/light images recolor surfaces and foregrounds as well as accents. gowall recolor-toward-palette remains an optional inverse tool for images that fight a chosen manual preset.
 
 **Animated wallpapers (previously deferred — now a built-in toggle):** verified on disk, the skwd daemon natively plays **video wallpapers and Wallpaper Engine items** (`wall.apply` types `video`/`we`, with per-output audio/volume/mute). The §14 deferral stands as the *default* — a dual-core i3 doesn't decode video for free — but the capability ships with the picker we're installing anyway. Post-acceptance opt-in behind a perf gate, with policy: pause on battery, pause when a window is fullscreen/covering, static fallback image published to the palette pipeline.
 
@@ -264,64 +360,122 @@ Entry points: System button → Wallpaper; desktop right-click → Change Wallpa
 
 Every surface: what it is, where the code comes from, what changes, how Alex touches it.
 
-### 5.1 The two bars — top taskbar + the caelestia rail *(layout revised 2026-07-21 with Alex: vertical is welcome; both surfaces, cohesive, on demand)*
+### 5.1 The two bars — ilyamiro top widget bar + caelestia left application rail *(architecture corrected 2026-07-29)*
 
-**The revision:** Alex is open to a vertical bar and loves ilyamiro's top-bar aesthetic; the original plan's rotation of caelestia's bar was the riskiest adaptation in the document. New layout: **a persistent horizontal top taskbar (new module, ilyamiro's geometry) + caelestia's left rail kept vertical and native (hover-reveal by default)**. This deletes the popout-system surgery entirely — caelestia's tray menus, status popouts, WiFi join flow, and kb-layout switcher run exactly as shipped and as Alex screenshotted — and gives each beloved bar aesthetic its natural home. It also resolves the ilyamiro-vs-caelestia bar dilemma by splitting duties instead of picking a loser.
+The final surfaces follow a strict role split:
 
-**The top bar — new module `modules/topbar/`, the taskbar. Persistent.** 48px logical, **ilyamiro `TopBar.qml` geometry** (sectioned islands, 34px minimum controls, 4–8px spacing, room to breathe — the bar look Alex rated best); behavior donors: iNiR `BarTaskbar*` + caelestia components + DMS drag chain.
-- **Left island:** Apps button (launcher) · pinned Chrome, Kitty, Dolphin (Papirus ~22px, detached).
-- **Center island:** workspace pills 1–5 (caelestia `Workspace` delegates in a Row; **each a `DropArea`** → `hl.dsp.window.move({workspace, window:"address:0x…", follow:false})` — DMS `OverviewWidget` chain grafted; same-surface as the drag sources, deliberately) · **running tasks** (iNiR behavior: click activate, click-active cycle that app's windows, right-click menu Close / Close others / Move to workspace ▸ / Float / Pin — dispatch shapes from caelestia `windowinfo/Buttons.qml`; **`Drag` sources**; minimized tasks render dimmed, click restores — §6.2) · active title (hover = live `windowinfo` preview popout, re-anchored to open below the bar — the one popout that moves).
-- **Right island:** media chip (≥34px controls + source-app icon, resolver M4, click focuses/launches the player) · CPU pill · RAM pill (hover = plugin-sensor sparkline popout; **click = sysmon workspace** — distinct views, the "both open CPU" bug dies) · network **Mbps** · battery % · clock (→ dashboard) · bell (unread dot → history) · **System button** (→ §5.7).
-- Scroll: workspace zone scrolls workspaces; right cluster scrolls volume (caelestia `bar.scrollActions` config). All launches detached.
+```text
+TOP — system information and independent widgets
+[Search] [Bell] [WS 1][WS 2][WS 3][+]   [Now playing / EQ]   [Clock / Date / Weather]   [Tray/Lang] [Net] [BT] [Audio] [Battery] [Resources/System]
 
-**The left rail — caelestia `modules/bar/` in its native orientation, near-zero adaptation.** Entries (top→bottom): OS logo · **the dock entry (new — §5.3)**: agridyne-glass app tiles, pinned + running grouped · tray (native nested `TrayMenu` popouts with ‹ Back) · StatusIcons (network / bluetooth / audio / battery — native hover popouts incl. `WirelessPassword` join flow and kb-layout switcher) · **Kurve visualizer strip (new entry — §5.3)** · power (→ session). The vertical workspaces entry is disabled (workspaces live on the top bar, keeping drag-and-drop same-surface). **Reveal: hover-reveal by default** — caelestia `BarWrapper`'s shipped persistent-vs-hover mode; this is Alex's "on demand." Persistent-rail is a Nexus Appearance toggle. Rail and top bar share tokens, islands, and motion — one visual system, two axes.
+LEFT — applications and windows
+[Launcher]
+[Pinned apps]
+[Current-workspace running apps]
+[Current-workspace minimized apps — dimmed]
+[Grouped previews for multi-window apps]
+[Optional Kurve visualizer / app-centric footer]
+```
 
-**Redundancy by design (the §2 philosophy, mapped):** quick glance = top-right pills; quick control = rail popouts (native caelestia); full views = the ilyamiro-presentation expanded panels (§5.2). Window switching = top taskbar; app launching = rail tiles + launcher. Nothing exists in only one place, and nothing renders twice at the same fidelity.
+#### Top bar — ilyamiro nearly 1:1
 
-**Adaptation delta (revised — net risk sharply down):** top bar = new module composed from cited parts (M1, size M); rail = **two added entries**, zero popout surgery (M5); `windowinfo` popout re-anchor to top (S); tray/status/kb popouts untouched.
+New `modules/topbar/`, persistent, using ilyamiro's actual independent-island composition and morphing widgets rather than merely borrowing its geometry.
 
-**[GATE — bars]** every §6 bar requirement demonstrable by mouse: workspace click + drag-task-to-workspace; task click/cycle/right-click-close; media controls usable; CPU vs RAM distinct; Mbps visible; rail hover-reveal doesn't fight window edges or the dock tiles' hit areas; tray menus drill in and back natively; nothing dies on `systemctl --user restart aurora-shell`.
+- **Left:** search/launcher icon, notification bell, then workspace pills. Three workspaces are shown by default; `+` creates/reveals another. Active extra workspaces remain visible while in use. The responsive maximum is whatever fits comfortably between neighboring islands at the MacBook's 1707-logical width; after that the workspace island compacts/scrolls rather than bloating the bar. No fixed eight-workspace row.
+- **Media island:** current source/app, track, elapsed time and transport controls. Click expands the final Music/EQ surface in §5.9.
+- **Center:** clock/date/weather island, preserving ilyamiro's centered visual balance.
+- **Right:** tray/language plus independent network, Bluetooth, audio, battery, and approved CPU/RAM/System islands. Each opens its own anchored detail panel. These are separate widgets, not one stacked right-side mega-popout.
+- **Never on top:** pinned apps, running task buttons, minimized tasks, or active-window title. Those belong to the left rail.
+
+The only structural additions to the ilyamiro reference are explicit project-required system entries such as CPU/RAM and the System action; they remain independent islands and may not rearrange the source into a Windows taskbar.
+
+#### Left rail — caelestia app/work surface
+
+Caelestia's vertical rail remains the structural owner, adapted around its app icons and window-preview service:
+
+- launcher/app entry;
+- pinned applications always visible;
+- running and minimized windows from the **current workspace only**;
+- minimized entries visibly dimmed but still active;
+- one window: click focuses/restores;
+- multiple windows: hover opens exact live previews, click a preview focuses/restores that window;
+- right-click actions and optional drag/reorder/move-to-workspace behavior;
+- optional Kurve visualizer/footer if it earns its space.
+
+The final rail removes the stock duplicate workspace, tray, calendar/time, network, Bluetooth, audio, and battery stack because those are owned by the top bar. An "active elsewhere" indicator for pinned apps is optional later polish, not a Stage 2 requirement.
+
+#### Visibility policy
+
+The rail stays **persistent during implementation and Stage 2 acceptance**. Persistent versus immediate hover-reveal is decided only after the completed top bar and rail are viewed together at actual scale. Both modes remain a Nexus toggle; no default is pre-decided.
+
+#### Bar gate
+
+By mouse: top widgets open the correct independent panels; three-workspace-plus behavior is clear; rail pinned/running/minimized state is correct; grouped previews choose exact windows; minimized restore is one click; no app or system-status duplication; motion reads as one system; shell restart does not kill applications.
 
 ### 5.2 Popouts, previews, and the status panels
 
-**Source: carried caelestia modules — native on the rail** (§5.1; only the windowinfo preview re-anchors to the top bar). These are the surfaces Alex screenshotted; they ship with their behavior intact:
-- **Window preview popout** — `modules/windowinfo/` (`Preview.qml` live `ScreencopyView`, `Details.qml`, `Buttons.qml` max/float/pin/close + move-grid). Hover the active title or a task button. Live capture is visibility-gated (only while the popout is open — cheap).
-- **Tray menus** — `popouts/TrayMenu.qml` StackView drill-in with ‹ Back.
-- **Network popout** — `popouts/Network.qml` + `WirelessPassword.qml` (622-line in-bar WiFi join flow). **Two mandated patches:** (1) the password never transits argv — use the pinned QuickShell's native `WifiNetwork.connectWithPsk()` if present, else an nmcli stdin/secret-agent path; clear the QML field on every outcome; (2) `NetworkUsage.qml` gets its two verified bugs fixed (stale read-after-reload; 2^64 wraparound spike) and binds to the default-route interface; label is "live traffic," with a click-to-run WAN speed test action (labeled as a test). Shows SSID, IPv4/v6, gateway/DNS, band, and the §8.4 Portal/Limited/Full state distinctly from link speed.
-- **Bluetooth popout** — `popouts/Bluetooth.qml` + Nexus `BtDeviceInfo` (battery %). Device rows stay put across refreshes (stable ordering); pair/forget flows in Nexus. ilyamiro's radial device view is cut-listed (§11) as an optional expanded treatment.
-- **Audio popout** — `popouts/Audio.qml`: output volume/mute, mic mute, device switch, per-app streams (Nexus `AppVolumes`), EQ button → §5.9. OSD (`modules/osd/`) is the transient volume/brightness feedback: bounded surface, no input interception, 220ms in / 2s dismiss.
-- **Battery popout** — `popouts/Battery.qml` + UPower truth: %, time-to-empty/full (0 = "calculating…", never "0 minutes"), power-profile selector (PPD), keyboard-backlight slider (§8.1).
-- **Keyboard-layout popout** — carried as-is (kblayout).
-- **Display panel** — **grafted: DMS `Modules/Settings/DisplayConfig/` + `Services/DisplayService.qml`** (session verdict over ilyamiro MonitorPopup: real per-compositor apply, VRR/transform/mirror, reconnect persistence, **battery-aware 60Hz downclock** — adopted). Presented as a Nexus Display page + a bar-reachable panel; visual template is ekremx25's button-row layout (resolution/refresh/scale rows, "layout looks healthy" line). Single-display v1 exposes Mode/Refresh/Scale/Transform; the arrangement canvas stays dormant for the Alienware future. Adaptation M: map `SettingsData`/`Theme` → aurora Config/Colours.
+**System/status content uses caelestia services and proven popout internals, but its final anchors are the corresponding ilyamiro top islands — not duplicate icons on the rail.**
 
-**The expanded tier — ilyamiro's presentation layer (promoted per Alex's cinematic direction).** The rail popouts are the fast path; *clicking through* opens the full panels, and these wear **ilyamiro's compositions** — his widgets are the expressive half of this OS: **battery/power panel** = his animated battery ring + uptime + profile row (staged entrance shortened to ≤700ms; `BatteryPopup.qml`) · **audio expanded** = his liquid master orb + node cards (`VolumePopup.qml`) over the chassis PipeWire service · **Bluetooth expanded** = his radial five-slot device constellation with scan rings and hold-to-disconnect (`NetworkPopup.qml` BT mode — promoted from the cut-list; compact rail popout stays the everyday path) · **network expanded** = the radial gauge with **download Mbps as the hero number** (signal is only the arc fill) + 2×2 detail grid · **FocusTime** (his SQLite app-history analytics — the "app history" panel Alex likes) ships as an opt-in dashboard page rather than a cut-list item. All of them run on chassis services (no shell-script pollers — that part of ilyamiro is replaced), enter with staged choreography on first open, and reopen at `panelOpen` speed.
+- **App/window previews:** carried `modules/windowinfo/` beside left-rail app groups. Hover is visibility-gated; preview selection targets an exact window. Context actions include focus/restore, close, close others, float, pin, and move to workspace.
+- **Tray menus:** carried StackView drill-in, opened from the top tray island.
+- **Network:** carried service and join flow, re-presented under the top network island; fix password transport and `NetworkUsage` bugs; show live traffic distinctly from an explicit WAN speed test.
+- **Bluetooth:** top Bluetooth island; stable device order, battery and scan; deeper radial ilyamiro panel may open from it.
+- **Audio:** top audio island; volume/mute/device/per-app fast controls; expanded ilyamiro audio/EQ surface for depth. OSD remains transient feedback.
+- **Battery/power:** top battery island; percentage/time/profile/keyboard backlight fast controls; expanded ilyamiro battery presentation.
+- **Display:** DMS `DisplayConfig`/`DisplayService` as the functional backend, presented from the top/System/Nexus rather than a rail duplicate.
 
-### 5.3 The dock entry — glass tiles + the Kurve strip (lives inside the rail)
+**Independent expanded tier:** ilyamiro's battery, audio, Bluetooth, network and media compositions remain separate anchored widgets. They run on caelestia services, not shell-script pollers. First open may use staged choreography; repeat opens use normal panel speed.
 
-**Source: DMS `quickshell/Modules/Dock/` (11 files, ~3.5k lines, on disk)** — the settled three-way winner — grafted as a **caelestia bar entry** rather than a separate PanelWindow (layout revision §5.1): `DockApps`/`DockAppButton` behavior with `CompositorService/SettingsData/Theme` mapped to the chassis's `Hypr`/`Config`/`Colours`.
 
-**Behavior:** pinned block (Chrome, Kitty, Dolphin, Spotify, Media Center) → 1px separator → running apps grouped per-app (≤4 running dots, focus dot in `primary`); click activates (grouped >1 cycles), middle-click launches a new instance, right-click menu (pin/unpin, desktop-file actions like New Window, Close All), long-press drag-reorder persisted. "On demand" comes from the rail's hover-reveal (§5.1) rather than DMS auto-hide; DMS's smart overlap detection is the donor if the reveal policy ever needs to be occlusion-aware.
+### 5.3 The left-rail application stack — pinned, running, minimized, previews
 
-**The glass tile treatment** (the one bespoke visual piece, sanctioned small-glue — **motif from agridyne's monochrome-glass launcher tiles**, the "YouTube tile" look from Alex's reference build; no repo ships per-icon tiles, so this is a delegate wrapper over DMS's button): ~48px rounded-square (radius 12–14), shared 0.60 tint fill, 1px 10%-white inner rim, Papirus icon 28–32px, hover = brightness layer 200ms, active = thin `primary` underglow.
+**Primary structure:** caelestia `modules/bar/` app entries plus `modules/windowinfo/` preview machinery. **Behavior donors only where gaps remain:** DMS dock grouping/context/drag patterns and iNiR preview/performance guards. DMS is not the structural owner.
 
-**Kurve strip** — `luisbocanegra/kurve` Canvas/Cava renderer (`Visualizer.qml`, `drawCanvas.js`, `Cava.qml`), exact agridyne settings verified from screenshots: Blocks style, fill wave on, rounded bars, bar width 4/gap 5, block height 5/gap 4, orientation Left, transparent background, non-interactive ("disable left click"). ~140px band at the rail's foot; **shares the chassis's one cava provider**; stops when silent, hidden, or on battery.
+**Visual direction:** agridyne's persistent-glass/negative-space language and app-icon treatment, adapted onto the Caelestia rail. "Glass app tiles" means the app buttons themselves receive a restrained glass container/hover/active treatment; it is not a separate surface or a new dock architecture.
 
-DMS's live-thumbnail hover (`DockPreview`-class) is **not** in v1 — the top bar owns live previews. iNiR's `DockPreview.qml` graft stays cut-listed behind an Iris Plus measurement (§11).
+**Behavior:**
 
-### 5.4 The dashboard — the top drawer
+- pinned block: Chrome, Kitty, Dolphin, Spotify, Media Center;
+- current-workspace running apps/windows below or integrated with pinned entries;
+- current-workspace minimized windows remain in place but dim;
+- click focused single window = leave focused; click unfocused/minimized single window = focus/restore;
+- grouped app with multiple windows = hover live previews, click exact window;
+- middle-click/new-window and right-click desktop actions where supported;
+- task/window may be dragged to a top workspace pill once cross-surface drag is proven;
+- no other-workspace running-window clutter in the current rail.
 
-**Source: carried `modules/dashboard/`** (Wrapper/Content/Tabs + Dash/Media/Performance/Weather). Opens from the clock, a 4-finger-up gesture… and its native top-edge hover/swipe — which now composes perfectly with a top bar. Tabs swipe with the animated indicator.
+**Minimize integration:** the rail is the mandatory one-click recovery surface. It consumes explicit minimized state from §6.2 and must never infer minimize from a visible `special:min-*` workspace.
 
-- **Dashboard tab:** DateTime + **calendar rebuilt to the overhaul §5.8 values** (the "wall of text" fix): hero clock 64px light `tnum` with seconds as a separate 1s-tick Text; 7×6 month grid, 40×40 cells; today = filled `primary` circle; event dots 4px `secondary` — fed read-only from Alex's Google Calendar ICS URL (C20; **built for access now, URL supplied later** — read from the gitignored secrets path so it never reaches GitHub; empty state is graceful, the calendar simply shows no dots) · User card · Resources · SmallWeather.
-- **Media tab:** cover art + radial `CoverVisualiser` (adapted per overhaul: 32 paths, ~30fps cap, GeometryRenderer) + controls + seek + **synced lyrics** (`LyricList` — C8, free with the chassis).
-- **Performance tab:** Hero/Memory/Network/Storage/Battery cards (plugin sensors; NetworkCard gets the §5.2 NetworkUsage fixes). The storage card carries the §8.4 disk thresholds (amber <15GiB, red <8GiB, "Review generations" action).
-- **Weather tab:** forecast — **Austin, TX (30.2672, −97.7431)**, defined once (collapse the four duplicate definitions).
+**Kurve:** optional rail-foot visualizer using the existing shared cava provider; stops when silent, hidden, or on battery. Its inclusion is visual/space-gated and does not block minimize recovery.
+
+### 5.4 The Caelestia dashboard UI — retired; reusable backends only
+
+The stock Caelestia dashboard drawer is **not part of the final desktop**. It duplicated the independently approved ilyamiro top widgets:
+
+- calendar/date;
+- media/lyrics;
+- performance/storage/battery;
+- weather forecast.
+
+Therefore:
+
+- disable the dashboard drawer UI;
+- remove its top-edge hover/swipe trigger;
+- do not bind any gesture or bar item to it;
+- do not rebuild or restyle its duplicate tabs;
+- keep only reusable services, models, or components that directly support the independent top widgets, Nexus, notifications, sysmon, or another approved surface;
+- calendar event data belongs in the top calendar expansion;
+- media/lyrics belong in the top media expansion;
+- performance/storage depth belongs in resource expansions, Nexus System, or sysmon;
+- weather detail belongs in the top weather expansion.
+
+This is a source-role correction, not a loss of functionality: the information remains available in the independently approved surfaces without a second duplicate hub.
 
 ### 5.5 The launcher
 
 **Source: carried `modules/launcher/`, full-fat** — real icons, fuzzy search-as-type, favorites, **appdb frequency ranking** and **qalculator inline calculator** (plugin is resident, so the shell-surfaces session's "drop these" trade is obsolete), actions (lock/sleep/scheme…), detached `DesktopEntry.execute()`. Click-away via the drawers' `HyprlandFocusGrab` (the §5 Escape-only bug dies by construction) and Escape.
 
-Adaptation: drop `WallpaperList` mode (skwd-wall owns wallpapers; the "wallpaper" action launches skwd); keep scheme/variant modes (harmless, cut-listed); Papirus icons; rows sized for 1707-logical width; **triggers: Apps button, dock Apps tile, and Cmd+Space** (rebound from window-focus — the §5 bug). Emoji mode: `:` prefix (iNiR pattern) — see §5.7 for the button path. File results (§4.11): a `plocate`-backed file mode is budgeted glue (§9) — labeled "app/action/file search," honest about not being a content indexer.
+Adaptation: drop `WallpaperList` mode (skwd-wall owns wallpapers; the "wallpaper" action launches skwd); keep scheme/variant modes (harmless, cut-listed); Papirus icons; rows sized for 1707-logical width; **triggers: Apps button, left-rail Apps entry, and Cmd+Space** (rebound from window-focus — the §5 bug). Emoji mode: `:` prefix (iNiR pattern) — see §5.7 for the button path. File results (§4.11): a `plocate`-backed file mode is budgeted glue (§9) — labeled "app/action/file search," honest about not being a content indexer.
 
 ### 5.6 Notifications
 
@@ -349,24 +503,30 @@ Two ported behaviors + one bespoke: **iNiR's noncritical ingress cap** (20/s) an
 8. **Language & region** (weather location UI) + **About**.
 9. **Bluetooth** page (carried: pairing, device info, battery).
 
-Retheme: Blobs window chrome → plain glass container (keep the window factory); tokens ride the scheme. Nexus opens from: System surface, launcher "settings," bar right-click, `aurora shell ipc call nexus open`.
+Retheme: Blobs window chrome → plain glass container (keep the window factory); tokens ride the scheme. Nexus opens from: System surface, launcher "settings," System/top-bar settings action, `aurora shell ipc call nexus open`.
 
-### 5.9 Music & EQ — the staged composition (D2 resolved: staged upgrades)
+### 5.9 Music & EQ — ilyamiro top-island composition
 
-**Daily surface:** the dashboard Media tab (§5.4) — art, controls, radial visualizer, lyrics. **Stage 2 — the expanded Music/EQ widget** (first-expansion cinematic allowed): overhaul §5.8 geometry (900×340; play 56×56, prev/next 44; 20px-tall seek hit area; vinyl via RotationAnimator, pause-don't-stop). EQ subview: **ilyamiro's EQ** (`music/MusicPopup.qml` — 10 bands, 8 presets, 350ms band motion, finite lightning sweep as apply feedback) adapted onto the **existing, working `equalizer-state` backend script** (kept from the current build: validates, locks, writes a modern EasyEffects `equalizer#0` preset to `$XDG_STATE_HOME`, applies async). MPRIS/cava/lyrics come from the chassis; EasyEffects stays invisible (service mode, presets in the XDG data dir — both §5 fixes). Per-device EQ autoload (§8.3) shows the active preset name here — the "why it sounds right everywhere" row.
+**Stage 3 daily surface:** the top media island follows ilyamiro's source composition: artwork/source identity, track, elapsed time and usable transport controls. It is independent from the clock/weather and status islands.
 
-### 5.10 The lock screen — the composite (decision already made with Alex; carried into the plan verbatim)
+Clicking it expands the final Music/EQ widget beneath the same anchor: large art, seek, transport, visual motion, 10-band EQ and presets from ilyamiro's `music/MusicPopup.qml`, adapted to the existing validated `equalizer-state`/EasyEffects backend. MPRIS, cava and lyrics use caelestia services; EasyEffects remains invisible. Per-device preset state is shown.
 
-**`ilyamiro appearance + Vast cinematic depth/unlock engine + iNiR/DMS status pills + DMS safety lifecycle. Hyprlock stays installed as the emergency fallback.`**
+Synced lyrics and deeper listening context live inside the top media expansion itself. Music/EQ therefore ships with the Stage 3 top bar, not in a duplicate dashboard and not as a Stage 9 afterthought.
 
-Built as aurora-shell's `modules/lock/` replacement (the chassis instantiates `Lock{}` in `shell.qml` — we swap the module's internals):
-- **Identity (ilyamiro `Lock.qml`, 1,252 lines read):** blurred current wallpaper, circular rings/orbit vignette, 140px clock + date, avatar→PIN transformation on input activity (400–600ms), restrained bottom pills, 3×120ms failure shake.
-- **Depth + unlock (Vast `Modules/Lock/`):** two-plane wallpaper (background + one precomputed foreground cutout — *still* planes on Iris Plus), typing-focus zoom (planes to 1.12, blur builds), and the **gated multi-beat exit**: lock-icon open → bar collapse → planes scale 1.15 + blur release → only the final `ScriptAction` releases the session lock.
-- **Status (iNiR/DMS):** battery + WiFi pills.
-- **Lifecycle (DMS `Modules/Lock/Lock.qml` donor):** logind `LockedHint` set before locking, cleared only after PAM success *and* the gated exit completes; on shell start, if logind says locked → immediately re-acquire `WlSessionLock`. Hyprland `misc:allow_session_lock_restore = true` (present in 0.55 — verified). Bounded PAM timeouts/retries; never release on timeout or missing resources; **never** the iNiR release-then-fallback pattern.
-- **PAM:** `security.pam.services.aurora-lock = {};` declared **before** first enable. Password is the acceptance path.
+### 5.10 The lock screen — agridyne visual direction × Vast depth, with selected proven donors
 
-**[GATE — lock, mandatory before it owns idle/suspend]** the lock session's full checklist: correct/incorrect/empty/stalled PAM; kill the shell while locked → stays locked → service restarts → re-acquires → password works (repeat during entry animation, during auth, during exit); suspend/lid/DPMS only after lock-ready; failed resource loads still give a usable password field; VT chord + root login verified on the T2 keyboard; motion smooth, memory sane. **If crash/re-acquire fails even once, ship Hyprlock** (`security.pam.services.hyprlock = {};`) and revisit.
+**Corrected ownership:** `agridyne visual composition/negative-space/glass identity + Vast cinematic depth and gated unlock engine + selected ilyamiro clock/PIN/motion mechanics + iNiR/DMS status pills + DMS safety lifecycle`. Hyprlock stays installed as emergency fallback.
+
+Built as aurora-shell's `modules/lock/` replacement:
+
+- **Primary visual direction — agridyne:** restrained persistent-glass composition, negative space, monochrome/aurora cohesion, and the lock-screen visual treatment Alex previously selected. Agridyne is not reduced to a generic “glass tile” donor.
+- **Depth + unlock — Vast:** two-plane wallpaper, focus zoom/blur build, and gated multi-beat exit whose final action alone releases the session lock.
+- **Interaction/motion details — ilyamiro where they improve the result:** hero clock/date, avatar→PIN transformation, failure shake and motion curves; these are donors, not ownership of the whole visual face.
+- **Status — iNiR/DMS:** battery and WiFi pills.
+- **Lifecycle — DMS:** logind `LockedHint`, session-lock re-acquisition, bounded PAM retries, no release on missing resources/timeouts.
+- **PAM:** `security.pam.services.aurora-lock = {};` before first enable.
+
+**[GATE — lock]** retain the existing full crash/PAM/suspend/re-acquire test. If crash-safe lifecycle fails, Hyprlock ships temporarily and the composite remains open rather than being called complete.
 
 ### 5.11 Boot, greeter, and the session chain (§4.4)
 
@@ -380,7 +540,7 @@ Power-on → **no Option hold** (one-time t2linux Startup-Manager procedure: Opt
 
 **Source: carried** `modules/areapicker/` (live region / frozen region / straight-to-clipboard modes) + `services/Recorder.qml` + utilities Record card + CLI `screenshot.py`/`record.py`.
 - **Bindings:** `Cmd+Shift+S` → region picker (adjustable, **overlay-tinted only** — capture happens via grim after geometry, so the §5 purple-film bug is structurally gone); `Print` → full screen. Region output: clipboard **and** timestamped PNG in `~/Pictures/Screenshots`. Buttons: System surface + bar.
-- **Recorder backend: `gpu-screen-recorder` with VA-API H.264** (`intel-media-driver`/iHD — **already in the flake**; `LIBVA_DRIVER_NAME=iHD`) — caelestia's Recorder drives it natively, so zero backend glue. Fallback if region capture misbehaves on i915: `wf-recorder -c h264_vaapi -d /dev/dri/renderD128 -g "$(slurp)"`. **[GATE]** `vainfo` shows iHD encode; 10s test recording stays low-CPU and smooth.
+- **Recorder backend: `gpu-screen-recorder` with VA-API H.264** (`intel-media-driver`/iHD; `LIBVA_DRIVER_NAME=iHD`) driven by caelestia's Recorder. Any region fallback consumes geometry from the final Areapicker; **`slurp` is forbidden in the final capture/recording path** because its overlay caused the proven pink-film defect. **[GATE]** `vainfo` shows iHD encode; 10s recording stays low-CPU and smooth.
 - **OCR (C6):** "Copy text" mode on the picker toolbar → tesseract → clipboard + toast.
 
 ### 5.13 Clipboard history (§4.3)
@@ -389,7 +549,7 @@ Power-on → **no Option hold** (one-time t2linux Startup-Manager procedure: Opt
 
 ### 5.14 Polkit & privileged prompts (B8)
 
-**Source: iNiR `modules/polkit/`** (155 lines — cleanest) over QuickShell's first-party `Quickshell.Services.Polkit.PolkitAgent`, restyled to tokens: the sudo-grade dialog **is** an aurora glass surface. Exactly one agent runs (no hyprpolkitagent/GNOME agent autostart). Live-check: `Quickshell.Services.Polkit` present in the pinned QuickShell rev.
+**Source: iNiR `modules/polkit/`** (155 lines — cleanest) over QuickShell's first-party `Quickshell.Services.Polkit.PolkitAgent`, restyled to tokens: the sudo-grade dialog **is** a project glass surface. Exactly one agent runs (no hyprpolkitagent/GNOME agent autostart). Live-check: `Quickshell.Services.Polkit` present in the pinned QuickShell rev.
 
 ### 5.15 The desktop layer
 
@@ -397,19 +557,24 @@ Power-on → **no Option hold** (one-time t2linux Startup-Manager procedure: Opt
 
 ### 5.16 Alt+Tab & overview (B1)
 
-Alex's primary switching is the taskbar; Alt+Tab is the keyboard redundancy. **Shipped end-state: a live-content QuickShell cycler** composed from carried parts — `windowinfo/Preview.qml` (ScreencopyView) delegates in a horizontal centered strip, MRU order from the `Hypr` service, Alt-hold/release + arrows + mouse click, glass container, `selectionStretch` indicator. Composition of resident components, budgeted §9 (M). From day one (before it lands): `Alt+Tab` → `hl.dsp` `cyclenext` + `bringactivetotop` so the reflex never hits dead air. **hyprexpo** plugin (pinned via the plugins flake) gives the mouse-driven "show everything" overview on a 4-finger-up gesture + bar corner. snappy-switcher stays on the cut-list as a zero-effort alternative if the cycler slips.
+Alex's primary mouse switching is the left application rail; Alt+Tab is keyboard redundancy.
+
+- **Alt+Tab:** live-content QuickShell cycler composed from carried `windowinfo/Preview.qml`, MRU order from the Hypr service, mouse-selectable, with ilyamiro selection motion.
+- **Overview:** Hyprexpo's zoomed-out window/workspace navigator. **Four-finger up opens Overview.** A visible top-bar workspace/overview action opens it by mouse. The retired dashboard has no gesture or edge trigger.
+
+snappy-switcher remains a cut-list fallback only if the final cycler fails.
 
 ### 5.17 The file manager — Dolphin (locked) + the file layer
 
 - **Dolphin** (Qt/KF6): `inode/directory` handler; split view, tabs, undo, batch rename, built-in terminal panel; **Baloo disabled** (on-demand search only). Service menus: **Ark** (Extract Here/To, Compress) — archives' double-click opener (B10). Thumbnails via KIO providers (image/PDF/video, remote previews conservative).
-- **Theming (§4.17):** Qt6/KF6 color roles + Kvantum from the scheme (iNiR Qt writers + agridyne's KDE mapping); GTK3/GTK4/libadwaita writers stay for non-Qt apps. Dark, near-black surfaces, rounded frame — "dark glass adjacent," honest about GTK/Qt windows not compositing real blur.
+- **Theming (§4.17):** Qt6/KF6 color roles + Kvantum from the generated scheme (iNiR Qt writers + agridyne's KDE mapping); GTK3/GTK4/libadwaita writers stay for non-Qt apps. The file layer follows the wallpaper-selected light/dark family and remains visually glass-adjacent, while staying honest that GTK/Qt application contents do not composite true desktop blur.
 - **Devices & trash (§4.12):** UDisks2 + Solid; **one** headless `udiskie` for hotplug automount + notification; Dolphin owns mount/eject affordances; KIO Trash. **[GATE]** the §4.12 checklist live: insert USB → one notification, sidebar appears, writable, trash vs delete correct, safe eject; verify with no window open.
 - **File-picker portal (B9):** `default=hyprland;gtk` with `org.freedesktop.impl.portal.FileChooser=kde` (matches Dolphin's world). **[GATE]** Chrome upload + Save-As: dark, parented, Recents, remembers directory; drag-from-Dolphin-into-page works.
 - **Default apps (§4.1), declared once in Home Manager `mimeapps.list`:** dev-lane (code/md/json/logs/configs) → VS Code · images → Gwenview · video/audio → mpv · PDF → Okular · archives → Ark · web → Chrome · directories → Dolphin. Surfaced in Nexus › Default apps.
 
 ### 5.18 The system/process workspace (§6 system monitor)
 
-`special:sysmon` — the dedicated full workspace, not a widget, in the canonical riced layout: the **fetch card** (aurora ASCII + OS info lines, persistent) on one side, **btop** (caelestia theme — the reactive CPU/RAM/net waveforms) as the centerpiece, plus `sensors` temps/fan RPM and PipeWire xrun visibility (`pw-top`) in flanking panes — the fan/thermal/audio legibility the guardrails ask for. Opened by: bar CPU/RAM pills (click), launcher "system monitor," `Cmd+Escape` bind, dock right-click. Spawned via the toggle orchestrator (§7.1) with a named Kitty (`--class sysmon`).
+`special:sysmon` — the dedicated full workspace, not a widget, in the canonical riced layout: the **fetch card** (aurora ASCII + OS info lines, persistent) on one side, **btop** (caelestia theme — the reactive CPU/RAM/net waveforms) as the centerpiece, plus `sensors` temps/fan RPM and PipeWire xrun visibility (`pw-top`) in flanking panes — the fan/thermal/audio legibility the guardrails ask for. Opened by: bar CPU/RAM pills (click), launcher "system monitor," `Cmd+Escape` bind, left-rail right-click. Spawned via the toggle orchestrator (§7.1) with a named Kitty (`--class sysmon`).
 
 ---
 
@@ -417,60 +582,64 @@ Alex's primary switching is the taskbar; Alt+Tab is the keyboard redundancy. **S
 
 ### 6.1 The daily walk (the win condition, moment by moment)
 
-1. **Press power.** Aurora splash. No menu, no text. (Hold a key if you ever need macOS or an old generation.)
-2. **The lock screen** fades in with real depth — clock huge, wallpaper alive behind glass. Click or type → avatar and PIN field morph in. Enter password → the cinematic exit plays → desktop.
-3. **Open an app:** click Apps (bar or dock) → launcher → type two letters or click the icon (frequency-ranked). Or click a pinned tile. Or Cmd+Space.
-4. **Manage windows:** every window wears a titlebar — grab it anywhere to move, double-click to maximize, red/yellow/green buttons to close/minimize/maximize. Minimized windows dim on the taskbar; click to bring back. Drag a task button onto a workspace number to move it there. Focus moves only when you click.
-5. **Adjust volume:** function keys (OSD confirms) or click the bar's audio icon → slider, devices, per-app, EQ. Plug in AirPods → sound moves there, with their EQ profile, automatically.
-6. **Check WiFi:** the bar icon shows real Mbps. Click for networks; join with a password inline; captive portals announce themselves with a Sign-in button.
-7. **Install an app:** Nexus › (or nix-software-center) → click Install — imperative "now" or declarative "permanent" is a visible choice. Updating the OS shows exactly what will change, with a Roll back button. Updating Claude/Codex is `npm install -g` like anywhere else.
-8. **Take a screenshot:** Cmd+Shift+S → drag region → it's on the clipboard and in Pictures. Print for full screen. Copy-text mode for OCR.
-9. **Lock:** Cmd+L, or the bar power → Lock. **Close the lid:** it locks, then sleeps. **Open it tomorrow:** lock screen, instantly, WiFi back, nothing lost.
-10. **When agents run hot:** the fan ramps early and quietly, the UI never stutters (they're weight-capped, not you), and a notification tells you when Claude finished and what changed.
+1. Power → Aurora splash → lock screen.
+2. Unlock → persistent top widget bar and left app rail appear as one system.
+3. Open apps from the left rail/launcher or optional shortcut.
+4. Manage windows with ordinary titlebars and borders. Minimize File Manager: it leaves the layout but remains dimmed in the same workspace's left rail. Click it once to restore.
+5. Super+Left/Right creates exact two-pane work. When both halves are occupied, surplus windows minimize into that same workspace's rail. Restoring one dissolves the pair and returns to ordinary tiling.
+6. Scroll a window under the pointer without stealing keyboard focus; click transfers typing focus.
+7. Use independent top widgets for media/EQ, weather/calendar, network, Bluetooth, audio, battery and system information.
+8. Use the independent top-widget expansions for calendar/weather/media/resources and Hyprexpo Overview for spatial window/workspace navigation.
+9. Every normal action has a visible UI; shortcuts remain optional.
 
 ### 6.2 Window management (the full spec)
 
-- **Per-window controls: hyprbars** (official plugin; pinned via `hyprland-plugins` flake with `inputs.hyprland.follows` — the ABI-desync failure class is structurally impossible on NixOS). Config: `bar_height 28`, padding 10, text 11 FiraCode NF, `bar_part_of_window`, `bar_precedence_over_border`, `on_double_click = fullscreen 1`, buttons (R→L): close `killactive` · maximize `fullscreen 1` · minimize → `window-minimize`. Colors from the scheme template. `hyprbars:no_bar` rules for CSD apps (GNOME headerbar apps), the shell's own windows, PiP.
-- **Minimize:** omarchy `window-minimize` script (per-window `special:min-<addr>` workspaces, `movetoworkspacesilent`, `misc:close_special_on_empty = 1`, LIFO restore) — the community-proven fix for the shared-special dump-all bug. Restore paths: taskbar click (dimmed task), `Super+Alt+M`.
-- **Focus:** `follow_mouse = 0` (click-to-focus — kills the hover-mistarget bug outright), `focus_on_close = 2` (most-recent, macOS-like), `misc:focus_on_activate = true`. `follow_mouse = 2` documented as a Nexus Input toggle for hover-scroll fans.
-- **Move/snap:** titlebar drag with **no modifier** (hyprbars `MBIND_MOVE` — verified in `barDeco.cpp`); `Super+drag` anywhere as redundancy; `general:snap { enabled }` floating magnetism; keybind half/full snap via the legacy string dispatchers (`resizewindowpixel "exact 50% 100%"` — the Lua resize API is pixels-only, verified); `Super+Ctrl+arrows` = half-snaps, `Super+Up` = maximize toggle. Drag-to-edge Aero snap: no community implementation exists anywhere — optional bespoke glue, cut-listed, not required (drag-to-workspace + keybinds + titlebar drag cover §4.16).
-- **Workspaces:** 1–5 + `special:sysmon` + `special:dev` + per-window `special:min-*`. Move: `Super+Shift+arrows` (directional), `Super+Alt+1..5` (to workspace), drag-to-bar-button (mouse).
-- **Resize:** `resize_on_border` on; **known hyprbars interaction (#355)** — [GATE] verify border-resize with bars on the pinned build; if broken, corner `Super+RMB` + document. Corner one-directionality on tiled windows is dwindle's tree math, not a bug: `smart_resizing` tuned live; pseudotile (`Super+P`) for symmetric; floating resizes freely — this is the honest §5 answer.
-- **Gestures (§4.8):** 3-finger horizontal = workspace swipe (**keep — do-not-regress**); 3-finger vertical = live volume (wiki live-gesture table); 4-finger up = hyprexpo overview; 4-finger down = `special:sysmon`; pinch = native `cursor_zoom` live magnifier (**pinch is sourced** — 0.55 native; the accessibility zoom C19 rides the same action with `Super+=`/`Super+-` and a Nexus toggle); Chrome in-page pinch/back-forward via its Ozone flags (C16a). **Sleep is not a gesture.** Every gesture has a click path.
-- **Input tuning (§5 bugs → values):** DWT root cause is libinput keyboard↔touchpad pairing on T2 — ship the quirks override (`AttrKeyboardIntegration=internal`, bus matched on-machine) then `disable_while_typing = true` works; [GATE] `libinput debug-events` before/after. `repeat_rate 22` / `repeat_delay 350` (progressive repeat is protocol-impossible — say so in Nexus Input's help text). `scroll_factor 0.3` + Chrome `#smooth-scrolling` Disabled (+ `emulate_discrete_scroll` A/B); natural scroll on. All exposed as Nexus Input rows.
-- **Third-window-closes bug:** expected-resize half is dwindle; the close half was the Waybar cgroup/OOM chain — Waybar is gone and every launch is detached + `KillMode=process`; [GATE] repro attempt post-cutover; if anything still vanishes, `hyprctl clients` + `coredumpctl` triage per the window session's script.
+- **Per-window controls:** hyprbars, ABI-pinned with Hyprland. Close/maximize/minimize buttons; titlebar drag without modifier; double-click maximize; ordinary borders/corners resize.
+- **Drag anchor:** carried narrow Hyprland patch prevents tiled-window pickup from jumping to center; floating drag/drop-to-retile behavior preserved.
+- **Corner resize:** ordinary all-four-corner grow/shrink is mandatory. Carry the approved narrow compositor patch; Super+RMB remains redundancy, never fallback acceptance.
+- **Focus and scrolling:** `follow_mouse = 2`: pointer interaction/scroll follows the window under the cursor, keyboard focus stays on the last clicked window, clicking transfers keyboard focus. `focus_on_close = 2`, `misc:focus_on_activate = true`.
+- **Same-workspace minimize:** reject omarchy's final `special:min-*` model. Minimized windows retain original workspace, prior tiling/floating state and geometry where possible; they leave rendering/input/layout and remain represented in the left rail. One click restores/focuses. A restore-last hotkey may exist as optional redundancy but is not a primary or required path. Investigate native Hyprland minimized state / a narrow patch first; offscreen hiding is not accepted without explicit approval.
+- **Deterministic two-pane snap:** `Super+Left` always makes the active window exact left 50%; `Super+Right` exact right 50%, independent of dwindle tree shape or number of windows. When a window snaps onto an occupied side, the previous occupant minimizes. When both halves are occupied, all other visible windows on that workspace minimize. The opposite half remains stable.
+- **Pair dissolution:** restoring a surplus minimized window, dragging/unsnapping/maximizing either half, or closing a side dissolves the strict pair and returns the workspace to normal Hyprland tiling; prior placement/state is restored where technically possible. Clicking a restored window is expected to bring an additional window into view.
+- **Snap gate:** one, two, and 3+ windows; target side already occupied; left/right; second-press return; restore surplus; drag; close; maximize; new window after pair.
+- **Workspaces:** three visible baseline workspaces plus `+`; active extras appear dynamically up to responsive available space. `special:sysmon` and `special:dev` remain purpose-built; **no minimize workspaces**. Move by optional keybind and mouse drag from rail app/window to top workspace pill.
+- **Gestures:** 3-finger horizontal workspace swipe; 3-finger vertical volume; 4-finger down sysmon; pinch zoom (operator-confirmed working, do not retest unless touched). 4-finger up opens Hyprexpo Overview as specified in §5.16.
+- **DWT:** add hwdb match `touchpad:usb:v05acp0280:*` with `ID_INPUT_TOUCHPAD_INTEGRATION=internal`, then `disable_while_typing = true`; verify libinput changes from `n/a` to available/enabled and test with natural palm placement. Palm thresholds are measured, never guessed.
+- **Input tuning:** repeat rate/delay and scroll factor remain Nexus rows. Touchpad two-finger scroll/tap/natural scroll are do-not-regress.
 
-### 6.3 The placement map (B18 — where every control lives)
+### 6.3 The placement map (B18)
 
-**Principle: bar right = status that changes · System surface = actions you take · Nexus = anything you configure · launcher = everything by name.** The §5 surfaces implement it; the keymap below is the redundancy layer. Any control reachable only one way is a bug.
+**Top bar = system awareness and independent widgets · left rail = apps/windows/minimize recovery · System surface = actions · Nexus = configuration · launcher = everything by name · Overview = spatial window/workspace navigation.** Any ordinary action reachable only by hotkey is a bug.
 
-### 6.4 The keymap (hotkeys are shortcuts, never the only path)
+### 6.4 The keymap (shortcuts are optional redundancy)
 
-| Keys | Action (click path in parentheses) |
+| Keys | Action (ordinary UI path) |
 |---|---|
-| `Cmd+Space` | Launcher (Apps button / dock tile) |
+| `Cmd+Space` | Launcher (top search / left launcher) |
 | `Cmd+Shift+S` / `Print` | Region / full screenshot (System surface) |
-| `Cmd+V` → `Super+V` | Clipboard history (bar) |
-| `Cmd+L` | Lock (power menu) |
-| `Alt+Tab` | Window cycler (taskbar buttons) |
-| `Super+N` | Notification history (bell) |
-| `Cmd+E` | Dolphin (dock/pinned) |
-| `Cmd+Return` | Kitty (dock/pinned) |
-| `Super+D` | Dev workspace (dock button) |
-| `Cmd+Escape` | sysmon workspace (CPU/RAM pills) |
-| `Super+Alt+M` | Restore last minimized (taskbar click) |
-| `Cmd+.` (`Cmd+Ctrl+Space`) | Emoji (System surface) |
+| `Super+V` | Clipboard history (top/System entry) |
+| `Cmd+L` | Lock (power/System) |
+| `Alt+Tab` | Window cycler (left rail / overview) |
+| `Super+N` | Notification history (top bell) |
+| `Super+Left` / `Super+Right` | Exact two-pane snap (window UI may expose snap actions) |
+| `Super+Up` | Maximize toggle (titlebar maximize) |
+| `Cmd+E` | Dolphin (left rail pinned app) |
+| `Cmd+Return` | Kitty (left rail pinned app) |
+| `Super+D` | Dev workspace (left rail/launcher) |
+| `Cmd+Escape` | Sysmon workspace (top resource widget/launcher) |
+| `Cmd+.` | Emoji (System/launcher) |
 | `Super+=` / `Super+-` | Zoom magnifier (Nexus toggle) |
-| Media/brightness Fn keys | OSD-confirmed (bar sliders) |
-| `Ctrl+T` | Kitty new tab (tab bar `+`) |
+| Media/brightness Fn keys | OSD-confirmed (top widgets/sliders) |
 
-Window keys per §6.2. Kitty: `confirm_os_window_close = 0` (agents can close their own terminals — §5 bug), `copy_or_interrupt` Ctrl+C, Ctrl+V paste, 10k scrollback, clickable tabs, `kitten hints` path/linenum maps (§7.4), startup art = a **custom aurora ASCII header + caelestia's boxed blue-gradient fastfetch panel** (`fastfetch/config.jsonc`) — saatvik333's terminals are the quality bar, and if LazyVim is adopted its dashboard art rides along in the editor — never SIGUSR1.
+Restore-last-minimized may be offered as an optional user-configurable bind, but it is intentionally absent from the canonical memorization list because one-click rail restore is the normal path.
+
+Kitty: `confirm_os_window_close = 0`, context-aware Ctrl+C, Ctrl+V paste, 10k scrollback, clickable tabs, path hints, custom Aurora startup art.
 
 ---
 
 ## 7. THE DEV WORKSPACE (§7)
 
-One action — `Super+D` or the dock's code-glyph tile — reveals `special:dev`, the two-agent cockpit. Composed entirely from sourced mechanisms:
+One action — `Super+D` or the left rail's code-glyph entry — reveals `special:dev`, the two-agent cockpit. Composed entirely from sourced mechanisms:
 
 ### 7.1 The spine
 **caelestia CLI `toggle.py`** (read in full; vendored as `aurora toggle dev`): workspace-name → clients map, spawns missing clients **directly into** `special:NAME` (`[workspace special:dev] exec …`), moves matching strays, else toggles. `rules.lua` pins `class: dev-*` → `special:dev`.
@@ -483,7 +652,7 @@ One action — `Super+D` or the dock's code-glyph tile — reveals `special:dev`
 - **Dolphin** (`--class dev-files`, window rule → `special:dev`): the file pane of the workspace — split view + its built-in terminal panel pointed at the active repo.
 - Quick-spawn buttons for preset dirs (`~/nix`, active project): `kitty --class dev-term --directory <preset>`.
 
-Per-class Papirus-mapped desktop entries give each terminal its own icon in the taskbar/dock; Kitty `window_logo_path` watermarks Claude vs Codex panes.
+Per-class Papirus-mapped desktop entries give each terminal its own icon in the rail/top widgets; Kitty `window_logo_path` watermarks Claude vs Codex panes.
 
 ### 7.3 Agent supervision (C1/C2)
 - **Persistence: zellij** (`default_mode "locked"` so its binds never shadow agent TUIs; built-in serialization). A dead Kitty window never kills an agent — reattach and continue. tmux is the documented fallback if RAM pressure bites (a values coin-flip, per the session).
@@ -534,7 +703,7 @@ UPower owns thresholds/action: `PercentageLow=20, PercentageCritical=10, Percent
 
 ### 8.4 Disk, backup, health, portals (B6/B13/B14/B11)
 
-- **Disk truth:** iNiR `ResourceUsage` df poll in bar/sysmon + caelestia StorageCard in the dashboard; thresholds on **free bytes**: amber <15GiB/85%, red <8GiB/92% (persistent + "Review generations"), re-arm at 18GiB. Never auto-deletes.
+- **Disk truth:** iNiR `ResourceUsage` df poll in bar/sysmon + caelestia storage/resource service in Nexus/sysmon; thresholds on **free bytes**: amber <15GiB/85%, red <8GiB/92% (persistent + "Review generations"), re-arm at 18GiB. Never auto-deletes.
 - **GC policy:** `nix.gc.automatic` weekly **after** a generation trimmer enforcing *keep ≥5 generations OR everything <30 days, whichever is more* (NixOS wiki trimmer adapted, dry-run action in Nexus › System); **no `--delete-older-than` on the GC itself.** A human-labeled **known-good GC root** pins the accepted closure (with its activation path recorded); "Mark current as known-good" is a Nexus button, never automatic. §15 lifecycle: delete gens 1–7 now; at acceptance, pin the accepted closure *first*, then wipe the era. `nh clean` covers user profiles.
 - **Backup (B14):** `services.restic.backups.home` — **fully wired now, destination deliberately deferred (operator call 2026-07-21):** paths (`~/Documents`, `~/Pictures/Wallpapers`, project repos, `~/.local/share/mediacenter` — the Jellyfin data, `~/.local/state`), nightly `Persistent=true`, keep 7d/5w/12m, and the `createWrapper` restore/browse tooling all ship configured. The repository target (external disk and/or B2/rclone bucket) is the one missing input: until Alex sets it, the timer stays inert and Nexus › System shows **"Backup: choose a destination"** rather than a fake status; the moment a target + password file land in the secrets path, first run initializes and the status line goes live.
 - **Health (B13):** `OnFailure=notify-failure@%n` template on user-relevant units (aurora-shell, skwd-daemon, restic, easyeffects, hypridle) → journal excerpt → **systembus-notify** bridge → notification history. The shell's own unit hardening (§2.2) makes "watchdog gave up" legible. restic failures ride the same channel.
@@ -569,7 +738,7 @@ Located and inventoried (verified this session):
 | **Xbox controller BT tuning** | uncommitted `modules/nixos/desktop.nix` (`bluetooth.settings.LE` 7–9/0) | **Commit in Stage 0; keep verbatim** |
 | **t2fanrd + curve 50/75** | uncommitted `flake.nix` input + `laptop-power.nix` | **Commit; keep verbatim** (supersedes the research's 55/82 suggestion — this is the live-tuned value) |
 | **VA-API (iHD)** | uncommitted `desktop.nix` (`hardware.graphics` + intel-media-driver) | **Commit; keep** (serves Chrome decode + recorder encode) |
-| **Media Center ("Moonfin") stack** | `~/.local/share/mediacenter/` (server.js, Jellyfin data/cache), `~/.local/bin/mediacenter`, `mediacenter.desktop`, `mediacenter-cache-cleanup.{service,timer}` | User-dir — survives rebuilds by construction. **Add to restic paths; pin the launcher in the dock; never auto-start Jellyfin** (on-demand is the design) |
+| **Media Center ("Moonfin") stack** | `~/.local/share/mediacenter/` (server.js, Jellyfin data/cache), `~/.local/bin/mediacenter`, `mediacenter.desktop`, `mediacenter-cache-cleanup.{service,timer}` | User-dir — survives rebuilds by construction. **Add to restic paths; pin the launcher in the left rail; never auto-start Jellyfin** (on-demand is the design) |
 | **TV firewall rule** (LG TV MAC-accept) | **channel `/etc/nixos/configuration.nix`** — *not in the flake* | **Stage 0: read it (sudo), port the exact rule into `modules/nixos/media-center.nix`**, plus any other post-Jul-16 additions found in the same diff |
 | BT pairings, keyring, Jellyfin ServerId | `/var/lib/bluetooth`, `~/.local/share/keyrings`, mediacenter data | State, not config — no rebuild touches them; do not regenerate machine identity |
 | Bluetooth QML + `equalizer-state` edits | uncommitted in the repo | Commit; carry the equalizer-state backend into §5.9; port any BT panel improvements' *behavior* into the new BT popout before deleting the old tree |
@@ -588,68 +757,105 @@ Located and inventoried (verified this session):
 
 ## 9. THE MANUAL-WORK REGISTER (honest scope — everything that is more than config)
 
-Everything below is development or substantial adaptation. If it isn't in this table or a §5 adaptation delta, it's config/vendoring — and if an execution session finds itself doing unlisted development, that's a plan bug to flag, not to absorb silently.
+Everything below is development or substantial adaptation. Unlisted development is a plan bug to flag, not absorb silently.
 
 | # | Work | Size | Anchor |
 |---|---|---|---|
-| M1 | Top taskbar module — new compose: ilyamiro geometry, iNiR task behavior, caelestia components (+ windowinfo popout re-anchor) | **M** | §5.1–5.2 |
-| M2 | Top-bar right cluster (media chip, pills, System button) + ilyamiro expanded-tier panels on chassis services | **M** | §5.1–5.2 |
-| M3 | Drag-task→workspace graft (DMS DropArea chain onto bar delegates) | S–M | §5.1 |
-| M4 | MPRIS→desktop-entry source-app resolver (~50 lines, unsourced anywhere) | S | §5.1 |
-| M5 | DMS dock behavior as a rail entry (service/theme mapping) + agridyne glass-tile delegate + Kurve strip wiring | **M** | §5.3 |
-| M6 | Composite lock (ilyamiro identity × Vast engine × DMS lifecycle × pills) | **L** | §5.10 |
-| M7 | Calendar rebuild (hero clock, month grid, event dots; curved hourly timeline is Shape-built — no community artifact exists) | M | §5.4 |
-| M8 | Music/EQ stage-2 composition (ilyamiro EQ subview on equalizer-state backend) | M | §5.9 |
-| M9 | Theme transaction wrapper (stage→validate→publish→report) + new templates (Kitty, Starship, hyprbars, regreet, skwd UI, Qt/Kvantum) | **M** | §4 |
-| M10 | SkwdBridge subscriber service (~80 lines) + evening-variant timer (~15 lines) | S | §4.1 |
-| M11 | Scheme-generator patch: pinned surface ladder + accent tone/chroma clamps | S–M | §4 |
-| M12 | Nexus new pages: Input, Display (DMS front), System (updates/rollback/GC/backup/health), Startup apps; glass-tuner sliders | **M–L** (page by page) | §5.8 |
-| M13 | Semantic notification filter + iNiR ingress-cap port | S–M | §5.6 |
-| M14 | Nmcli password-path replacement + NetworkUsage two-bug fix | S | §5.2 |
-| M15 | Alt+Tab live cycler (composition of carried preview components) | M | §5.16 |
-| M16 | Clipboard panel composition (iNiR service + ilyamiro grid/morph) | M | §5.13 |
-| M17 | window-minimize vendoring + taskbar-restore glue + minimized-task dimming | S | §6.2 |
-| M18 | Dev workspace: toggle entry, agent-status tile, git-count script, launchers | S–M | §7 |
-| M19 | Camera-in-use watcher; mic dot + bar mute (derived properties) | S | §8.1 |
-| M20 | Health template unit + systembus-notify wiring; captive-portal dispatcher+handler | S | §8.4 |
-| M21 | Plymouth aurora theme (recolor an existing minimal theme) + regreet theming | S | §5.11 |
-| M22 | Generation trimmer service + known-good pin affordance | S–M | §8.4 |
-| M23 | keyboard-backlightd packaging + idle-dim wiring | S | §8.1 |
-| M24 | plocate-backed launcher file mode | S–M | §5.5 |
-| M25 | DisplayConfig graft (DMS state/service mapping) | M | §5.2 |
-| M26 | Sudo session switch: sudoers drop-in, glass askpass, keepalive/disarm service, bar pill, Fish banner + Kitty marks | S–M | §7.5 |
+| M1 | Ilyamiro-faithful top widget bar: independent islands, 3+ workspace model, centered clock/weather, top system widgets; no app tasks | **M–L** | §5.1–5.2 |
+| M2 | Independent top-widget expansions on caelestia services, including media/EQ, audio, network, BT, battery, resources/System | **M–L** | §5.1–5.2/§5.9 |
+| M3 | Cross-surface rail-window→top-workspace drag chain | S–M | §5.1/§5.3 |
+| M4 | MPRIS→desktop-entry source-app resolver | S | §5.9 |
+| M5 | Caelestia rail app stack adaptation: pinned/current running/current minimized, grouped previews, agridyne visual treatment, optional Kurve | **M** | §5.3 |
+| M6 | Composite lock: agridyne visual direction × Vast depth × selected ilyamiro motion × DMS lifecycle/status | **L** | §5.10 |
+| M7 | Top calendar/weather expansions, event dots and detailed forecast on shared services | M | §5.1–5.2/§5.4 |
+| M8 | Ilyamiro top media/EQ composition on equalizer-state backend | M | §5.9 |
+| M9 | Theme transaction wrapper + missing consumer templates | **M** | §4 |
+| M10 | SkwdBridge subscriber + evening timer | S | §4.1 |
+| M11 | Full wallpaper-derived semantic generator: auto light/dark, colored surface ladders, contrast/chroma guards | **M–L** | §3–§4 |
+| M12 | Nexus pages and glass tuner | **M–L** | §5.8 |
+| M13 | Notification filter + ingress cap | S–M | §5.6 |
+| M14 | Network password-path and NetworkUsage fixes | S | §5.2 |
+| M15 | Alt+Tab live cycler | M | §5.16 |
+| M16 | Clipboard service/panel + ilyamiro grid/morph | M | §5.13 |
+| M17 | Native/same-workspace minimize state + rail restore/dimming + snap-pair state integration | **M–L** | §5.3/§6.2 |
+| M18 | Dev workspace toggle/status/launchers | S–M | §7 |
+| M19 | Camera watcher + mic status | S | §8.1 |
+| M20 | Health/captive portal wiring | S | §8.4 |
+| M21 | Plymouth + regreet theme | S | §5.11 |
+| M22 | Generation trimmer + known-good pin | S–M | §8.4 |
+| M23 | keyboard-backlightd + idle dim | S | §8.1 |
+| M24 | plocate launcher file mode | S–M | §5.5 |
+| M25 | DMS DisplayConfig adaptation | M | §5.2 |
+| M26 | Sudo session switch | S–M | §7.5 |
+| M27 | Deterministic two-pane snap orchestration, surplus minimization, pair dissolution/restoration | M | §6.2 |
 
-Explicitly **not** built: any from-scratch panel content, a second theming authority, a QuickShell per-window-button overlay (hyprbars owns that), drag-to-edge Aero glue (cut-list), a new wallpaper picker host (retired with the SliceDelegate plan).
+Explicitly **not built as final architecture:** DMS as the primary rail; iNiR/top-bar task buttons; top-bar pinned/running/minimized apps; Caelestia duplicate rail status stack; omarchy `special:min-*`; a second palette authority; a QuickShell per-window-button overlay; `slurp` capture/record geometry; drag-to-edge Aero glue unless separately approved.
 
 ---
 
 ## 10. THE BUILD SEQUENCE
 
-Each stage ends at a gate; Alex tests before the next begins. Order chosen so every stage leaves the machine *more* usable than before it.
+Each stage ends at a gate; later-stage work may proceed in isolated worktrees, but each deployed closure stays intentional and stage-pure.
 
-- **Stage 0 — Reconcile & baseline.** Commit the uncommitted work (§8.7); **set the `AlexbringsMercy/nix` upstream and push** (pushes repeat at every gate — §2.3). Read `/etc/nixos` (sudo), port the TV firewall rule + any other channel-side additions into the flake; flake becomes the sole authority. Reboot **[GATE]**: generation boots clean, `start-hyprland` warning resolved or root-caused, Media Center still reachable from the TV, controller still paired. Delete gens 1–7.
-- **Stage 1 — Chassis up.** Vendor the caelestia fork (aurora-shell) + plugin build via Nix; aurora scheme with pinned ladder (M11); shell replaces the old QuickShell/Waybar/Rofi/SwayOSD trees (their keepers — equalizer-state, weather cache pattern, dunst fallback — carried first). Bar still vertical at this gate (stock caelestia) — **[GATE]**: shell runs supervised, launcher/dashboard/notifications/OSD/session/utilities/Nexus all open, IPC works, glass A/B evening happens here (§3.2), VA-API confirmed.
-- **Stage 2 — The window model.** hyprbars + minimize + focus policy + input tuning (DWT quirk!) + gestures + keymap + detached-launch sweep. **[GATE]**: §6.2 checklist; the §5 input/window bug list retested line by line. *(Clarified 2026-07-28 — see §10.1.)*
-- **Stage 3 — The top taskbar + expanded panels.** M1–M4 (rail stays native throughout — no downtime on the surfaces Alex already likes). **[GATE]**: §5.1 gate.
-- **Stage 4 — Wallpaper & theme pipeline.** skwd-wall + daemon (awww retired), SkwdBridge, transaction, all templates (M9–M10); **import the Downloads wallpaper collection into the skwd library** (`wall.import` → `~/Pictures/Wallpapers`, tag the `dark/` subset). **[GATE]**: §4.1 gate — the one-breath recolor across every consumer, **plus the §3.2 glass A/B gate, moved here by explicit operator approval dated 2026-07-28** *(see §10.1)*.
-- **Stage 5 — Rail dock entry + desktop layer + clipboard + polkit + switcher.** M5, M15–M16, desktop menu, hyprexpo. **[GATE]**: two-surface daily flow feels complete; rail hover-reveal feels "on demand," never in the way. *(Placement unchanged; clipboard scope confirmed 2026-07-28 — see §10.1.)*
-- **Stage 6 — Files & apps.** Dolphin suite (theming, portals, udiskie, Ark, MIME map), apps.nix (§13 list), nh + store lanes, npm-global hardening. **[GATE]**: USB/trash/portal/upload checklists; every §13 app installed and opens.
-- **Stage 7 — Boot & lock.** Plymouth, timeout 0, startup-manager default, greetd+keyring, regreet; the composite lock (M6) behind its **mandatory** gate; hypridle + lid policy + T2 suspend acceptance (§8.5). This stage has the two hardest gates in the plan — schedule Alex time.
-- **Stage 8 — Dev workspace & agents.** §7 complete: toggle, launchers, slice, hooks, zellij, fzf, Starship; sysmon workspace. **[GATE]**: §8.6 dual-agent responsiveness trial; hooks toast; a killed Kitty window doesn't kill an agent.
-- **Stage 9 — Guardrails & Nexus completion.** Battery/night-light/audio-lifecycle/disk/GC/backup/health/captive-portal (§8.2–8.4); Nexus pages M12 in ship order; dashboard calendar (M7); music stage-2 (M8). **[GATE]**: guardrail acceptance matrices (audio transitions, thresholds, restic run, health event).
-- **Stage 10 — Hardware truth & polish.** Webcam gate, speaker preset A/B, kbd-backlight, gaming legs A–D, OCR, color picker, emoji, system sounds, micro-status, C-item sweep (§11). **[GATE — acceptance]**: the §6.1 walk end-to-end with Alex; §11 do-not-regress checklist; pin known-good; §15 generation wipe; retire this plan's Stage markers into EXECUTION_LOG.
+- **Stage 0 — Reconcile & baseline.** Existing gate/debt remains.
+- **Stage 1 — Chassis up.** Caelestia chassis/services/surfaces running; existing acceptance debt remains recorded. Glass A/B is not accepted here; it is Stage 4.
+- **Stage 2 — Window model + minimum left-rail recovery slice.** Drag-anchor and corner patches; hyprbars ABI match; DWT; pointer-scroll/click-focus; deterministic two-pane snap; same-workspace minimize backend; the final left-rail pinned/running/minimized/one-click-restore slice; screenshot color-fidelity/final Areapicker; detached-launch cleanup. **[GATE]:** §6.2 plus rail recovery and screenshot gates. No top widget bar is required in the Stage 2 closure.
+- **Stage 3 — Ilyamiro top widget bar + independent expansions.** M1–M4 and M8: nearly source-faithful top composition, workspace 3+ model, media/EQ, clock/weather, system widgets/panels. At this gate Alex views completed top+left together and chooses the default rail visibility; persistent and immediate hover-reveal remain configurable.
+- **Stage 4 — Wallpaper & theme pipeline.** skwd, SkwdBridge, palette transaction/templates, imports, and the explicitly moved glass A/B gate.
+- **Stage 5 — Desktop layer + clipboard + polkit + switcher.** M15–M16, desktop menu, Hyprexpo and supporting surfaces. The rail app stack is no longer deferred here.
+- **Stage 6 — Files & apps.** Dolphin suite, apps, portals, MIME, install/update lanes.
+- **Stage 7 — Boot & lock.** Plymouth, greeter/keyring, composite lock and suspend/lid gates.
+- **Stage 8 — Dev workspace & agents.** Full agent workspace and responsiveness gate.
+- **Stage 9 — Guardrails & Nexus completion.** System guardrails and Nexus pages. No dashboard UI is built; resource/calendar/weather depth already lives in approved top expansions, Nexus, and sysmon.
+- **Stage 10 — Hardware truth & polish.** Remaining hardware/bonus acceptance and known-good pin.
 
-Dependencies are linear except: Stage 4 can start once Stage 1's scheme exists; Stage 6 and 7 are order-swappable; Stage 8–10 items may interleave as gates allow. **Nothing in any stage is a throwaway** — every artifact is the end-state artifact.
+**Batch rule:** before every expensive build the PM publishes the closure manifest. Build time is used for compatible work in the current stage and isolated later-stage work. Gen 27 from the 2026-07-29 session is a valid compile/staging milestone but not the final Stage 2 candidate because it predates the approved snap/minimize/rail/focus decisions.
 
-### 10.1 Sequencing clarifications (2026-07-28, active generation 26)
+### 10.1 Sequencing clarifications — carried forward
 
-Operator-approved sequencing only. **The architecture in §1–§9 is unchanged.** Full decision text: `EXECUTION_LOG.md` → **OPERATOR DECISIONS — 2026-07-28 — ACTIVE GENERATION 26** (decisions 15–17). Close-out brief: `STAGE2_CLOSEOUT_WORK_ORDER.md`.
+Carried from the 2026-07-28 operator decisions. The full decision text, with dates
+and acceptance conditions, remains in `EXECUTION_LOG.md`; these are the binding
+summaries plus the testable specifics, which must not be lost in condensation.
 
-**Stage 2 — screenshot colour fidelity pulled forward (decision 15).** Stage 2's close-out now includes an operator-approved urgent screenshot colour-fidelity correction. Both region **and** full-screen captures currently carry a uniform mauve/pink cast, so the region-selection overlay is *not* established as the sole cause. Required: diagnose **both** capture paths (is the physical display tinted, or does PNG capture change the colours?); **pull forward the final §5.12 capture architecture** rather than repairing the interim path; ship no throwaway interim screenshot implementation (MASTER §1.6). **Stage 2 cannot close while screenshots retain a uniform tint or a capture overlay baked into output.** This is a targeted capture correction — it is not authorisation for the Stage 4 palette or theme work.
+- **Screenshot colour fidelity remains a Stage 2 blocker** (decision 15, 2026-07-28).
+  Final Areapicker architecture, no overlay baked into output, correct region *and*
+  full-screen output, clipboard *and* timestamped PNG. No throwaway interim
+  implementation may be retained (MASTER §1.6). *Root cause was found and proven on
+  2026-07-28 — slurp's selection overlay composited into the frame; the full-screen
+  path was never defective. See findings 19a–19c.*
+- **Glass A/B remains explicitly Stage 4** (decision 16, 2026-07-28). The current
+  glass is **not accepted** — live `size 8 / passes 2 / vibrancy_darkness 0.38` is an
+  unratified interim value, not a shipped decision. The Stage 4 gate must run the
+  complete matrix: `size 12 / 1-pass` versus `size 8 / 2-pass`; `xray = true` versus
+  `false`; the optional `decoration:glow` rim accent; actual wallpaper visibility
+  through the surfaces; and Alex's physical visual approval. Stage 4 cannot close
+  without it.
+- **Clipboard surface remains Stage 5**, placement unchanged, and is committed
+  scope — `cliphist` + `wl-clipboard` ingestion, the iNiR service/panel, the ilyamiro
+  grid/morph presentation, `Super+V`, a clickable bar/System entry, and persistent
+  history across reload. **Only the privacy-policy layer** (sensitive-type exclusion,
+  expiry) is deferred per MASTER §15. The surface itself is not optional.
 
-**Stage 4 — the glass A/B gate lives here (decision 16).** §3.2's glass A/B gate was a Stage 1 gate item; its move to Stage 4 is now explicitly approved by Alex, dated 2026-07-28, because the final wallpaper and palette pipeline lands here. The Stage 4 gate must include: `size 12 / 1-pass` versus `size 8 / 2-pass`; `xray = true` versus `false`; the optional `decoration:glow` rim accent; actual wallpaper visibility through the surfaces; and Alex's physical visual approval. **The current glass settings are not accepted** — the live `size 8 / passes 2 / vibrancy_darkness 0.38` is an unratified interim value, not a shipped decision. Stage 4 cannot close without Alex physically approving the result.
+### 10.2 Architecture decisions — 2026-07-29
 
-**Stage 5 — clipboard scope confirmed, placement unchanged.** Clipboard history remains Stage 5 as written in §5.13, and its surface is committed scope: `cliphist` + `wl-clipboard` ingestion; the iNiR service/panel; the ilyamiro grid/morph presentation; `Super+V`; a clickable bar/System entry; persistent history across reload. **Only the privacy-policy layer** (sensitive-type exclusion, expiry) remains deferred per MASTER §15 — the clipboard surface itself is not deferred and must not be treated as optional.
+Record in `EXECUTION_LOG.md` with the active generation and operator-decision numbers:
+
+1. Top bar = ilyamiro system/widget surface; left rail = caelestia app/window surface.
+2. No app duplication on top and left; no final system-status duplication on the rail.
+3. Left rail displays pinned apps always and running/minimized windows from current workspace only.
+4. Multiple windows use hover previews and exact selection.
+5. Minimized windows retain original workspace; `special:min-*` rejected.
+6. One-click rail restore is mandatory; restore hotkey optional only.
+7. Exact left/right snap; occupied-side replacement minimizes prior occupant; completed pair minimizes all surplus same-workspace windows.
+8. Restoring surplus or changing the pair dissolves it and resumes ordinary tiling.
+9. `follow_mouse = 2` behavior is the default.
+10. Three visible workspaces + `+`; active extras expand responsively.
+11. Rail default visibility waits for a completed top+left visual A/B; both modes remain available.
+12. Future-stage implementation may proceed in isolated worktrees during waits; current closure remains stage-pure.
+13. Pinch zoom already physically passed; no retest unless touched.
+14. Four-finger up opens Hyprexpo Overview; the Caelestia dashboard UI and its edge/gesture triggers are retired.
+15. Aurora is the project/shell codename, not a palette; the teal/purple/green preset is named Northern Lights.
+16. Auto theme is dark-preferred but switches to light for clearly light wallpapers; the entire semantic palette and every supported consumer recolor coherently.
 
 ---
 
@@ -664,51 +870,88 @@ Optional layer (in the plan, first to cut):
 - **Bar pomodoro** (iNiR timers) — C12 tail.
 - **KDE Connect** (C7) — included as module + firewall ports + indicator; **needs Alex's phone answer** (Android = full; iPhone = files/clipboard only).
 - **hypr-kinetic-scroll** (macOS inertial feel; A/B vs scroll_factor fix) and **hypr-dynamic-cursors** (delight) — perf-gated.
-- ilyamiro radial Bluetooth expanded view; iNiR DockPreview live thumbnails (perf-gated); snappy-switcher trial; drag-to-edge Aero glue; `build-vm` update sandbox; caelestia scheme/variant launcher modes; background Visualiser + DesktopClock.
-- **Deferred stays deferred (§14):** animated wallpapers, matrix boot theme, Alienware port, self-hosted music, clipboard privacy policy + WiFi-argv hardening (security bundle).
+- iNiR DockPreview alternative (only if Caelestia preview path fails/perf-gated); snappy-switcher trial; drag-to-edge Aero glue; `build-vm` update sandbox; caelestia scheme/variant launcher modes; background Visualiser + DesktopClock.
+- **Deferred/default-off:** matrix boot theme, Alienware port, self-hosted music, clipboard privacy policy. Animated-wallpaper capability ships with skwd but stays default-off behind its performance policy. The WiFi password-path fix is required when the network UI is adapted and is not silently deferred here.
 
 ---
 
-## 12. THE SIX OPEN QUESTIONS — RESOLVED
+## 12. THE RESOLVED ARCHITECTURE QUESTIONS
 
-1. **skwd daemon vs awww →** Full skwd-wall app **with** its daemon; **awww retired**. The daemon's socket API + `skwd.wall.applied` broadcast (verified on disk) gives the palette pipeline a patch-free hook; its 38 shader transitions are the approved experience; its native rotation covers auto-cycling with theming reacting to every apply. The MASTER §6 "vendor SliceDelegate" instruction is retired as obsolete. (§4.1)
-2. **How much caelestia →** The shell **is** the chassis (fork = aurora-shell): plugin, services, drawers, launcher, dashboard, windowinfo, tray, notifications, OSD, session, utilities, areapicker, Nexus, CLI — and after the 2026-07-21 revision, **its bar stays vertical as the left rail**, with a new ilyamiro-geometry top taskbar beside it. Replaced: lock (composite), wallpaper rendering (skwd). Grafts ride inside it. Rationale: Alex's approved surfaces are caelestia code; the plugin we'd need anyway collapses the slice-vs-shell economics; Nexus/lyrics/VPN/appdb arrive nearly free; one authority everywhere. (§2.1)
-3. **Lid close →** logind owns suspend; hypridle locks-before-sleep with `inhibit_sleep=3`; `LidSwitchIgnoreInhibited=yes`; T2 suspend ships behind a repeated-cycle acceptance gate, with the apple-bce/brcmfmac workarounds added **only** on reproduced failure; Hyprland switch-bind is the documented fallback, exact-named, never unqualified. (§8.5)
-4. **Agent workloads →** `agent.slice` (CPUWeight 20 / IOWeight 20 / MemoryHigh 4GiB / MemoryMax 5.6GiB, nice+idle-IO scopes), all §7 launchers inside it; nix-daemon contained separately (`max-jobs 1, cores 2` + weights); no hard quota unless the dual-agent gate demands it; t2fanrd keeps it cool and audible-sane. Work-conserving weights are how "smooth on this machine" and "agents at full speed when idle" coexist. (§8.6)
-5. **Recent config to preserve →** Located, itemized, and staged: Xbox BLE tuning + t2fanrd curve + VA-API (uncommitted flake changes — commit verbatim); Media Center stack (user-dir; backed up; docked; never auto-started); TV firewall MAC rule (channel config — ported to the flake in Stage 0); pairing/keyring/ServerId state untouched. (§8.7)
-6. **Current broken things →** Screenshot keybind → rebuilt capture chain (§5.12, Stage 2/4); brightness keys → rebound through the shell's brightness service + OSD (Stage 2); start-hyprland warning → Stage 0 reboot gate root-cause; all three die inside the clean-state stages rather than being spot-patched. (§10)
+1. **Wallpaper renderer:** full skwd-wall + daemon; awww retired.
+2. **How much caelestia:** the complete shell chassis and selected services/surfaces, with the final rail pruned to applications/windows and system popouts re-anchored to top widgets.
+3. **Top-bar owner:** ilyamiro structure/widgets nearly 1:1, with only explicit Aurora system additions; no running/minimized apps.
+4. **Left-rail owner:** caelestia structure/app previews; DMS/iNiR supply missing behavior patterns only; agridyne supplies major visual direction.
+5. **Palette chain:** skwd triggers; the project's patched caelestia engine generates and publishes the complete auto-light/auto-dark semantic palette; iNiR/agridyne map consumers; Hellwal is fallback; Matugen is not system authority. Aurora is a codename, not the color policy; Northern Lights is one preset.
+6. **Minimize/snap:** same-workspace minimized state, left-rail recovery, deterministic two-pane pair with surplus minimize.
+7. **Lock:** agridyne visual direction + Vast engine + selected ilyamiro interaction/motion + DMS lifecycle/status donors.
+8. **Lid, agents, protected state:** existing §8 decisions remain unchanged.
 
 ---
 
-## 13. SOURCE MAP (consolidated attribution — repo → what we take)
+## 13. SOURCE MAP — ownership, use, and explicit boundaries
 
-| Source (all under `~/nix/repos/` unless noted) | Taken |
+### 13.1 Active implementation donors
+
+| Source | Used for | Explicitly not used / boundary |
+|---|---|---|
+| `caelestia/shell-main/shell-main` | Shell chassis, plugin, services, drawers, launcher, notifications, OSD, session, utilities, Areapicker, Nexus, window previews, vertical rail structure; reusable dashboard data/components only | Stock status-heavy rail and dashboard UI are not final; does not own top-bar structure, final lock face, or wallpaper renderer |
+| `caelestia` main repo + CLI | Hyprland patterns, toggle/CLI, scheme fan-out, btop/fastfetch/Fish assets | Does not override explicit window/snap/minimize decisions |
+| `ilyamiro-nixos-configuration` | Top bar nearly 1:1; independent widgets/expansions; media/EQ; system-panel presentation; motion; clipboard presentation; selected lock interaction details; FocusTime | Does not own running/minimized apps, left rail, shell backends, or one unrelated morphing hub |
+| `agridyne-dotfiles-dt/rice-contents` | Major glass/negative-space visual language, rail app-button treatment, KDE/chrome mappings, visualizer reference, lock visual composition | Does not own bar information architecture or backend behavior |
+| `liixini-skwd-wall` + daemon | Complete wallpaper UI/renderer/transitions/library/apply event that triggers full theme generation | Not semantic palette authority; internal Matugen remains scoped to picker UI |
+| `dankmaterialshell` | DisplayConfig/DisplayService, drag/drop patterns, lock lifecycle/status/greeter safety donors | Not primary rail/dock owner; not top-bar owner |
+| `snowarch/iNiR` | Polkit, Cliphist, emoji/context menus, notification caps, systemd/perf patterns, GTK/Qt/Kitty writers, selected status services | Not top-bar/task-list owner; not primary lock face |
+| Vast shell | Lock depth planes and gated unlock engine | Not entire lock visual identity or shell architecture |
+| `hyprwm/hyprland-plugins` | hyprbars, Hyprexpo; carried narrow patches with ABI-matched Hyprland | Super+RMB is not acceptance; Hyprexpo is overview, not dashboard |
+| `luisbocanegra/kurve` | Optional left-rail cava visualizer | Not required for rail/minimize acceptance |
+| `end4-dots-hyprland` | hypridle and selected animation/base snap references | Does not override approved deterministic pair rules |
+| `cxOrz/dotfiles-hyprland` | Selected panel/service and OSD patterns | Not primary system-panel architecture |
+| `linuxbeginnings-hyprland-dots` / ML4W | Diffuse radial wallpaper-derived gradient technique | Not overall theme authority; hues come from the active scheme |
+| `saatvik333-hyprland-dotfiles` | Terminal/dev experience quality reference and sourced pieces where cited | Not shell/bar architecture |
+| `abusoww/tuxmate` | Installer UX reference | Not package backend authority |
+| omarchy | Historical hyprbars values and minimize research reference | `special:min-*` backend explicitly rejected as final |
+
+### 13.2 Policy/visual references rather than primary code owners
+
+| Source | Role | Boundary |
+|---|---|---|
+| `mubin-thinks/minimal-wm-config` | Whole-system cohesion quality reference and gowall discovery | Its pinned-dark-surface policy is explicitly not adopted; result/reference only, not runtime palette authority |
+| `nathanhoulamy/macos-dotfiles` | Whole-system theming/cohesion reference | No primary component ownership assigned |
+| `SherLock707/hyprland_dot_yadm` | Wallpaper color-picking/theming research reference | Incomplete read must not silently become final code |
+| `snes19xx/surface-dots` | Launcher/widget sizing and terminal-startup reference | Rofi and its opacity are not final architecture |
+| `elifouts`, `GlassesArch`, `Sharddots` | Historical bar/glass mechanics and geometry references | Waybar implementation retired |
+| `ekremx25` | Display-panel row-layout visual reference | DMS remains functional Display backend |
+| `angelobdev/t2-easyeffects-preset` + AutoEq | Speaker/headphone preset sources | Audio backend only |
+
+### 13.3 Fallback, optional, deferred, or rejected
+
+| Source/tool | Status |
 |---|---|
-| `caelestia/shell-main/shell-main` | **The chassis** (§2.1 manifest); btop theme; fastfetch art; Fish abbrs |
-| `caelestia` main repo + `cli-main` | Hyprland Lua patterns (gestures/keybinds/rules), `toggle.py`, CLI subcommands, scheme/theme fan-out |
-| `liixini-skwd-wall` (+ its `skwd-daemon` flake input, pinned) | The entire wallpaper system |
-| `dankmaterialshell` | Dock (11 files) · DisplayConfig + DisplayService · OverviewWidget drag chain · Lock.qml lifecycle donor · greeter reference |
-| `inir` | Polkit dialog · Cliphist service/panel · emoji DB+picker · desktop ContextMenu · MicToggle · Battery service · Hyprsunset service/controls · ingress caps · systemd unit hardening · Qt/GTK/Kitty theme writers · ShellExec scope pattern · AltSwitcher perf guards (pattern) |
-| `ilyamiro-nixos-configuration` | **The expressive presentation layer:** top-bar geometry/sections · expanded panels (battery ring, liquid audio orb, radial Bluetooth, network gauge) · EQ widget · lock visual identity · clipboard grid/morph · hold-to-confirm fill · motion patterns · FocusTime |
-| `saatvik333-hyprland-dotfiles` | Terminal-experience quality bar (startup art standard; LazyVim proven in this aesthetic lane) |
-| vast-shell (web, rev `2884937…`) | Lock depth planes + gated unlock engine |
-| omarchy-desktop-shell (web) | `window-minimize` + hyprbars config values |
-| `hyprwm/hyprland-plugins` (flake) | hyprbars · hyprexpo |
-| `luisbocanegra/kurve` (via agridyne) | Cava strip renderer + exact sizing |
-| `agridyne-dotfiles-dt/rice-contents` | Glass-tile motif · KDE color mapping · negative-space discipline · chrome/content rule |
-| `end4-dots-hyprland` | hypridle config · animation curve tables · snap values |
-| `cxorz-dotfiles-hyprland` | FeatureTile split-tile pattern · OSD timing references |
-| `linuxbeginnings-hyprland-dots` | ML4W radial-aurora gradient technique |
-| `abusoww-tuxmate` | Install-UX bar + declarative snippet lane |
-| snowfallorg/nix-software-center · nix-community/nh · nvd · restic · udiskie · systembus-notify · gpu-screen-recorder · t2fanrd (in flake) · angelobdev/t2-easyeffects-preset · AutoEq · hyprsunset · hyprpicker · tesseract · zellij · fzf+bat+fd · Starship (tokyo-night preset) · LazyVim · snappy-switcher (cut-list) · regreet/tuigreet · plocate | Named tools, roles as cited |
+| Hellwal | Named palette-generator fallback only if the patched caelestia generator fails acceptance; must feed the same semantic contract |
+| Matugen | Rejected as system-wide authority; skwd-internal use may remain scoped to picker UI |
+| Hyprlock | Installed emergency lock fallback only |
+| gowall | Optional inverse wallpaper recoloring tool |
+| snappy-switcher | Cut-list fallback for Alt+Tab only |
+| Harshil-Anuwadia boot theme | Deferred; current bootloader path unchanged |
+| Waybar, Rofi, awww, Waypaper | Retired from final architecture |
+| DMS primary dock, iNiR top task list | Rejected ownership roles, though narrow donor patterns remain usable |
+| omarchy `special:min-*` | Rejected minimize backend |
+
+### 13.4 Named utility layer
+
+nix-software-center/`nh`/`nvd`, restic, udiskie, systembus-notify, gpu-screen-recorder, t2fanrd, hyprsunset, hyprpicker, tesseract, zellij, fzf/bat/fd, Starship, LazyVim, regreet/tuigreet and plocate keep only the roles assigned in their sections; no utility becomes a surface owner by convenience.
+
+**Palette-specific ownership:** patched caelestia engine = semantic authority; skwd = wallpaper/trigger; iNiR + agridyne = consumer mapping/cohesion donors; Hellwal = fallback; Matugen = not system authority. Aurora is only the project codename; Northern Lights is one optional preset.
+
+---
 
 ## 14. NO-SESSION LIST ACCOUNTING (nothing vanished)
 
-A1→§2.1/§5.1 · D1→§2.1 (comparison run, drawers win) · D2→§5.9 (staged) · D4→§5.2 (bug-fixed donor) · D5→§5.6/M13 · D7→§3.2 gate · process workspace→§5.18 · Ctrl+Shift+T→§7.4 · MIME map→§5.17 · CUPS→§8.4 · VA-API→§8.7/§5.12 · Chrome pack→§11/§6.2 · weather Austin→§5.4 · purple film→§5.12 · capture/launcher binds→§6.4 · system sounds→§8.4 · USB/trash→§5.17 · C17/C15/C19→§3.4/§5.6/§6.2 · C9→§5.7 · generation cleanup→§8.4/§10 · glass alpha/palette slots/EasyEffects/detach/motion/ML4W→§3–§4 · C6/C8/C11/C12/C20→§11/§5.4 · B18 map→§6.3 · deferred security items→§11 · **C7/C18 user questions→§11 (flagged for Alex)**.
+A1→§2.1/§5.1 · D1→§2.1 (comparison run, drawers win) · D2→§5.9 (staged) · D4→§5.2 (bug-fixed donor) · D5→§5.6/M13 · D7→§3.2 gate · process workspace→§5.18 · Ctrl+Shift+T→§7.4 · MIME map→§5.17 · CUPS→§8.4 · VA-API→§8.7/§5.12 · Chrome pack→§11/§6.2 · weather Austin→§5.1/§5.2 · purple film→§5.12 · capture/launcher binds→§6.4 · system sounds→§8.4 · USB/trash→§5.17 · C17/C15/C19→§3.4/§5.6/§6.2 · C9→§5.7 · generation cleanup→§8.4/§10 · glass alpha/palette slots/EasyEffects/detach/motion/ML4W→§3–§4 · C6/C8/C11/C12/C20→§11/§5.1–§5.2 · B18 map→§6.3 · deferred security items→§11 · **C7/C18 user questions→§11 (flagged for Alex)**.
 
 ## 15. BUG LOG TRACEABILITY (§5 of MASTER → where it dies)
 
-Input: DWT→§6.2(quirk) · repeat→§6.2 · scroll→§6.2 · gestures/pinch→§6.2. Windows: 3rd-window→§6.2 · corner-resize→§6.2(honest) · hover-focus→§6.2(`follow_mouse 0`) · ws2 dead→§5.1(QuickShell workspaces) · move-between-ws→§5.1/§6.2 · agents-can't-close→§6.4(Kitty) · bar-restart-kills→§5.1+§2.2(`KillMode=process`). Bar/panels: cramped/media-size→§5.1(34px) · CPU=RAM→§5.1 · calendar wall→§5.4 · no audio panel→§5.2 · capture-under-battery→§5.7 · notif spam→§5.6. Launcher: broken visuals/Escape-only/Cmd+Space→§5.5. Visual: opaque glass→§3.2 · non-universal palette/cheap gradients→§4/§3.4 · EasyEffects visible/preset path→§5.9 · Thunar dated→§5.17(Dolphin) · picker jank→§4.1 · no morphing→§3.3. Capture/keys: purple film→§5.12 · Cmd+Shift+S/Print→§5.12 · Kitty Ctrl+T→§6.4 · weather→§5.4.
+Input: DWT→§6.2 hwdb · repeat/scroll→§6.2 · pointer-scroll focus→§6.2 `follow_mouse=2` · gestures/pinch→§6.2. Windows: drag jump→§6.2 patch · corner resize→§6.2 mandatory patch · third-window/two-pane behavior→§6.2 deterministic pair · minimize/recovery→§5.3/§6.2 same-workspace rail · workspace bloat→§5.1 dynamic 3+ · move-between-workspaces→§5.1/§6.2 cross-surface drag. Bars/panels: app duplication→§5.1 removed · rail status duplication→§5.1 removed · ilyamiro source fidelity→§5.1–§5.2/§5.9 · calendar/dashboard duplication→§5.1/§5.4 retired · CPU/RAM distinction→§5.1 · capture actions→§5.7. Visual: glass→§3.2/Stage4 · full wallpaper-derived light/dark palette→§3–§4 · lock source ownership→§5.10 · motion→§3.3. Capture: pink film/slurp→§5.12 · region/full paths→§5.12. Launcher/files/notifications remain in their existing sections.
 
 ---
 
