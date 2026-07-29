@@ -11,6 +11,18 @@ signal for this personal installation.
 | aurora-shell chassis | `github.com/caelestia-dots/shell` | `/` | `modules/home/aurora-shell/` | Attribution headers; path-input revision fallback build shim; aurora scheme defaults (ladder pinned, dark default, accent families); Stage 1C cutover — HM module renamed to `programs.aurora-shell` + unit `aurora-shell` (§2.2 hardening, `KillMode=process`), dunst fallback keeper carried with a static `assets/fallback-dunstrc`, write-if-absent `assets/aurora-scheme.json` state seed. <!-- # Aurora: Stage 1B/1C local delta. --> |
 | window-minimize | `github.com/OnlyLyan/omarchy-desktop-shell` | `05-hyprbars-titlebar/files/window-minimize` | `scripts/window-minimize` | Vendored **verbatim** (upstream now cloned to `repos/omarchy-desktop-shell`); only an attribution header added — runtime deps come from the `writeShellApplication` wrapper. The same repo's `hyprbars.conf` traffic-light button values (red/yellow/green ✗/⌄/◇) are used in `modules/home/hyprland/hyprbars.lua.in`, translated to the native-Lua `hl.plugin.hyprbars.add_button` API. (Stage 2A) |
 
+## Carried compositor and plugin patches
+
+Narrow, isolated patches carried against pinned upstreams. Each is justified by a
+proven mechanism read from the pinned source, applies with zero fuzz, and is
+listed here before it is adopted.
+
+| Patch | Upstream | Pinned revision | Touches | Why it is carried |
+|---|---|---|---|---|
+| `modules/nixos/patches/hyprland-drag-anchor.patch` | `github.com/hyprwm/Hyprland` | `0.55.4` (`a0136d8c`) | `src/layout/supplementary/DragController.cpp`, one hunk inside `if (m_dragThresholdReached)` | Restores Hyprland's own former behaviour: a tiled window picked up for a drag keeps the normalized grab anchor instead of jumping centre-under-cursor. Operator decision #10 (2026-07-22). |
+| `modules/nixos/patches/hyprland-deco-border-grab.patch` | `github.com/hyprwm/Hyprland` | `0.55.4` (`a0136d8c`) | `src/managers/input/InputManager.cpp`, three hunks — `processMouseDownNormal` band, its input-decoration guard, and the matching `setCursorIconOnBorder` hover band | `processMouseDownNormal` measured the resize grab band outwards from the *client surface* (`m_realPosition`/`m_realSize`), so on a window carrying a reserved top decoration the band fell 18 px short of the visible top corners; and hyprbars cancels the event-bus button press for any point inside its own box (`hyprbars/barDeco.cpp:221`), which is why `extend_border_grab_area` provably could not reach through. The patch measures the band from `getWindowBoxUnified(RESERVED_EXTENTS)` — the idiom already used at `src/layout/LayoutManager.cpp:226` — and skips it over decorations flagged `DECORATION_ALLOWS_MOUSE_INPUT`, reusing the predicate `setCursorIconOnBorder` already applies, so the click band and hover cursor agree by construction. Upstream `hyprwm/hyprland-plugins#355` is open with no PR and no commit, and the causing code is unchanged on both `main` branches, so there is nothing to backport. Operator decision #19 (2026-07-28). |
+| `modules/home/hyprland/patches/hyprbars-hover.patch` | `github.com/hyprwm/hyprland-plugins` | `v0.55.0` (`90e66baf`) | `hyprbars/` button hover state | Adds the button hover-highlight state the plugin does not implement. (Stage 2A) |
+
 The chassis was vendored from the on-disk snapshot audited by the research corpus. The upstream remote `github.com/caelestia-dots/shell` is recorded for future diffs. A history graft was deliberately not performed so the audited bytes stay exact (PM decision, 2026-07-21).
 
 | Source | Planning revision | Use |

@@ -34,8 +34,9 @@
       system = "x86_64-linux";
       hyprlandOverlay = _: prev: { # Aurora: carry the approved tiled-drag grab-anchor fix in every package set.
         hyprland = prev.hyprland.overrideAttrs (old: { # Aurora: extend nixpkgs' pinned Hyprland derivation without replacing its attributes.
-          patches = (old.patches or [ ]) ++ [ # Aurora: retain any nixpkgs patches before applying the local compositor fix.
+          patches = (old.patches or [ ]) ++ [ # Aurora: retain any nixpkgs patches before applying the local compositor fixes.
             ./modules/nixos/patches/hyprland-drag-anchor.patch # Aurora: preserve the normalized grab anchor when a tiled window floats on pickup.
+            ./modules/nixos/patches/hyprland-deco-border-grab.patch # Aurora: measure the resize band from the reserved box so corners outside a reserved decoration stay grabbable.
           ]; # Aurora: finish the additive Hyprland patch list.
         }); # Aurora: finish the patched Hyprland derivation.
       }; # Aurora: share one compositor override across standalone Home Manager and NixOS evaluation.
