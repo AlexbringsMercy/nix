@@ -2873,3 +2873,33 @@ or the application rail.
 **Acceptance condition:** the runtime gate rows for focus restoration on cancel and
 completion, exact window bounds, the full-screen button, toolbar absent from output,
 and no ghost screenshot icon in the rail.
+
+---
+
+### Correction — the Kitty SIGUSR1 rule was recorded too broadly (2026-07-29)
+
+Carried forward during the `ISSUE_LOG.md` migration so the corrected diagnosis is
+not lost with the archived file.
+
+**What this log said:** *"Never send Kitty `SIGUSR1`: it terminates this Kitty
+0.47.4 build."*
+
+**What the source actually says.** In Kitty 0.47.4 `child-monitor.c`, `SIGUSR1` is
+an explicitly handled signal — `KITTY_HANDLED_SIGNALS` includes it, and the handler
+is `case SIGUSR1: ss->reload_config = true;`. It is **reload-config**, dispatched
+through signalfd in the event loop. It does not terminate the GUI process.
+
+**The real mechanism.** `SIGUSR1`'s default disposition is `Term`, and **only the
+kitty GUI process installs the handler**. A broad `pkill -USR1 kitty`-style send
+also reaches `kitten __watch_conf__`, `kitten __atexit__` and kitty's own children,
+none of which handle it. Those die, the window vanishes, and it presents as "kitty
+terminated." Both helpers are visible in this machine's live process tree, so the
+mechanism is concrete rather than hypothetical.
+
+**Corrected rule:** do not broadcast `SIGUSR1` across the process name. Targeting
+the kitty GUI process specifically is a config reload and is safe. The original
+blanket prohibition is superseded — it forbade a working mechanism on the strength
+of a symptom.
+
+**Status:** documentation correction only. No behaviour in the tree depends on it
+today; recorded so a future session does not re-derive it or avoid a usable path.

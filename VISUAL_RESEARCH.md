@@ -4,6 +4,15 @@ Author: Claude Code research pass, 2026-07-16
 Companion: `OVERHAUL_PLAN.md` (root causes — accepted as input), `ISSUE_LOG.md`,
 `~/Downloads/visual-design-reference.md` (design intent).
 
+> **Read-list correction (2026-07-29).** All three companions above are now
+> historical. `OVERHAUL_PLAN.md` and `ISSUE_LOG.md` live in `archive/`
+> (`archive/superseded-handoffs/2026-07-28/` and
+> `archive/superseded-docs/2026-07-29/`), and ISSUE_LOG's still-live items were
+> migrated to `docs/issue-log-migration-2026-07-29.md`. The design-intent document
+> is now `visual-design-reference.md` at the repository root, itself subordinate to
+> `GRAND_PLAN.md`. This research pass remains valid as dated research; it is not
+> current architecture authority.
+
 > **Status: research only.** Nothing on the machine was changed. Every claim below
 > is sourced; anything unverified is marked **[UNVERIFIED]**.
 
