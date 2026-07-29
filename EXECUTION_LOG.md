@@ -2385,3 +2385,31 @@ are dead; `modules/dashboard/` remains in the tree as a component source.
 **Acceptance condition:** after reboot, `Super+K` does nothing, no top-edge hover or
 swipe raises the dashboard, no clickable path opens it, and the Stage 3 widgets can
 still read live media/weather/resource data when they arrive.
+
+---
+
+### Reboot — generation 31, 2026-07-29
+
+**Operator approved the single reboot**, with the added requirement that the
+working set return: this build terminal, the seedbox terminal, and Chrome.
+
+**Honest constraint stated to the operator rather than glossed:** Wayland/Hyprland
+has **no session manager**. Windows do not persist across a reboot and there is
+nothing to "restore" — they must be **relaunched**. The armed-resume hook previously
+brought back only the build terminal.
+
+`scripts/aurora-resume-agent` now relaunches all three, each with its own working
+directory because that is what decides which conversation `claude --continue`
+resumes: Chrome first (slowest to paint; its own `restore_on_startup: 1` restores
+the tabs), then a terminal in `~/Media-Center` for the concurrent seedbox lane, then
+the build terminal in `$HOME`. Chrome is guarded so a browser failure cannot abort
+the terminals. Still gated on the armed flag — an unplanned boot brings nothing back.
+
+**Staged generation 31**, boot-only. Gen 26 remains the fallback. Zero compositor
+recompiles across all four rebuilds in this sequence — the patch set never changed,
+so `wrz9r718…` was reused throughout, as decision 20 item 23 requires.
+
+**State at reboot:** zero failed system units, zero failed user units.
+
+**Stage 2 remains OPEN.** The reboot is a runtime-validation pass; the physical gate
+follows.
