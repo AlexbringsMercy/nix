@@ -6,6 +6,12 @@
       set -g fish_greeting
       set -gx EDITOR nano
       set -gx VISUAL nano
+
+      # Aurora: re-assert the agent lane invariant last, so neither a stale
+      # `fish_user_paths` universal variable nor an installer's prepend can put the
+      # npm-global lane ahead of the self-managed ~/.local/bin one. Idempotent.
+      set -gx PATH (string match -v "$HOME/.local/bin" $PATH)
+      set -gx PATH "$HOME/.local/bin" $PATH
     '';
     shellAliases = {
       rebuild-macbook = "sudo nixos-rebuild switch --flake /home/alex/.config/nixos-local#macbook --override-input macbook-config path:/home/alex/nix --override-input firmware path:/etc/nixos/firmware";
