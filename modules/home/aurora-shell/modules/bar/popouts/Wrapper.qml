@@ -28,6 +28,21 @@ Item {
 
     property alias currentName: popoutState.currentName
     property alias hasCurrent: popoutState.hasCurrent
+
+    // Aurora: the left rail's exact-window preview popout ("railgroup") state.
+    // These MUST be aliased *here*, not merely declared on PopoutState. Every
+    // bar caller — Bar.qml's checkPopout(), components/AppRail.qml's
+    // openGroupPreview() — is handed this Wrapper as `popouts` (see
+    // BarWrapper.qml, drawers/Panels.qml, drawers/Interactions.qml); none of
+    // them can see PopoutState, which is a private child of this file. Without
+    // these aliases `popouts.currentToplevels = …` raised
+    // "Cannot assign to non-existent property" (proven in the live shell's
+    // journal at AppRail.qml:181), which aborted openGroupPreview() before it
+    // reached `hasCurrent = true`, so the preview popout was never opened at
+    // all — for grouped *and* single-window tiles alike.
+    property alias currentToplevels: popoutState.currentToplevels
+    property alias currentToplevelsHovered: popoutState.currentToplevelsHovered
+
     property real currentCenter
 
     property string detachedMode

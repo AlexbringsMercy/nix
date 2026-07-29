@@ -11,6 +11,64 @@
 # why each entry names its own working directory — that is what decides which
 # conversation `claude --continue` resumes.
 
+# --- Boot-readiness gate (Stage 2 fix, 2026-07-29) --------------------------
+# This is a T2 Mac: the RTC reads back 1970-01-05 at boot (ISSUE_LOG §28) and
+# the kernel sets the wall clock from it before systemd-timesyncd corrects it
+# against a real NTP server, tens of seconds later. Any outbound TLS
+# connection attempted in between sees "SSL certificate is not yet valid".
+#
+# Proven on the 2026-07-29 boot, not assumed: the Media-Center resume
+# terminal's own transcript logged its resume prompt at a self-reported
+# 1970-01-05 timestamp and got exactly that API error half a second later
+# (isApiErrorMessage: "SSL certificate is not yet valid"); the build
+# terminal's identical call, launched by this same script on the same boot,
+# happened to land 17s after that boot's real NTP sync and went through
+# clean. Same script, same boot — the only difference was which side of the
+# sync jump the outbound call landed on. Full evidence in
+# ~/.local/state/aurora-build/pm/stage2-boot-readiness.md.
+#
+# Local window restoration must stay prompt — the operator wants windows back
+# immediately on reboot — but the *outbound* call is what actually needs a
+# trustworthy clock and network, so this gate is invoked from inside each
+# backgrounded launch below, never at the top of this script: the windows
+# still appear at once, only the network-touching part waits.
+#
+# Bounded: a machine that never syncs must still hand back working terminals,
+# so this gives up after $AURORA_RESUME_READY_TIMEOUT seconds (default 60)
+# and proceeds anyway with a visible message instead of hanging forever.
+# Checks (both systemd/NetworkManager-native, not homegrown):
+#   - timedatectl's NTPSynchronized property — the kernel's own adjtimex
+#     sync flag, authoritative regardless of which NTP client is in use.
+#   - `nm-online -x -q` — the same readiness check NetworkManager-wait-
+#     online.service itself uses, queried directly rather than via
+#     network-online.target (this system's network-online.target is
+#     currently never activated by anything — see the write-up — so
+#     is-active on it would just stall out to the timeout every boot).
+if [ "${1:-}" = "--await-readiness" ]; then
+    timeout_s="${AURORA_RESUME_READY_TIMEOUT:-60}"
+    start_ts=$(date +%s)
+    warned=0
+    while :; do
+        time_ok=0
+        net_ok=0
+        [ "$(timedatectl show -p NTPSynchronized --value 2>/dev/null)" = "yes" ] && time_ok=1
+        nm-online -x -q 2>/dev/null && net_ok=1
+        if [ "$time_ok" = 1 ] && [ "$net_ok" = 1 ]; then
+            exit 0
+        fi
+        if [ "$warned" = 0 ]; then
+            echo "aurora-resume-agent: waiting for a synchronized clock and network before contacting the API (T2 RTC reads 1970 at boot — ISSUE_LOG §28); up to ${timeout_s}s..." >&2
+            warned=1
+        fi
+        now_ts=$(date +%s)
+        if [ "$(( now_ts - start_ts ))" -ge "$timeout_s" ]; then
+            echo "aurora-resume-agent: readiness wait timed out after ${timeout_s}s (clock_synced=$time_ok network_online=$net_ok) — continuing anyway; the first request may need a manual retry." >&2
+            exit 0
+        fi
+        sleep 1
+    done
+fi
+
 flag="${XDG_STATE_HOME:-$HOME/.local/state}/aurora-build/resume-armed"
 [ -f "$flag" ] || exit 0
 rm -f "$flag"
@@ -20,16 +78,32 @@ rm -f "$flag"
 # the terminals come up. Failure here must not abort the terminals below, hence
 # the guard — a missing browser is an annoyance, a missing agent terminal loses
 # the thread.
+#
+# Restoring tabs is itself an outbound, TLS-validating action — the exact
+# mechanism that invalidated the ChatGPT session on the 2026-07-29 boot — so
+# Chrome's own process launch is gated behind the same readiness wait as the
+# terminals below, not just backgrounded.
 if command -v google-chrome-stable >/dev/null 2>&1; then
-    google-chrome-stable --ozone-platform-hint=auto >/dev/null 2>&1 &
+    ( aurora-resume-agent --await-readiness
+      exec google-chrome-stable --ozone-platform-hint=auto ) >/dev/null 2>&1 &
 fi
 
 # The concurrent Media Center / seedbox lane. Its conversation lives in
 # ~/Media-Center, so the terminal must start there for --continue to find it.
 # Backgrounded, not exec'd, so this script still reaches the build terminal.
+#
+# The kitty window opens immediately — local restore stays prompt — but the
+# fish command inside waits for readiness before claude ever makes its first
+# outbound call, so the failure this fixes never gets a chance to happen. The
+# trailing `||` retry is a second line of defense for a genuinely transient
+# failure that slips past the gate; it is not the primary mitigation — this
+# boot's own evidence is that claude does not exit on the "certificate not
+# yet valid" error, it just sits at the prompt until a human notices and
+# types something, so preventing the bad window from ever being used is what
+# actually matters here.
 if [ -d "$HOME/Media-Center" ]; then
     kitty --hold --directory "$HOME/Media-Center" \
-        fish -lc 'claude --dangerously-skip-permissions --continue "Reboot complete — the session harness relaunched you. Re-establish your working state and continue where you left off."' \
+        fish -lc 'aurora-resume-agent --await-readiness; claude --dangerously-skip-permissions --continue "Reboot complete — the session harness relaunched you. Re-establish your working state and continue where you left off." || claude --dangerously-skip-permissions --continue "Reboot complete — the session harness relaunched you. Re-establish your working state and continue where you left off."' \
         >/dev/null 2>&1 &
 fi
 
@@ -40,4 +114,4 @@ fi
 # --dangerously-skip-permissions: the build agent runs unattended across reboots
 # (matches the §7.2 dev-workspace launcher); without it the resumed session
 # prompts for every command (operator-confirmed 2026-07-21).
-exec kitty --hold --directory "$HOME" fish -lc 'claude --dangerously-skip-permissions --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'
+exec kitty --hold --directory "$HOME" fish -lc 'aurora-resume-agent --await-readiness; claude --dangerously-skip-permissions --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build." || claude --dangerously-skip-permissions --continue "Reboot complete — the build harness resumed you. Verify the reboot per the current stage gate and continue the build."'

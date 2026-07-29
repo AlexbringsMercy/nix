@@ -19,6 +19,13 @@ Item {
     id: root
 
     property string iconSource: ""
+    // Aurora: shown when iconSource is empty. AppRail resolves icons with
+    // Quickshell.iconPath(name, true), which returns "" for an unknown icon
+    // instead of the theme's `image-missing` placeholder — that placeholder is a
+    // torn-photo pictogram in Papirus and was being read as a dead
+    // "screenshot/image utility" tile in the rail. A themed Material glyph is
+    // always legible and always matches the palette.
+    property string fallbackGlyph: "web_asset"
     property bool focused: false
     property bool dimmed: false
     property int windowCount: 0
@@ -55,8 +62,16 @@ Item {
 
             anchors.centerIn: parent
             asynchronous: true
+            visible: root.iconSource.length > 0
             implicitSize: root.implicitWidth * 0.55
             source: root.iconSource
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            visible: !icon.visible
+            text: root.fallbackGlyph
+            color: root.focused ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
         }
 
         Row {

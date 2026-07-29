@@ -33,6 +33,11 @@ ColumnLayout {
     required property bool fullscreen
     readonly property int vPadding: Tokens.padding.large
 
+    // Aurora: the only bar entries allowed to reach volume/brightness on scroll
+    // (see handleWheel below). The app rail and every other region of the bar
+    // are deliberately excluded.
+    readonly property var scrollStatusEntries: ["activeWindow", "tray", "clock", "statusIcons", "power"]
+
     function closeTray(): void {
         if (!Config.bar.tray.compact)
             return;
@@ -86,33 +91,91 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
+        } else if (id === "appRail") {
+            // Aurora: the rail owns its own popout lifecycle. AppRail.qml opens
+            // "railgroup" from the hovered tile itself (it needs to know *which*
+            // tile, which this coarse childAt() hit-test cannot tell it) and
+            // closes it on its own debounce. Deliberately a no-op so the two
+            // don't fight over the same popout.
+        } else if (popouts.currentName === "railgroup") {
+            // Aurora: the chain above had no final dismissal branch, so a rail
+            // preview left open by AppRail could survive while the pointer sat
+            // on an unrelated entry (logo/clock/power) that sets no popout of
+            // its own. Scoped to "railgroup" only — the upstream branches
+            // deliberately leave e.g. an open tray submenu alone.
+            popouts.hasCurrent = false;
         }
     }
 
+    // Aurora: rewritten from upstream's positional fall-through.
+    //
+    // The old shape was `if (workspaces) … else if (y < height/2) volume else
+    // brightness`, i.e. *every* wheel event on the bar that wasn't over the
+    // workspaces entry drove volume or brightness. The app rail is a scrollable
+    // application column, so scrolling it fell straight through to
+    // `monitor.setBrightness(…)` and walked the display to zero — the operator
+    // reproduced exactly that around a minimized rail entry.
+    //
+    // Wheel handling is now scoped to the entry actually under the pointer:
+    //   • appRail     — scrolls its own list and CONSUMES the event. Nothing
+    //                   below can run for a rail scroll.
+    //   • workspaces  — unchanged behaviour, still gated on its config flag,
+    //                   and now consumes even when the flag is off rather than
+    //                   falling through to brightness.
+    //   • the status stack (activeWindow/tray/clock/statusIcons/power) — keeps
+    //     upstream's top-half-volume / bottom-half-brightness split verbatim,
+    //     so the capability is preserved on the entries where it was actually
+    //     meant to live, and both config flags stay honoured rather than being
+    //     switched off.
+    //   • everything else (logo, spacer, dead space between entries) is inert.
+    //
+    // Volume and brightness remain fully available from their dedicated
+    // surfaces — modules/osd/Content.qml's sliders and wheel handlers are
+    // untouched — so no capability is lost by removing the blanket fall-through.
     function handleWheel(y: real, angleDelta: point): void {
         const ch = childAt(width / 2, y) as EntryWrapper;
-        if (ch?.entryId === "workspaces" && Config.bar.scrollActions.workspaces) {
-            // Workspace scroll
+        const id = ch?.entryId ?? "";
+
+        if (id === "appRail") {
+            (ch.item as AppRail)?.scrollByWheel(angleDelta.y);
+            return;
+        }
+
+        if (id === "workspaces") {
+            if (!Config.bar.scrollActions.workspaces)
+                return;
+
             const mon = (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special("${specialWs.slice(8)}")` : `togglespecialworkspace ${specialWs.slice(8)}`);
             else if (angleDelta.y < 0 || (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? mon.activeWorkspace?.id : Hypr.activeWsId) > 1)
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "r${angleDelta.y > 0 ? "-" : "+"}1" })` : `workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
-        } else if (y < screen.height / 2 && Config.bar.scrollActions.volume) {
-            // Volume scroll on top half
+            return;
+        }
+
+        if (!root.scrollStatusEntries.includes(id))
+            return;
+
+        if (y < screen.height / 2) {
+            // Volume scroll on top half of the status stack
+            if (!Config.bar.scrollActions.volume)
+                return;
             if (angleDelta.y > 0)
                 Audio.incrementVolume();
             else if (angleDelta.y < 0)
                 Audio.decrementVolume();
-        } else if (Config.bar.scrollActions.brightness) {
-            // Brightness scroll on bottom half
-            const monitor = Brightness.getMonitorForScreen(screen);
-            if (angleDelta.y > 0)
-                monitor.setBrightness(monitor.brightness + GlobalConfig.services.brightnessIncrement);
-            else if (angleDelta.y < 0)
-                monitor.setBrightness(monitor.brightness - GlobalConfig.services.brightnessIncrement);
+            return;
         }
+
+        // Brightness scroll on bottom half of the status stack
+        if (!Config.bar.scrollActions.brightness)
+            return;
+        const monitor = Brightness.getMonitorForScreen(screen);
+        if (angleDelta.y > 0)
+            monitor.setBrightness(monitor.brightness + GlobalConfig.services.brightnessIncrement);
+        else if (angleDelta.y < 0)
+            monitor.setBrightness(monitor.brightness - GlobalConfig.services.brightnessIncrement);
     }
 
     spacing: Tokens.spacing.medium

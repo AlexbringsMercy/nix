@@ -50,6 +50,20 @@ MouseArea {
     property real sw: Math.abs(sx - ex)
     property real sh: Math.abs(sy - ey)
 
+    // Aurora: two fixes for "automatic window bounds appear inconsistent for
+    // floating windows" (root cause, both confirmed from hyprctl clients -j
+    // read-only, not live-tested against an actual overlap):
+    // 1. hidden (minimized) clients were not excluded. Hyprland keeps a
+    //    minimized window's last on-screen at/size in its client record, so a
+    //    hidden window can still win the hit-test below and get silently
+    //    captured/highlighted in place of the visible window that now
+    //    occupies that space.
+    // 2. floating windows can overlap each other, unlike tiled ones, and the
+    //    old sort had no tiebreaker among same-category clients -- ties fell
+    //    back to Hyprland.toplevels' own order, which is not stacking order.
+    //    focusHistoryID (0 = most recently focused) is the best read-only
+    //    proxy for "on top" available, since Hyprland raises a floating
+    //    window when it is focused.
     property list<var> clients: {
         const mon = Hypr.monitorFor(screen);
         if (!mon)
@@ -58,11 +72,12 @@ MouseArea {
         const special = mon.lastIpcObject.specialWorkspace;
         const wsId = special.name ? special.id : mon.activeWorkspace.id;
 
-        return Hypr.toplevels.values.filter(c => c.workspace?.id === wsId).sort((a, b) => {
-            // Pinned first, then fullscreen, then floating, then any other
+        return Hypr.toplevels.values.filter(c => c.workspace?.id === wsId && !c.lastIpcObject.hidden).sort((a, b) => {
+            // Pinned first, then fullscreen, then floating, then any other;
+            // most-recently-focused first within a tier.
             const ac = a.lastIpcObject;
             const bc = b.lastIpcObject;
-            return (bc.pinned - ac.pinned) || ((bc.fullscreen !== 0) - (ac.fullscreen !== 0)) || (bc.floating - ac.floating);
+            return (bc.pinned - ac.pinned) || ((bc.fullscreen !== 0) - (ac.fullscreen !== 0)) || (bc.floating - ac.floating) || ((ac.focusHistoryID ?? Infinity) - (bc.focusHistoryID ?? Infinity));
         });
     }
 
@@ -180,6 +195,7 @@ MouseArea {
             save();
         } else {
             overlay.visible = border.visible = false;
+            toolbar.hiddenForCapture = true;
             screencopy.visible = false;
             screencopy.active = true;
         }
@@ -189,7 +205,11 @@ MouseArea {
         const x = event.x;
         const y = event.y;
 
-        if (pressed) {
+        // Aurora: in Window mode (the toolbar's toggle) a press-drag never
+        // becomes a free rectangle -- it keeps re-snapping to whatever client
+        // is under the cursor, so releasing anywhere always captures exactly
+        // one window's bounds, never an arbitrary region.
+        if (pressed && root.loader.selectMode !== "window") {
             onClient = false;
             sx = ssx;
             sy = ssy;
@@ -340,6 +360,7 @@ MouseArea {
                 // in the grab, and the frame that reached hasContent was captured
                 // with it hidden.
                 overlay.visible = border.visible = true;
+                toolbar.hiddenForCapture = false;
                 root.save();
             }
         }
@@ -393,6 +414,21 @@ MouseArea {
         Behavior on border.color {
             CAnim {}
         }
+    }
+
+    // Aurora: the visible Region/Window/Full screen mode toolbar (PM directive
+    // 2026-07-29 -- a hover-to-discover affordance is not enough, MASTER §2).
+    // A sibling of screencopy, exactly like overlay/border above, so it is
+    // excluded from the region-mode grab by construction, not by timing.
+    // root.opacity's fade (closeAnim below) already cascades to it like every
+    // other sibling here, so Escape and normal completion need no extra code;
+    // only the toolbar's own instant full-screen path (hiddenForCapture on the
+    // loader) skips that fade deliberately.
+    Toolbar {
+        id: toolbar
+
+        loader: root.loader
+        screen: root.screen
     }
 
     Behavior on opacity {

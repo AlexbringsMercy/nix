@@ -21,6 +21,13 @@ Singleton {
     property string fullTarget
     property int fullWidth
     property int fullHeight
+    // Aurora: the window that owned keyboard focus just before grim ran,
+    // captured fresh in captureFullScreen and restored once grim exits --
+    // covers the Print keybind, the utilities-card Full screen action, and the
+    // area-picker toolbar's Full screen button (which tears its own picker
+    // down first and defers to this capture-and-restore rather than doing its
+    // own, so the restore dispatch can never race grim's actual screen grab).
+    property string priorFocusAddress: ""
 
     // mode is one of "region", "frozen", "clipboard", "full".
     function capture(mode: string): void {
@@ -68,7 +75,14 @@ Singleton {
     // on a path that was never defective. GRAND_PLAN §5.12 names grim as the
     // capture backend; what was retired was the standalone shell scripts bound
     // to keys, not grim.
-    function captureFullScreen(): void {
+    // Aurora: restoreAddress is optional. Passed explicitly by the area-picker
+    // toolbar's Full screen button (AreaPicker.qml's captureFullFromToolbar),
+    // which already captured the right address when ITS picker opened -- that
+    // is the address this call restores, not whatever is focused (or not) at
+    // this later moment. Left undefined by every path with no picker in the
+    // way (the Print keybind, the utilities-card action, the IPC handler), in
+    // which case a fresh capture is taken below instead.
+    function captureFullScreen(restoreAddress: string): void {
         if (grimProc.running) {
             Toaster.toast(qsTr("Screenshot busy"), qsTr("A full screen capture is already running"), "hourglass_top", Toast.Warning);
             return;
@@ -79,6 +93,12 @@ Singleton {
             Toaster.toast(qsTr("Screenshot failed"), qsTr("No focused output to capture"), "broken_image", Toast.Error);
             return;
         }
+
+        // Aurora: restore only after grim exits (see grimProc.onExited) -- an
+        // explicit focuswindow dispatch is what actually hands typing back,
+        // and firing it any earlier would race grim's own screen grab with a
+        // focus-change repaint.
+        root.priorFocusAddress = restoreAddress !== undefined ? restoreAddress : (Hypr.activeToplevel?.address ?? "");
 
         root.fullTarget = root.targetPath();
 
@@ -134,6 +154,17 @@ Singleton {
         Toaster.toast(qsTr("Screenshot failed"), qsTr("Could not write %1").arg(path ? Paths.shortenHome(path) : qsTr("the screenshot")), "broken_image", Toast.Error);
     }
 
+    // Aurora: same dispatch shape as AppRail.qml/RailGroupPreview.qml/
+    // windowinfo/Buttons.qml. A no-op if the address is empty (nothing was
+    // focused before, or this call already consumed it).
+    function restoreFocus(): void {
+        if (!root.priorFocusAddress)
+            return;
+        const addr = root.priorFocusAddress;
+        root.priorFocusAddress = "";
+        Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ window = "address:0x${addr}" })` : `focuswindow address:0x${addr}`);
+    }
+
     Process {
         id: grimProc
 
@@ -143,6 +174,9 @@ Singleton {
                 root.reportSaved(root.fullTarget, root.fullWidth, root.fullHeight, root.fullWidth, root.fullHeight, false);
             else
                 root.reportFailed(root.fullTarget);
+            // Aurora: restore regardless of outcome -- a failed capture must
+            // not also leave the operator unable to type.
+            root.restoreFocus();
         }
     }
 
