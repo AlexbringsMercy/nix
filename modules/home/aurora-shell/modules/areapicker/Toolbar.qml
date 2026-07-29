@@ -6,16 +6,32 @@
 // select it) is not sufficient on its own (MASTER §2, a hotkey/gesture is
 // never the only path in).
 //
-// Declared as a sibling of the screencopy Loader in Picker.qml, exactly like
-// the pre-existing overlay/border, so CUtils.saveItem's grab of the
-// screencopy subtree structurally excludes it -- the same "excluded by
-// construction, not by timing" property that made the original pink-film
-// overlay-tint defect (slurp's selection compositing into the frame)
-// impossible to reintroduce here. See Picker.qml's onReleased/
-// onHasContentChanged for the one place it IS deliberately hidden (the live
-// completion flash, cosmetic only) and AreaPicker.qml's captureFullFromToolbar
-// for the one path that tears it down instantly rather than fading it (the
-// toolbar's own Full screen button, which hands off to grim).
+// HOW THIS TOOLBAR STAYS OUT OF CAPTURES (2026-07-29 architecture correction).
+// Every capture mode now excludes it structurally, and by two different
+// mechanisms, neither of which is a hide:
+//
+//  * Frozen mode is captured with CUtils.saveItem on Picker.qml's `screencopy`
+//    item. This toolbar is declared as a SIBLING of that item, exactly like the
+//    pre-existing overlay/border, so a grab of that subtree cannot contain a
+//    toolbar pixel. And the frame inside `screencopy` is one the compositor took
+//    when the picker was created, before this toolbar had drawn anything.
+//
+//  * Live region/window mode and the Full screen button are captured by grim,
+//    after AreaPicker.qml's tearDownForGrim has DESTROYED this whole layer-shell
+//    window and Screenshotter.qml's pickerGoneGuard has waited for Hyprland to
+//    confirm the surface is gone from what it composites. A surface that does
+//    not exist cannot be in the frame.
+//
+// What this replaced, and why the replacement was necessary: region/window mode
+// used to switch overlay/border/toolbar invisible and start a compositor-level
+// screencopy of the WHOLE output in the same tick. This window sits on
+// WlrLayer.Overlay, the topmost compositing layer, so whether the toolbar landed
+// in that capture depended on whether Qt had committed the hide before the
+// compositor grabbed the frame -- a race, and one biased towards losing, since
+// no repaint had been requested yet. That is the hide-then-capture pattern
+// operator decision 27 rules out ("outside the captured subtree BY
+// CONSTRUCTION, NOT BY TIMING"), and the `hiddenForCapture` property that drove
+// it has been removed rather than left dormant.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -33,13 +49,6 @@ StyledRect {
     required property LazyLoader loader
     required property ShellScreen screen
 
-    // Aurora: true only for the instant, unanimated teardown that precedes a
-    // toolbar-triggered full-screen grab. Kept as its own property (rather
-    // than assigning `visible` directly from Picker.qml) so imperatively
-    // toggling it never overwrites -- and thereby destroys -- the binding
-    // below.
-    property bool hiddenForCapture: false
-
     // Aurora: rail-filtering identifier, per PM request -- this toolbar is not
     // a separate surface (it lives inside the same caelestia-area-picker
     // layer-shell window as the picker), but it is named for introspection.
@@ -51,7 +60,7 @@ StyledRect {
     // object identity -- this codebase already does the same for toplevels
     // (AppRail.qml compares .address, not the object) rather than assume two
     // separately-fetched Quickshell wrappers for the same monitor are ===.
-    visible: !hiddenForCapture && Hypr.monitorFor(root.screen)?.name === Hypr.focusedMonitor?.name
+    visible: Hypr.monitorFor(root.screen)?.name === Hypr.focusedMonitor?.name
 
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
@@ -106,9 +115,9 @@ StyledRect {
 
         // Aurora: not a mode -- a one-click action. Tears the whole picker
         // session down (all monitors) and hands off to Screenshotter's grim
-        // path; see AreaPicker.qml's captureFullFromToolbar for why that
-        // teardown is instant rather than the animated close every other exit
-        // uses.
+        // path; see AreaPicker.qml's tearDownForGrim for why that teardown is
+        // instant rather than the animated close Escape and frozen completion
+        // still use.
         IconTextButton {
             type: IconTextButton.Tonal
             isRound: true

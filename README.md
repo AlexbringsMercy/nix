@@ -47,14 +47,25 @@ To install an exact validated closure as a **boot** generation without switching
 underneath the active terminal:
 
 ```fish
+# Repin the wrapper to the current commit first — the wrapper tracks
+# git+file:///home/alex/nix, so it builds COMMITTED work only.
+nix flake update --flake /home/alex/.config/nixos-local
 set out (nix build --no-link --print-out-paths \
-  path:/home/alex/.config/nixos-local#nixosConfigurations.macbook.config.system.build.toplevel \
-  --override-input macbook-config path:/home/alex/nix \
-  --override-input firmware path:/etc/nixos/firmware \
+  /home/alex/.config/nixos-local#nixosConfigurations.macbook.config.system.build.toplevel \
   --max-jobs 2 --cores 2)
 sudo nix-env --profile /nix/var/nix/profiles/system --set "$out"
 sudo "$out/bin/switch-to-configuration" boot
 ```
+
+> **Never pass `--override-input macbook-config path:/home/alex/nix`.** The `path:`
+> fetcher ignores `.gitignore` and copies the entire worktree into the store —
+> including the 11 GB `repos/` research clones — **on every evaluation**. Three such
+> copies (33 GB) accumulated unnoticed and filled the disk to 98%, which is what
+> killed the 2026-07-29 compositor build: `ar: unable to copy file
+> 'libhyprland_lib.a'; reason: No space left on device`. The wrapper's own
+> `flake.nix` comment warns about exactly this. Use the committed `git+file:` input
+> and repin, as above. If you genuinely need uncommitted work in a build, commit it
+> first — that is also what `PM_OPERATING_RULES.md` requires.
 
 Setting the system profile is what creates the new numbered generation.
 `switch-to-configuration boot` then writes that generation's systemd-boot

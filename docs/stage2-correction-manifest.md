@@ -84,11 +84,103 @@ change. Verified by tracing the full chain (`AppRail` → `Bar` → `Wrapper` �
 
 ## 4. Review status of the remaining items
 
-Filled in from the concurrent source reviews before the build is staged. No item
-ships as "reviewed" on the strength of the previous session's assertion.
+Filled in from the source reviews before the build is staged. No item ships as
+"reviewed" on the strength of the previous session's assertion.
 
-*(Pending: window-model review — items 2 and 5; screenshot/boot review — items 6
-and 7.)*
+### Item 2 — deterministic snap: **two defects found and fixed**
+
+Core mechanism verified correct, and verified against the **live** compositor
+rather than against the code's own comments: `hyprctl` reports
+`reserved [60,10,10,10]`, `gaps_in 5`, `gaps_out 8`. Hand-computing
+`snap_geometry` with those real numbers gives left `{x=68,y=48,w=808,h=1001}` and
+right `{x=881,y=48,w=808,h=1001}` — widths exactly equal, right edge landing
+exactly on the gapped usable boundary (`881+808 = 1689 = 1697-8`). No off-by-gap
+or off-by-reserved error.
+
+Ordering confirmed at the source: `hl.dispatch` is a synchronous `guardedPCall`
+and the minimize resolves to `aurora-minimize`'s `doMinimize`, a direct
+synchronous `setHidden` + `removeTarget` with no deferral. Every surplus minimize
+therefore completes before placement, and placement is absolute rather than a
+delta, so a transient reflow cannot survive it.
+
+- **Defect 1, behavioural — fixed.** `reconcile_pair` treated *a surplus window
+  closing while minimized* identically to *a surplus window being restored*,
+  forcing pair dissolution. Closing an unrelated minimized window is not one of
+  the dissolution triggers in `GRAND_PLAN.md` §6.2. Now prunes stale bookkeeping
+  only.
+- **Defect 2, dead code — fixed.** A positional `"exact"` marker copied from a
+  donor was silently ignored by this engine's parser; replaced with an explicit
+  `relative = false`.
+
+### Item 5 — floating hover focus: **verified correct, unchanged**
+
+`float_switch_override_focus = 0`, `follow_mouse = 2`, `focus_on_close = 2` all
+intact. Mechanism confirmed against `InputManager.cpp`: the hover-triggered
+`rawWindowFocus` is gated on `(floating && PFLOATBEHAVIOR == 2)` or
+`(focus-state differs && PFLOATBEHAVIOR != 0)`; at `0` both terms are false, so
+hover sets pointer focus only. Nothing elsewhere re-enables it.
+
+### Item 6 — screenshot: **lifecycle correct; one hazard NOT structurally solved**
+
+Correct and verified: focus restoration through a single choke point on both
+cancel and completion; hover/selection never dispatches focus; the full-screen
+path is a visible button with no Print key involved; window mode excludes
+hidden/minimized clients and adds a `focusHistoryID` z-order tiebreak for
+overlapping floating windows. The toolbar is **not** an independent layer-shell
+surface — it is a plain `Item` inside the single `caelestia-area-picker`
+`PanelWindow`, so focus-strand hazard (b) is structurally impossible.
+
+**Hazard (a) is not solved by construction — being corrected now.** In
+region/window mode the code hides overlay, border and toolbar and activates
+`screencopy` in the same tick with no settle. The Qt-scenegraph argument in the
+existing comment is real but addresses the wrong layer: `screencopy`'s *content*
+is a compositor-level capture of the whole output, and the picker sits on
+`WlrLayer.Overlay`. Whether the toolbar is in that frame is a race — the exact
+hide-then-capture pattern operator decision 27 rules unacceptable, and a
+divergence from `GRAND_PLAN.md` §5.12, which specifies capture **via grim after
+geometry** precisely so contamination is structurally impossible. Being reworked
+to geometry → unmap → grim before this closure ships.
+
+### Item 7 — boot readiness: **verified correct, and an open uncertainty resolved**
+
+The previous session left unverified whether `wantedBy = [ "sysinit.target" ]`
+on `systemd-time-wait-sync.service` would delay boot. The shipped unit file was
+read directly from the store: it declares `Before=time-sync.target
+shutdown.target` and `DefaultDependencies=no` — **not** `Before=sysinit.target`.
+So it bounds `time-sync.target` only and does **not** delay `sysinit.target`,
+`basic.target`, Hyprland start, or local restore. The separation the operator
+required is real at the systemd level, not merely in the resume script.
+
+`aurora-resume-agent` confirmed: kitty windows open immediately and
+unconditionally; only the inner `claude --continue` and Chrome launches are gated;
+the wait is bounded (60s default) with a visible waiting message, a visible
+timeout message, and `exit 0` regardless; both time **and** network are required;
+no application is special-cased — "ChatGPT" appears only in prose.
+
+### Item 3/4 — rail: **verified correct, unchanged**
+
+Recorded because it corrects the previous session's framing: the preview failure
+was **global**, not grouped-only. `popouts.currentToplevels` was assigned to an
+undeclared property, throwing on every call before `hasCurrent = true` — which is
+why single-window Thunar previews failed while its restore worked. The chain is
+now declared end to end, and the hover path has no `windowCount > 1` branch, so
+one fix repairs both paths.
+
+### Rail-owner handoff — ephemeral surface identifiers
+
+Required by the cross-session handoff the PM owns:
+
+- Layer-shell namespace **`caelestia-area-picker`** — covers picker, overlay,
+  border and toolbar; they are one surface.
+- QML `objectName` **`areaPickerToolbar`** — introspection only, no independent
+  window identity.
+- `services/Screenshotter.qml` — headless singleton, no surface at all.
+
+**No rail-side filter rule is actually required.** `AppRail`'s data source is
+`Hypr.toplevels` (`hyprctl clients`), and layer-shell surfaces structurally never
+appear there. The gen-31 "dead screenshot icon in the rail" had a different root
+cause — a pinned-spec icon-resolution issue, already fixed in `AppRail.qml`. The
+identifiers above are for debugging, not filtering.
 
 ---
 

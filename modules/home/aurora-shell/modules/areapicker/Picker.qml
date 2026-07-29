@@ -22,19 +22,38 @@ MouseArea {
     property real realBorderWidth: onClient ? (Hypr.options["general:border_size"] ?? 1) : 2
     property real realRounding: onClient ? (Hypr.options["decoration:rounding"] ?? 0) : 0
 
-    // Aurora: CUtils.saveItem multiplies the crop rect by the window's
-    // devicePixelRatio before cropping the grab, and only skips that when the
-    // ratio is exactly 1. This panel is at a fractional 1.5 scale, so an odd
-    // logical coordinate lands on half a device pixel and has to be rounded.
-    // pixelGrid is the smallest logical step that maps to a whole number of
-    // device pixels (2 at scale 1.5, 4 at 1.25, 1 at 1.0); snapping the crop to
-    // it keeps the scaled rect exact instead of leaving it to rounding.
+    // Aurora: dpr/pixelGrid belong to the FROZEN path only -- it is the one mode
+    // still captured with CUtils.saveItem (see save() below). saveItem
+    // multiplies the crop rect by the window's devicePixelRatio before cropping
+    // the grab, and only skips that when the ratio is exactly 1. This panel is
+    // at a fractional 1.5 scale, so an odd logical coordinate lands on half a
+    // device pixel and has to be rounded. pixelGrid is the smallest logical step
+    // that maps to a whole number of device pixels (2 at scale 1.5, 4 at 1.25, 1
+    // at 1.0); snapping the crop to it keeps the scaled rect exact instead of
+    // leaving it to rounding. Live region/window capture does NOT use either of
+    // these -- see grimScale/grimRect below, and do not confuse the two.
     readonly property real dpr: (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1
     readonly property int pixelGrid: {
         for (let step = 1; step <= 8; step++)
             if (Math.abs(step * root.dpr - Math.round(step * root.dpr)) < 1e-4)
                 return step;
         return 1;
+    }
+
+    // Aurora: the factor grim scales a -g box by, which is NOT root.dpr. grim
+    // derives its own logical_scale from the xdg-output ratio raw_width /
+    // logical_width and applies that single scalar to both axes; on this panel
+    // that is 2560 / 1707 = 1.4997071, while Qt's fractional-scale DPR is 1.5
+    // exactly. Using the wrong one of those two produces a crop that is subtly
+    // the wrong size and subtly resampled -- the failure a gate is least likely
+    // to catch -- so it is taken from the same HyprlandMonitor pixel geometry
+    // Screenshotter.captureFullScreen uses, divided by the logical size grim
+    // itself sees. Verified against grim 1.5.0 on this output: -g "0,0
+    // 1707x1067" is byte-identical to -o eDP-1, and -g "0,0 400x300" produced
+    // exactly 599x449 = floor(400 * 2560/1707) x floor(300 * 2560/1707).
+    readonly property real grimScale: {
+        const mon = Hypr.monitorFor(screen);
+        return mon && screen.width > 0 ? mon.width / screen.width : 1;
     }
 
     property real ssx
@@ -103,10 +122,11 @@ MouseArea {
         }
     }
 
-    // Aurora: snap the selection outwards onto the device-pixel grid, then clamp
-    // it inside the grab. Clamping is load-bearing: QImage::copy() pads a rect
-    // that overhangs its source with transparent pixels instead of failing, so an
-    // unclamped rect would silently produce a transparent edge on the output.
+    // Aurora: the FROZEN path's crop. Snaps the selection outwards onto the
+    // device-pixel grid, then clamps it inside the grab. Clamping is
+    // load-bearing: QImage::copy() pads a rect that overhangs its source with
+    // transparent pixels instead of failing, so an unclamped rect would silently
+    // produce a transparent edge on the output.
     function captureRect(): rect {
         const step = root.pixelGrid;
         const limitX = Math.floor(root.width / step) * step;
@@ -120,6 +140,61 @@ MouseArea {
         return Qt.rect(x, y, w, h);
     }
 
+    // Aurora: the LIVE region/window crop, in this output's logical pixels.
+    //
+    // Coordinate spaces -- a silent mix-up here is exactly the class of bug a
+    // gate does not catch:
+    //  * rsx/rsy/sw/sh are logical px inside this picker window, and the window
+    //    fills the output, so they are logical px from the output's top-left.
+    //  * grim -g takes LAYOUT coordinates, so the output's own logical position
+    //    (screen.x/screen.y) is added on at the call site, not here.
+    //  * the scale is grimScale, never root.dpr. See grimScale above.
+    //
+    // Why the origin is snapped: grim's mapping from output pixels to
+    // destination pixels is a pure translation -- destination = output pixel -
+    // origin * scale -- and the destination is floor(size * scale) px. So the
+    // crop is bit-exact when the fractional part of origin * scale is zero, and
+    // is bilinearly blended by that fraction otherwise; the SIZE only decides
+    // how many destination pixels come out, it cannot blur anything. frac(x *
+    // scale) advances by ~0.4997 per logical px here, so of any two adjacent
+    // logical origins one always lands far closer to a whole output pixel, and
+    // taking that one caps the blend at a quarter pixel instead of a half.
+    // Measured on this panel against a grim -o reference: origin 100 (phase
+    // 0.03) gives a mean channel error of 0.3/255, origin 1 (phase 0.50) gives
+    // 5.2/255.
+    //
+    // The snap only ever moves an edge OUTWARDS and by at most one logical px,
+    // which is tighter than the two-logical-px pixelGrid snap captureRect()
+    // above still applies on the frozen path, so no selection -- including a
+    // window's exact bounds in Window mode -- is ever cropped into.
+    function grimRect(): rect {
+        const s = root.grimScale;
+        const phase = v => Math.abs(v * s - Math.round(v * s));
+
+        let x = Math.max(0, Math.floor(root.rsx));
+        if (x > 0 && phase(x - 1) < phase(x))
+            x--;
+
+        let y = Math.max(0, Math.floor(root.rsy));
+        if (y > 0 && phase(y - 1) < phase(y))
+            y--;
+
+        // Clamped to the output: a box that overhangs it makes grim pad the
+        // result instead of failing, the same trap captureRect() guards against.
+        // root.width/root.height are the window's logical size, i.e. the
+        // output's, which is the size grim compares the box against.
+        const w = Math.min(Math.ceil(root.rsx + root.sw), root.width) - x;
+        const h = Math.min(Math.ceil(root.rsy + root.sh), root.height) - y;
+
+        return Qt.rect(x, y, Math.max(1, w), Math.max(1, h));
+    }
+
+    // Aurora: the FROZEN path's save. This is the only mode left that captures
+    // through CUtils.saveItem, and it is safe to: `screencopy` already holds a
+    // compositor frame taken when this picker was created, before any of its own
+    // content had been drawn, so nothing about this call depends on hiding
+    // anything first. Live region/window capture no longer comes through here --
+    // see onReleased.
     function save(): void {
         if (root.saving)
             return;
@@ -129,15 +204,18 @@ MouseArea {
 
         // Straight-to-clipboard keeps its scratch file; every other mode writes
         // the timestamped PNG the work order asks for and copies that.
-        const target = root.loader.clipboardOnly ? `/tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png` : Screenshotter.targetPath();
+        const target = root.loader.clipboardOnly ? Screenshotter.scratchPath() : Screenshotter.targetPath();
 
         verifier.path = target;
         verifier.expectedWidth = Math.round(crop.width * root.dpr);
         verifier.expectedHeight = Math.round(crop.height * root.dpr);
 
-        // Only the screencopy subtree is grabbed. The tinted overlay and the
-        // selection border are siblings, so they are not in the grab at all —
-        // which is what makes overlay contamination structurally impossible here.
+        // Only the screencopy subtree is grabbed. The tinted overlay, the
+        // selection border and the toolbar are siblings, so no pixel of theirs
+        // reaches this grab. Note precisely what that does and does not prove:
+        // it makes the QtQuick scenegraph half of the exclusion structural, and
+        // says nothing about what the compositor put INSIDE screencopy -- which
+        // on this path is a frame from before this picker drew anything.
         CUtils.saveItem(screencopy, Qt.resolvedUrl(target), crop, () => verifier.start(), () => {
             Screenshotter.reportFailed(target);
             root.finish();
@@ -188,17 +266,30 @@ MouseArea {
     }
 
     onReleased: {
-        if (closeAnim.running)
+        if (closeAnim.running || root.saving)
             return;
 
         if (root.loader.freeze) {
             save();
-        } else {
-            overlay.visible = border.visible = false;
-            toolbar.hiddenForCapture = true;
-            screencopy.visible = false;
-            screencopy.active = true;
+            return;
         }
+
+        // Aurora: live region and window capture, per GRAND_PLAN §5.12 and
+        // operator decision 27 -- geometry first, then the picker surface is
+        // destroyed, then grim crops the compositor's own output. What this
+        // replaced was a hide-then-capture: overlay/border/toolbar were switched
+        // invisible and a whole-output compositor screencopy was started in the
+        // same tick, which left it to chance whether Qt had committed the hide
+        // before the compositor grabbed the frame. Nothing here depends on that
+        // ordering any more, because by the time grim runs there is no picker
+        // surface for the compositor to include (see
+        // AreaPicker.captureRegionFromPicker and Screenshotter.pickerGoneGuard).
+        root.saving = true;
+
+        const r = root.grimRect();
+        const s = root.grimScale;
+
+        root.loader.captureRegionFromPicker(`${root.screen.x + r.x},${root.screen.y + r.y} ${r.width}x${r.height}`, Math.floor(r.width * s), Math.floor(r.height * s));
     }
 
     onPositionChanged: event => {
@@ -272,10 +363,16 @@ MouseArea {
         }
     }
 
-    // Aurora: risk R1 instrumentation. A fractional-scale grabToImage has never
-    // been exercised on this display, so the saved file is measured before the
-    // picker closes and its real pixel size is reported in the toast. A wrong
-    // size is then visible to the user instead of silently shipping.
+    // Aurora: risk R1 instrumentation, and now frozen-mode-only, because the
+    // frozen path is the only one still going through grabToImage. A
+    // fractional-scale grabToImage has never been exercised on this display, so
+    // the saved file is measured before the picker closes and its real pixel
+    // size is reported in the toast. A wrong size is then visible to the user
+    // instead of silently shipping. The grim paths do not need this and could
+    // not use it anyway -- their picker is already destroyed when the file
+    // lands, and grim's output size is deterministic rather than at the mercy of
+    // Qt's rounding; Screenshotter reports it and still fails loudly if the file
+    // did not get written (`test -s` in the capture command).
     Item {
         id: verifier
 
@@ -328,6 +425,13 @@ MouseArea {
         }
     }
 
+    // Aurora: frozen mode only, and now permanently so -- `active` is a plain
+    // binding on loader.freeze with nothing left that flips it imperatively. In
+    // frozen mode this is the picture the user is selecting on: one compositor
+    // frame taken when the picker was created, which is also what gets cropped
+    // and saved (save() above). Live region/window mode used to reuse this as a
+    // capture mechanism, taking a fresh whole-output screencopy after hiding the
+    // overlay; that is gone, and with it the hide it depended on.
     Loader {
         id: screencopy
 
@@ -351,18 +455,6 @@ MouseArea {
             // — the proper fix (padding the grab to an even logical width) needs
             // a source read this session could not do and is recorded as owed.
             smooth: false
-
-            onHasContentChanged: {
-                if (!hasContent || root.loader.freeze)
-                    return;
-
-                // Restore the selection UI for the close animation only. It is not
-                // in the grab, and the frame that reached hasContent was captured
-                // with it hidden.
-                overlay.visible = border.visible = true;
-                toolbar.hiddenForCapture = false;
-                root.save();
-            }
         }
     }
 
@@ -418,12 +510,17 @@ MouseArea {
 
     // Aurora: the visible Region/Window/Full screen mode toolbar (PM directive
     // 2026-07-29 -- a hover-to-discover affordance is not enough, MASTER §2).
-    // A sibling of screencopy, exactly like overlay/border above, so it is
-    // excluded from the region-mode grab by construction, not by timing.
-    // root.opacity's fade (closeAnim below) already cascades to it like every
-    // other sibling here, so Escape and normal completion need no extra code;
-    // only the toolbar's own instant full-screen path (hiddenForCapture on the
-    // loader) skips that fade deliberately.
+    // A sibling of screencopy, exactly like overlay/border above, so on the
+    // frozen path CUtils.saveItem grabs the `screencopy` item and never a
+    // toolbar pixel. On the live region/window and full-screen paths the toolbar
+    // is excluded by something stronger and completely separate: by the time
+    // grim runs, this entire window has been destroyed and the compositor has
+    // confirmed it (AreaPicker.tearDownForGrim, Screenshotter.pickerGoneGuard).
+    // Neither statement rests on hiding the toolbar first -- the hide that used
+    // to be load-bearing here is gone, along with the property that drove it.
+    // root.opacity's fade (closeAnim below) cascades to it like every other
+    // sibling, so Escape and frozen completion need no extra code; the two grim
+    // paths skip that fade deliberately and tear the surface down instead.
     Toolbar {
         id: toolbar
 

@@ -27,12 +27,15 @@ Scope {
         // handoff, which the operator found unreliable (typing stuck on the
         // previously-focused window until clicked again).
         property string priorFocusAddress: ""
-        // Aurora: set for the instant, unanimated toolbar-full-screen teardown
-        // (captureFullFromToolbar below) so onClosingChanged's normal restore
-        // does not fire before grim has actually captured the frame --
-        // Screenshotter restores focus itself once grim exits instead, using
-        // its own independently-captured address. Region/window/frozen
-        // completions and Escape are unaffected and still restore here.
+        // Aurora: set for the instant, unanimated teardowns that hand off to
+        // grim (captureFullFromToolbar and captureRegionFromPicker below) so
+        // onClosingChanged's normal restore does not fire before grim has
+        // actually captured the frame -- Screenshotter restores focus itself
+        // once grim exits instead, from the address this loader hands it. This
+        // is not a second restore path: it is still the one address captured in
+        // start() below, just consumed at the only moment that cannot race the
+        // grab. Frozen completions and Escape are unaffected and still restore
+        // here.
         property bool suppressAutoRestore: false
 
         function start(shouldFreeze: bool, clipOnly: bool): void {
@@ -58,19 +61,42 @@ Scope {
             Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ window = "address:0x${addr}" })` : `focuswindow address:0x${addr}`);
         }
 
-        // Aurora: the toolbar's Full screen button. The picker overlay (this
-        // whole window, including the toolbar itself) must be gone from the
-        // compositor's output before grim runs, so this skips the animated
-        // close entirely -- closing flips keyboardFocus/mask off immediately
-        // and activeAsync=false unloads the surface in the same tick, both
-        // synchronous, before any frame is captured. Screenshotter gets a short
-        // settle delay to let the compositor actually repaint without it, then
-        // captures and restores focus itself once grim exits.
-        function captureFullFromToolbar(): void {
+        // Aurora: the single teardown both grim hand-offs use. The picker
+        // overlay -- this whole window on every screen, the tinted overlay, the
+        // selection border and the toolbar alike -- must not merely be hidden
+        // before grim runs, it must not exist: `closing` drops keyboardFocus and
+        // masks input off immediately, and activeAsync=false destroys the
+        // layer-shell surfaces themselves. That is the "by construction, not by
+        // timing" half. The other half -- that a destroyed layer is also gone
+        // from the *frame*, which it is not until Hyprland finishes animating it
+        // out -- belongs to Screenshotter.pickerGoneGuard, which holds grim
+        // until the compositor says so. No settle delay is guessed at here; the
+        // 50ms timer this function used to restart was measured to be far too
+        // short (see that guard's comment).
+        function tearDownForGrim(): void {
             root.suppressAutoRestore = true;
             root.closing = true;
             root.activeAsync = false;
-            toolbarFullSettle.restart();
+        }
+
+        // Aurora: the toolbar's Full screen button.
+        function captureFullFromToolbar(): void {
+            root.tearDownForGrim();
+            // Pass the address captured in start() -- not a fresh re-query made
+            // after this picker has already torn itself down.
+            Screenshotter.captureFullScreen(root.priorFocusAddress);
+        }
+
+        // Aurora: region and window completion (Picker.qml's onReleased). The
+        // picker no longer captures anything itself in these modes: it hands
+        // back the crop it computed while it was still on screen and grim does
+        // the capture, exactly as GRAND_PLAN §5.12 specifies. geometry is grim's
+        // -g string in logical layout coordinates and pixelWidth/pixelHeight are
+        // the output size grim will produce for it; both are built by
+        // Picker.grimRect(), which owns that arithmetic.
+        function captureRegionFromPicker(geometry: string, pixelWidth: int, pixelHeight: int): void {
+            root.tearDownForGrim();
+            Screenshotter.captureRegion(geometry, pixelWidth, pixelHeight, root.clipboardOnly, root.priorFocusAddress);
         }
 
         onClosingChanged: {
@@ -108,22 +134,6 @@ Scope {
                 }
             }
         }
-    }
-
-    // Aurora: settle delay between the toolbar's hard teardown and the actual
-    // grim invocation (captureFullFromToolbar above) -- long enough for the
-    // compositor to repaint without the now-unloaded picker/toolbar surface, and
-    // deliberately short because there is no fade to wait out here (unlike
-    // Screenshotter's own 500ms drawer-close delay for the utilities card path).
-    // Unverified live -- see report. Calls captureFullScreen directly (not
-    // capture("full")) so the address captured in start() above -- not a fresh
-    // re-query made after this picker has already torn itself down -- is what
-    // gets restored.
-    Timer {
-        id: toolbarFullSettle
-
-        interval: 50
-        onTriggered: Screenshotter.captureFullScreen(root.priorFocusAddress)
     }
 
     // Aurora: region requests from a shell surface (the utilities Screenshot

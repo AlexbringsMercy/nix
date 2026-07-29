@@ -12,7 +12,7 @@
     dunst
     easyeffects
     gh
-    grim # Aurora: the Print capture path — aurora-shell's Screenshotter runs it directly. Do not remove.
+    grim # Aurora: every capture path — region, window and full screen all crop through `grim -g` after the picker surface is gone. Screenshotter runs it directly. Do not remove.
     hypridle
     hyprlock
     libnotify
