@@ -320,3 +320,32 @@ method before any claim was made.
 The closure is built from commit `6805009`. Documentation commits after it
 (`21b22c1` and later) do not enter the system closure and deliberately did **not**
 trigger a rebuild — reusing a good closure rather than rebuilding for bookkeeping.
+
+---
+
+## 9. Defect classification — corrected, and a correction to my own earlier wording
+
+**Toolbar / layer capture contamination — PROVEN.** Measured directly on
+generation 31: a throwaway opaque `WlrLayer.Overlay` surface, torn down exactly as
+the picker is, was still ~100% present in a grim frame 5 ms after destruction,
+~76% at 153 ms, and clean only at ~307 ms. That is a measurement, not an
+inference.
+
+**It is NOT established as the same root cause as the older tinted-overlay /
+slurp "pink film" defect.** Earlier wording in this session called it "the
+pink-film defect class"; that conflation is withdrawn. What the two share is only
+the *symptom shape* — an unintended surface reaching the output. The old defect
+was proven arithmetically as **alpha blending of a tinted selection overlay**
+(alpha `0x55` = ⅓ → predicted floor (80.33, 60.33, 73.00) vs measured (80, 60,
+73)). The new one is a **compositor fade-out timing window on an unmapped
+layer-shell surface**. No evidence collected here shows a shared mechanism, and
+none should be claimed until a capture is pixel-inspected at the gate.
+
+**The older failed build's disk-space cause — STRONG INFERENCE, not confirmed
+history.** *This* session's build failure on ENOSPC is confirmed (the log records
+`ar: ... No space left on device` with `/` at 98%). The 2026-07-29 **morning**
+session's build leaving no generation, boot entry or store output is *consistent*
+with the same silent ENOSPC, and two of the three stale 11 GB copies provably
+predate the 2026-07-28 archive commit — but **that session's build log was not
+preserved**, so the causal link is inference. It is recorded as such in
+`EXECUTION_LOG.md` and must not be restated as established fact.

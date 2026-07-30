@@ -2971,3 +2971,48 @@ destroyed the gen-26 fallback.
 **Standing lesson for every future session:** a detached build unit that fails can
 look identical to one still running. Check the unit `Result`, the log tail, **and**
 free disk before reporting a build as started, progressing, or complete.
+
+---
+
+### Decision 28 — Temporary wallpaper-picker discoverability is deferred, not fixed (2026-07-29)
+
+**Date/time:** 2026-07-29
+**Active generation:** 31
+**Stage:** Stage 2 (recorded) → replaced by Stage 4
+**Status:** APPROVED — BINDING
+
+**Operator decision, verbatim:** *"Temporary wallpaper-picker mouse discoverability
+is operator-approved as non-blocking because the current picker is replaced by skwd
+in Stage 4."*
+
+**Explicitly NOT a fix.** The temporary picker is **not** marked fixed, resolved or
+working. It is marked **deferred by operator approval**. No throwaway wallpaper UI
+is to be built in the Stage 2 correction cycle.
+
+**Revisit trigger:** Stage 4 installs the final skwd workflow, which owns the
+replacement.
+
+**Acceptance condition:** at Stage 4, an ordinary mouse path to change the wallpaper
+exists and is discoverable. Until then this remains an open, recorded debt that does
+**not** block the Stage 2 correction gate.
+
+---
+
+### Clarification — "reopen last closed tab" means Kitty tabs, not editor documents (2026-07-29)
+
+Recorded per the operator, closing the one item the `ISSUE_LOG.md` migration left
+unowned pending his word.
+
+**Operator's interpretation, verbatim:** the request means *"the last closed Kitty
+terminal tab"*, restoring *"its working directory and tab context where technically
+feasible."* It **does not** mean editor files — *"VS Code/LazyVim document
+restoration remains their own session behavior."*
+
+`GRAND_PLAN.md` §7.4's editor file-reopen therefore does **not** satisfy this item;
+treating it as satisfied would have been the silent substitution governance rule 3
+forbids.
+
+**Ownership:** Stage 8 (dev workspace and terminal), alongside the related
+`Ctrl+T` new-tab item. **This is not a Stage 2 blocker** — the Stage 2 close-out
+work order never listed it as one, so it does not delay the correction reboot.
+`docs/issue-log-migration-2026-07-29.md` item 3 is now assigned rather than open.
