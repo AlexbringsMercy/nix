@@ -2,6 +2,19 @@
 
 **Status: `STAGE 2 — OPEN`.**
 
+> ## ⚠ SUPERSEDED FOR THE CURRENT CYCLE — GENERATION 32 HARD FAIL (2026-07-29)
+>
+> This work order drove the generation-32 build. Generation 32 **activated and then failed
+> the physical gate** on ten defects, several of them regressions against generation 31
+> (titlebar drag, tiled resize). Its close-out criteria are therefore **not met** and this
+> document is **not** the brief for the next cycle.
+>
+> The current brief is **`PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`**, with ground truth and
+> the failure matrix in **`PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`**.
+>
+> Requirements below that were **met and must not be regressed** — notably rail previews and
+> exact grouped window selection — are listed in handoff §4.
+
 The exact implementation brief for the incoming PM. Written 2026-07-28 against
 confirmed ground truth: branch `codex/macbook-desktop`, HEAD `6486742`, clean
 tree, 0 ahead / 0 behind upstream; `/run/current-system`, `/run/booted-system` and

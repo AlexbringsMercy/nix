@@ -1,5 +1,23 @@
 # STAGE 2 CORRECTION — RUNTIME GATE
 
+> ## ⚠ THIS GATE WAS STOPPED ON 2026-07-29 — GENERATION 32 HARD FAIL
+>
+> Generation 32 returned **41 PASS / 0 FAIL / 0 UNVERIFIED** on the automated pass and then
+> **failed the physical gate**. The operator declared a hard fail during group A/B and
+> **stopped the remaining A–H tests**. Do not resume them until the correction closure lands.
+>
+> Ten defects were observed, including a ~5 s full-display freeze on snap, snap geometry
+> landing under the left rail, wrong-window minimize, keyboard-focus corruption, a returned
+> titlebar drag-anchor regression, completely dead tiled resize, a false "active" Media Center
+> rail entry, and an unequal scroll rate over hovered-but-unfocused windows.
+>
+> **Group C (rail previews and exact grouped selection) PASSED and must be preserved.**
+>
+> The automated pass **did not detect any of the ten failures**. Treat a structural pass as
+> necessary, never sufficient.
+>
+> See `PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`. Stage 2 remains **OPEN**.
+
 Two parts. **The machine goes first**, so the operator's sitting stays small.
 
 1. **Automated objective pass** — `~/.local/state/aurora-build/pm/aurora-stage2-gate-auto.sh`.

@@ -1,5 +1,19 @@
 # CURRENT STATE AUDIT — 2026-07-29, generation 31
 
+> ## ⚠ OUT OF DATE — the machine is now on generation 32, which PHYSICALLY FAILED
+>
+> This file is a **generation 31** snapshot taken on the afternoon of 2026-07-29. The
+> machine was subsequently rebooted into **generation 32**
+> (`62aim1mw2c26siwlymv9r5xa0qqa5ryw`), which passed the automated structural gate
+> 41/41 and then **failed the physical operator gate on ten distinct defects**.
+>
+> For current ground truth read **`PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`**, and start
+> from **`PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`**. Verify the machine live rather than
+> trusting either file.
+>
+> Stage 2 is **OPEN**. The operator gate was **stopped**. No Stage 3 deployment is
+> permitted. Generation 31 is comparison evidence only, **not** an accepted fallback.
+
 **Established from the live machine and repository on 2026-07-29, afternoon.**
 Supersedes the 2026-07-28 / generation-26 snapshot, archived intact at
 `archive/superseded-docs/2026-07-29/CURRENT_STATE_AUDIT-2026-07-28-gen26.md`.

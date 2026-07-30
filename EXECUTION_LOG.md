@@ -3063,3 +3063,74 @@ decision-23 Startup Manager selection (Control held), which is verified only on
 the **following** cold boot.
 
 **Stage 2 remains OPEN.**
+
+---
+
+## 2026-07-29 (late) — generation 32: ACTIVATED, then PHYSICALLY FAILED
+
+**State reached: `activated`. Testing result: FAILED. Not `passed`, not `accepted`.**
+
+The operator rebooted into generation 32
+(`/nix/store/62aim1mw2c26siwlymv9r5xa0qqa5ryw-nixos-system-macbook-…`). The
+automated objective pass returned **41 PASS / 0 FAIL / 0 UNVERIFIED**, stable over
+three runs. **That gate did not detect a single one of the failures below.** A
+structural pass is not a physical pass, and this is the clearest evidence yet that
+the automated gate cannot stand in for the operator gate.
+
+The operator declared a **HARD FAIL** and stopped the remaining A–H gate.
+
+### Observed failures, recorded without reinterpretation
+
+1. `Super+Left`/`Super+Right` freezes the entire display for roughly five seconds.
+2. Snap then produces incorrect floating geometry under the left vertical rail.
+3. With exactly Chrome and one terminal, snapping Chrome caused the terminal to
+   glitch and minimize incorrectly.
+4. Snap corrupted keyboard input/focus badly enough that Chrome had to be closed
+   and reopened.
+5. Rail previews and exact-window selection **now work** and must be preserved.
+6. Restore does not return windows to their prior state/position — not cleanly
+   isolable while snap is corrupt.
+7. Legacy Media Center remains falsely active on the rail with no such window open.
+8. Titlebar drag-anchor jump regressed: the window jumps upward and the pointer no
+   longer remains at the original grab point. **This passed on generation 31.**
+9. Ordinary tiled resize is completely nonfunctional — horizontal, vertical and
+   diagonal. **Generation 31 had horizontal resize.**
+10. Scroll over a hovered but keyboard-unfocused window is dramatically slower than
+    over the focused window. The focused path is already correct and must not be
+    globally sped up.
+
+### Compositor delta, proven at derivation level
+
+Both generations share `src cr4vq0w7…-source`, stdenv, all inputs and all flags.
+Gen 31 applied `hyprland-drag-anchor.patch` then `hyprland-deco-border-grab.patch`.
+Gen 32 applies those two as **byte-identical store paths**, plus
+`hyprland-dwindle-resize-workarea.patch` appended last. `hyprbars` and
+`aurora-minimize` were rebuilt only because the compositor derivation changed.
+The drag-anchor patch therefore did **not** itself change, yet drag regressed —
+that contradiction is unresolved and is handed to the next session.
+
+### No root cause is accepted
+
+Source-level observations were gathered (the snap path shells out to `hyprctl` from
+inside a Lua bind callback; `hyprctl`'s socket timeout is exactly 5 s; the Lua
+monitor object exposes no `reserved` key; `CSpace::workArea()` is
+`logicalBoxMinusReserved()` inset by `gaps_out`, and `resizeTarget`'s first use of
+the `DISPLAY*` flags is to zero `allowedMovement`). **None of it was verified by
+runtime instrumentation, and none of it is an accepted root cause.** The
+compositor self-IPC/deadlock explanation is a high-priority hypothesis only.
+
+The mandated Codex adversarial consultation was **not** obtained — seven invocation
+attempts failed (PM misconfiguration and an unbounded web-search loop). Consultation
+remains open. Details in `docs/codex-consultation-record.md`.
+
+### Session terminated by the operator
+
+This PM session was terminated mid-diagnosis. All Codex processes were killed, the
+`btmon` capture was flushed and preserved, and the evidence was checksummed. See
+`PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md` and
+`PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`.
+
+**No Stage 3 deployment. Gen 31 is comparison evidence, not an accepted fallback.
+The operator should avoid snap on gen 32 until corrected.**
+
+**Stage 2 remains OPEN.**

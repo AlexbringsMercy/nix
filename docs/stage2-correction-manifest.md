@@ -1,5 +1,16 @@
 # STAGE 2 CORRECTION CLOSURE — FROZEN MANIFEST
 
+> ## ⚠ OUTCOME: this manifest produced generation 32, which PHYSICALLY FAILED (2026-07-29)
+>
+> The build, the boot-only deployment and the reboot all completed, and the automated
+> structural pass returned 41 PASS / 0 FAIL / 0 UNVERIFIED. The **physical** gate then failed
+> on ten defects, including regressions against generation 31 in titlebar drag and tiled
+> resize. No row in this manifest may be advanced past `activated`.
+>
+> A **new** frozen correction manifest must be produced by the next PM, after the mandated
+> Codex reviews. See `PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md` and
+> `PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`.
+
 **Published before the expensive build, per `PM_OPERATING_RULES.md` §2 and
 operator decision 20.** One build → one boot-only deployment → one reboot → one
 gate. Nothing in this manifest is claimed as tested; every row states exactly
