@@ -63,7 +63,19 @@ Singleton {
     // AreaPicker.qml's `name: "area-picker"`. Every path that has no picker on
     // screen (the Print keybind, the utilities card, IPC) simply finds it absent
     // on the first poll and pays ~40ms.
-    readonly property string pickerGoneGuard: '{ n=0; while [ "$n" -lt 40 ] && hyprctl layers | grep -q "namespace: caelestia-area-picker"; do n=$((n+1)); sleep 0.02; done; } && '
+    // Aurora: the bound must FAIL, not fall through. An earlier form ended the
+    // loop and then ran grim unconditionally via `&&`, because the `{ }` block
+    // exits 0 whether the namespace vanished or the poll budget simply ran out.
+    // That silently produced exactly the contaminated capture this guard exists
+    // to prevent. The post-loop re-check is authoritative rather than inferring
+    // from the counter (the namespace can disappear on the final iteration), and
+    // `exit 92` leaves the whole `sh -c` before grim is ever reached.
+    readonly property int pickerStillUpExitCode: 92
+
+    // The re-check is an `if`, not `cond && exit`: a bare `&&` leaves the block's
+    // exit status at 1 on the common path where the namespace is already gone,
+    // which would make the following `&&` skip grim and break every capture.
+    readonly property string pickerGoneGuard: '{ n=0; while [ "$n" -lt 40 ] && hyprctl layers | grep -q "namespace: caelestia-area-picker"; do n=$((n+1)); sleep 0.02; done; if hyprctl layers | grep -q "namespace: caelestia-area-picker"; then exit 92; fi; } && '
 
     // mode is one of "region", "frozen", "clipboard", "full".
     function capture(mode: string): void {
@@ -242,6 +254,13 @@ Singleton {
         Toaster.toast(qsTr("Screenshot failed"), qsTr("Could not write %1").arg(path ? Paths.shortenHome(path) : qsTr("the screenshot")), "broken_image", Toast.Error);
     }
 
+    // Aurora: distinct from reportFailed -- nothing went wrong writing a file,
+    // the capture was refused on purpose. The message names the actual cause so
+    // the operator can retry rather than wondering why a screenshot vanished.
+    function reportPickerStillUp(): void {
+        Toaster.toast(qsTr("Screenshot cancelled"), qsTr("The capture overlay was still on screen, so nothing was captured. Try again."), "screenshot_monitor", Toast.Error);
+    }
+
     // Aurora: same dispatch shape as AppRail.qml/RailGroupPreview.qml/
     // windowinfo/Buttons.qml. A no-op if the address is empty (nothing was
     // focused before, or this call already consumed it).
@@ -260,6 +279,12 @@ Singleton {
             // qmllint disable signal-handler-parameters
             if (code === 0)
                 root.reportSaved(root.grimTarget, root.grimWidth, root.grimHeight, root.grimWidth, root.grimHeight, root.grimClipboardOnly);
+            else if (code === root.pickerStillUpExitCode)
+                // Aurora: the guard refused to capture because the picker surface
+                // was still being composited. No file was written -- deliberately,
+                // since the alternative is a contaminated screenshot handed over as
+                // if it were correct. Say so instead of failing silently.
+                root.reportPickerStillUp();
             else
                 root.reportFailed(root.grimTarget);
             // Aurora: restore regardless of outcome -- a failed capture must
