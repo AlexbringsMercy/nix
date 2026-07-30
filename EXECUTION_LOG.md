@@ -3016,3 +3016,50 @@ forbids.
 `Ctrl+T` new-tab item. **This is not a Stage 2 blocker** — the Stage 2 close-out
 work order never listed it as one, so it does not delay the correction reboot.
 `docs/issue-log-migration-2026-07-29.md` item 3 is now assigned rather than open.
+
+---
+
+### Generation 32 staged — boot-only, awaiting operator reboot (2026-07-29)
+
+**Active generation at time of writing: 31.** Generation 32 is **staged, not
+booted**. The operator explicitly withheld reboot approval pending his own
+greenlight, so this entry records a staged closure and nothing more.
+
+| Fact | Value |
+|---|---|
+| System profile | `system-32-link` → `62aim1mw2c26siwlymv9r5xa0qqa5ryw-nixos-system-macbook` |
+| Boot entry | `nixos-b8cc8d1a8521e7d90ea551e9f5548d8e7a80b0c2cbc78f5f598ae9df52836b4d.conf`, written 20:56 |
+| Loader default | that entry — `init=/nix/store/62aim1mw…/init` |
+| **Running system** | still `wirdp0v9…` (generation 31) — **no live switch was performed** |
+| Fallback | generation 26 (`92bdqiip…`) intact |
+| Pinned commit | `5d37e1c` |
+| Resume harness | armed (`~/.local/state/aurora-build/resume-armed`) |
+
+`switch-to-configuration **boot**` was used, never `switch` or `test`. The running
+compositor and Hyprbars were not touched, per the standing never-hot-swap rule.
+
+**Root access:** obtained through a labelled, operator-revocable channel in a GUI
+terminal, used only for `nix-env --profile --set` and `switch-to-configuration
+boot`, then closed. Verified revoked afterwards (`sudo -n` fails).
+
+**Three failed attempts to open that channel preceded the successful one, none of
+which staged anything** — the profile remained at `system-31-link` throughout.
+Recorded because two were avoidable and the lesson is reusable:
+
+1. The GUI terminal was launched as a child of a tool invocation and died with
+   that call's timeout. Long-lived operator-facing windows must be launched
+   detached (`systemd-run --user`).
+2. **A real defect:** the root loop created its FIFO and log as root with mode
+   600, leaving the unprivileged side unable to write commands or read output.
+   The channel now hands both back to uid 1000 after creation.
+3. `sudo`'s default five-minute `passwd_timeout` expired while the prompt sat
+   unattended, closing the window. The launcher now retries the prompt instead of
+   exiting, so an unattended window simply asks again.
+
+**Next:** operator greenlight → reboot → the automated objective pass
+(`scripts/aurora-stage2-gate-auto.sh`) → grouped operator gate
+(`docs/stage2-runtime-gate.md`). At that reboot the operator also performs the
+decision-23 Startup Manager selection (Control held), which is verified only on
+the **following** cold boot.
+
+**Stage 2 remains OPEN.**
