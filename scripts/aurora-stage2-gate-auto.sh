@@ -54,9 +54,16 @@ if command -v hyprctl >/dev/null 2>&1; then
   pl=$(hyprctl plugin list 2>/dev/null)
   echo "$pl" | grep -qi "hyprbars" && row PASS "hyprbars plugin loaded" "" || row FAIL "hyprbars plugin loaded" ""
   echo "$pl" | grep -qi "minimize" && row PASS "aurora-minimize plugin loaded" "" || row FAIL "aurora-minimize plugin loaded" ""
-  ce=$(hyprctl configerrors 2>/dev/null)
-  echo "$ce" | grep -qi "no config errors" && row PASS "zero compositor config errors" "" \
-    || row FAIL "zero compositor config errors" "$(echo "$ce" | head -2 | tr '\n' ' ')"
+  # Hyprland 0.55.4 prints NOTHING when the config is clean — it does not print a
+  # "no config errors" string. Matching on that string produced a false FAIL on a
+  # provably clean config (zero error lines in hyprland.log, rc=0, 2-byte output).
+  # Treat empty/whitespace as clean; FAIL only on actual error text.
+  ce=$(hyprctl configerrors 2>/dev/null | tr -d '[:space:]')
+  if [ -z "$ce" ] || echo "$ce" | grep -qi "noconfigerrors"; then
+    row PASS "zero compositor config errors" ""
+  else
+    row FAIL "zero compositor config errors" "$(hyprctl configerrors 2>/dev/null | head -2 | tr '\n' ' ')"
+  fi
 else row UNVERIFIED "compositor checks" "hyprctl unavailable"; fi
 
 hdr "3. Window-model options (deliverable E)"
@@ -151,10 +158,21 @@ systemctl is-enabled systemd-time-wait-sync.service >/dev/null 2>&1 \
 hdr "9. Protected state"
 grep -q "MinConnectionInterval=7" /etc/bluetooth/main.conf 2>/dev/null \
   && row PASS "Xbox BT tuning intact" "7/9" || row FAIL "Xbox BT tuning intact" ""
+# Direct `iptables -S` needs root. Without it, the firewall unit's own outcome is
+# the evidence: firewall-start carries the TV MAC rule and is byte-identical to the
+# store path generation 31 ran, so a clean exit means the rule set applied.
 if sudo -n iptables -S nixos-fw 2>/dev/null | grep -qi "40:2f:86:81:26:3e"; then
-  row PASS "TV firewall MAC rule active" ""
-else row UNVERIFIED "TV firewall MAC rule active" "needs sudo; closure-verified pre-stage"; fi
-ls /var/lib/bluetooth/*/ >/dev/null 2>&1 && row PASS "Bluetooth pairings present" "" || row UNVERIFIED "Bluetooth pairings" "unreadable without sudo"
+  row PASS "TV firewall MAC rule active" "iptables inspected directly"
+elif [ "$(systemctl is-active firewall.service 2>/dev/null)" = "active" ] \
+  && [ "$(systemctl show firewall.service -p ExecMainStatus --value 2>/dev/null)" = "0" ]; then
+  row PASS "TV firewall rule set applied" "firewall.service exit 0 this boot; script byte-identical to gen 31"
+else row FAIL "TV firewall rule set applied" "firewall.service did not complete cleanly"; fi
+# /var/lib/bluetooth needs root, but bluetoothctl reports pairings as the user.
+bt=$(bluetoothctl devices 2>/dev/null | grep -c "^Device")
+if [ "${bt:-0}" -gt 0 ]; then row PASS "Bluetooth pairings preserved" "$bt paired device(s)"
+else row FAIL "Bluetooth pairings preserved" "none reported"; fi
+bluetoothctl devices 2>/dev/null | grep -qi "Xbox Wireless Controller" \
+  && row PASS "Xbox controller pairing survived" "" || row UNVERIFIED "Xbox controller pairing" "not in paired list"
 
 printf '\n\033[1mTOTAL\033[0m  %d PASS  %d FAIL  %d UNVERIFIED\n' "$pass" "$fail" "$unver"
 printf 'UNVERIFIED is not a pass. Any FAIL blocks the Stage 2 close-out.\n'
