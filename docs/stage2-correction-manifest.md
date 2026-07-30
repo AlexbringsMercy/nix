@@ -349,3 +349,49 @@ with the same silent ENOSPC, and two of the three stale 11 GB copies provably
 predate the 2026-07-28 archive commit — but **that session's build log was not
 preserved**, so the causal link is inference. It is recorded as such in
 `EXECUTION_LOG.md` and must not be restated as established fact.
+
+---
+
+## 10. Final closure — attempt 3, after the fail-closed guard correction
+
+The pre-stage clarification found the capture guard fell through on timeout and
+would hand back a contaminated screenshot with no visible error. That was
+corrected and rebuilt once, per the operator's instruction. Compositor and plugin
+outputs were **reused from cache** — only QML changed, so no recompile.
+
+| Path | Result | Output |
+|---|---|---|
+| HM activation | `HM_EXIT=0` | `r9w8525d…-home-manager-generation` |
+| System toplevel | `SYS_EXIT=0` | **`62aim1mw…-nixos-system-macbook`** — `nix path-info` VALID |
+
+**Pinned commit:** `5d37e1c` (contains the guard fix). The only later commit,
+`521e76d`, touches `docs/` and an unreferenced script — it does not enter the
+closure, and no rebuild was triggered for bookkeeping.
+
+**Guard verified in the built artifact**, not merely in source
+(`qyfv7y9i…-caelestia-shell-1.0.0`):
+
+```
+{ n=0; while [ "$n" -lt 40 ] && hyprctl layers | grep -q "namespace: caelestia-area-picker";
+  do n=$((n+1)); sleep 0.02; done;
+  if hyprctl layers | grep -q "namespace: caelestia-area-picker"; then exit 92; fi; } && grim …
+```
+
+Three branches tested before building: namespace never disappears → exit 92, grim
+never runs; already absent → exit 0, grim runs; disappears after 5 polls → exit 0,
+grim runs. The first attempt at this fix used `grep -q … && exit 92`, which left
+the block's status at 1 on the common path and would have broken **every** capture
+— caught by testing rather than by reasoning.
+
+**Identity and protected state, re-verified on the final closure:**
+
+| Check | Result |
+|---|---|
+| Hyprland / hyprbars / aurora-minimize | `wf1971v5…` / `lm09v2cm…` / `jnhwa9xd…` — unchanged from attempt 2, ABI consistent |
+| T2 firmware · iHD · libva-utils · grim | all present |
+| TV firewall `firewall-start` | **byte-identical to generation 31** |
+| `systemd-time-wait-sync` wiring | present in closure |
+| Closure size / free disk | 7.9 GB / **35 GB free** |
+
+**Verdict: READY TO STAGE.** Nothing in this closure is physically verified — that
+is what the runtime gate is for (`docs/stage2-runtime-gate.md`).
