@@ -1,15 +1,16 @@
 # PM OPERATING RULES — Aurora
 
 **The incoming project manager's operating contract.** Compact by design. Written
-2026-07-28; **metadata refreshed 2026-07-29 — active generation 31; canonical
-branch `main` (the `codex/macbook-desktop` line was fast-forwarded onto `main`
-and retired 2026-08-09), Stage 2 OPEN.** The rules themselves are
-unchanged and remain binding; only stale state metadata and the read list were
-corrected.
+2026-07-28; **canonical branch `main`** (the `codex/macbook-desktop` line was
+fast-forwarded onto `main` and retired 2026-08-09); **Stage 2 OPEN.** Mutable
+machine/generation state is deliberately **not** hard-coded here — defer to
+`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` (the machine is currently on
+generation 32, hard-failed). The rules themselves are unchanged and remain binding.
 
 This file tells you how to work. It does not tell you what is true about the
 machine — `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` does that — and it does not tell you what to
-build — `docs/plans/GRAND_PLAN.md` and `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` do that.
+build — `docs/plans/GRAND_PLAN.md` (design authority) and the Stage 2 requirements in
+`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (the prior-cycle gen-32 work order) do that.
 
 ---
 
@@ -105,9 +106,12 @@ Two things sit outside the ranking because they are absolute:
   unchanged.** Never trigger a compositor or plugin recompile merely because
   unrelated configuration or shell code changed. Check the patch list in the
   derivation, not the calendar.
-- **Later-stage work runs in isolated worktrees** during build, reboot and operator
-  waits. Deployed closures stay **stage-pure** — worktree work never enters the
-  current closure.
+- **Keep deployed closures stage-pure** — later-stage or incomplete work must never enter
+  the current closure. Dormant/incomplete source lives in **ordinary directories on `main`**
+  (e.g. the Stage 3 top-bar source under `modules/home/aurora-shell/stage-3-in-progress/`),
+  **not** in a permanent branch or worktree. A temporary branch/worktree may still be used
+  when a bounded task genuinely needs isolation during a build/reboot, but branches and
+  worktrees are **not** permanent project or stage containers.
 - **Sonnet-first** for narrow diagnosis, source location and straightforward
   implementation. The PM reads the evidence and escalates to a stronger model only
   when source-level design ambiguity or patch risk justifies it.
@@ -193,10 +197,15 @@ generation from the machine — never copy a number from a document.
 ## 5. First actions for the incoming PM
 
 1. Read, in order: `docs/prompts/SESSION_PREAMBLE.md` · this file ·
-   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` · `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` · `docs/plans/GRAND_PLAN.md` ·
+   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` · the gen-32 recovery entry point
+   `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md` and the defect record
+   `docs/reports/gen32-recovery-diagnosis.md` · `docs/plans/GRAND_PLAN.md` ·
    `docs/plans/MASTER_REQUIREMENTS.md` · `docs/references/macbook-build-spec.md` · the `docs/reports/EXECUTION_LOG.md`
    current-authority header, the operator decisions registers, and every entry
    from the current Stage 2 correction work forward · `docs/references/SOURCES.md`.
+   The Stage 2 **requirements/scope** (including what must not regress — rail previews,
+   exact grouped selection) live in `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`, which
+   produced generation 32 and is now **prior-cycle support, not the current brief**.
    **`ISSUE_LOG.md` is no longer on this list** — it is an archived dated audit of
    the retired Waybar/Rofi-era system; its still-live items were migrated into the
    current gate (see `docs/reports/issue-log-migration-2026-07-29.md`). State the list to
@@ -209,7 +218,11 @@ generation from the machine — never copy a number from a document.
    generation link, a newer boot entry, and whether the current source's closure is
    actually valid in the store.
 3. Report the stage status honestly. Today that is **`STAGE 2 — OPEN`**.
-4. Start on `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`. Do not start Stage 3.
+4. Start on the gen-32 **recovery entry path**: `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`
+   → `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` → `docs/reports/gen32-recovery-diagnosis.md`
+   → `docs/plans/GRAND_PLAN.md`, honouring the Stage 2 requirements in
+   `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (prior-cycle work order, **not** the current
+   brief). Do not start Stage 3.
 
 **Latest binding operator decisions** (full text in `docs/reports/EXECUTION_LOG.md`):
 decisions 20–23 (frozen manifest, no-premature-removal, dashboard entry paths,

@@ -10,8 +10,9 @@ source review and clean automated checks.
 independent blind GPT-5.6 Sol `xhigh` reviews — **Review A** (compositor / coordinate
 spaces / focus / drag / resize / scroll) and **Review B** (snap / minimize / restore /
 rail state machine) — ran **before** being seeded with Claude's preferred diagnosis and
-**substantially converged**. Their accepted diagnosis is recorded as defects **D1–D9**
-in [`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md).
+**substantially converged**. Their accepted findings are recorded as the defect record
+**D1–D9** in [`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md) — D1–D7 and D9
+diagnosed to the level recorded, **D8 UNRESOLVED (no accepted root cause)**.
 
 **This is accepted _diagnosis only_ — not implemented, not built, not physically
 accepted.** Every Stage 2 defect remains **OPEN**.
@@ -134,8 +135,10 @@ tracked in Git**) live under `~/.local/state/aurora-build/pm/gen32-recovery/`.
 
 Both were run before being shown Claude's preferred diagnosis (`claude-diagnosis.md`) and
 **substantially converged** with it and each other. The converged, load-bearing findings
-are recorded as **D1–D9** in [`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md),
-and the corrected **reservation/reflow** snap model (superseding the old pair model) is in
+are recorded as the defect record **D1–D9** in
+[`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md) (D1–D7 and D9 diagnosed;
+**D8 remains unresolved**), and the corrected **reservation/reflow** snap model (superseding
+the old pair model) is in
 `docs/plans/GRAND_PLAN.md` §6.2. Claude's revised diagnosis is
 `claude-diagnosis-v2-reservation-reflow.md`.
 

@@ -8,8 +8,10 @@ and `~/.local/state/aurora-build/pm/gen32-recovery/` (runtime state, not tracked
 
 ## Status of this document
 
-These are **accepted recovery diagnoses**, established strongly enough to drive the next
-implementation batch. They are **NOT** implemented, built, or physically accepted.
+These are the **accepted gen-32 recovery findings** (defect record D1–D9): **D1–D7 and D9**
+have root causes identified to the level recorded; **D8 is UNRESOLVED** (no accepted root
+cause). They are strong enough to drive the next implementation batch. They are **NOT**
+implemented, built, or physically accepted.
 
 - **Stage 2 is OPEN.** Every defect below is **OPEN**.
 - Generation 32 booted, passed the automated structural gate 41/41, and then **physically

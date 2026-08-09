@@ -86,7 +86,8 @@ archive). Quick entry points:
 
 - Design authority — `docs/plans/GRAND_PLAN.md`
 - Requirements — `docs/plans/MASTER_REQUIREMENTS.md`
-- Current open work order — `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`
+- Stage 2 is **OPEN**; current recovery entry path — `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md` → `docs/reports/gen32-recovery-diagnosis.md`
+- Stage 2 requirements (prior-cycle gen-32 work order, superseded for the current cycle) — `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`
 - Verified state — `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`
 - Operating contract — `docs/instructions/PM_OPERATING_RULES.md`
 - Source map — `docs/references/NIXOS_CURRENT_SOURCE_INDEX.md`

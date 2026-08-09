@@ -5,6 +5,20 @@
 # ⚠ CURRENT AUTHORITY — READ BEFORE THE HISTORICAL LOG
 # ═══════════════════════════════════════════════════════════════════
 
+> **CURRENT AUTHORITY (2026-08-09).** Canonical repo `/home/alex/nix`, remote
+> `AlexbringsMercy/nix`, branch **`main`** (the only branch). Verified machine/repo state:
+> **`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`**. The machine is on **generation 32**
+> (it booted and then **physically hard-failed**); **Stage 2 is OPEN**. Current recovery entry
+> point: `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md` → the current audit →
+> `docs/reports/gen32-recovery-diagnosis.md` (defect record **D1–D9**; D1–D7/D9 have root causes
+> identified, **D8 is UNRESOLVED**) → `docs/plans/GRAND_PLAN.md`. All authority docs live under
+> `docs/…`. **`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the prior-cycle (gen-32) work order,
+> not the current execution brief.** Everything below this block is **historical** — including the
+> 2026-07-29 correction set that named generation 31 as active. Trust the current audit and the
+> latest dated entries at the **end** of this log over any earlier claim in this banner.
+>
+> ---
+>
 > **This log contains two incompatible architectures.** Read chronologically and
 > trust later entries over earlier ones.
 >
@@ -23,8 +37,8 @@
 > the wallpaper authority, staged gates controlling execution.
 >
 > **Start here:** `## Stage 0 — Reconcile & baseline (2026-07-21)`, then read
-> forward to the end. Then read `CURRENT_STATE_AUDIT.md` for verified machine
-> state — this log records what was *attempted*, not what is *running*.
+> forward to the end. Then read `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` for
+> verified machine state — this log records what was *attempted*, not what is *running*.
 >
 > **Four corrections to entries below, proven against the machine:**
 > 1. The 2026-07-22 close-out's batch line says "drag patch **(built)**". It was
@@ -34,7 +48,8 @@
 > 2. The handoff's "gen 25 booted, gen 26 staged and NEVER TESTED" is stale. The
 >    machine has since **booted into gen 26**. The 2D half-snap rework is
 >    activated — but still not live-tested.
-> 3. **Generation 31 is the active and default boot generation** (re-confirmed
+> 3. **(As of 2026-07-29 afternoon — SUPERSEDED; the machine is now on generation 32,
+>    see the top block.) Generation 31 was then the active and default boot generation** (re-confirmed
 >    from the machine 2026-07-29 afternoon: `/run/current-system`,
 >    `/run/booted-system` and `/nix/var/nix/profiles/system` all resolve to
 >    `wirdp0v9…`, and `loader.conf` defaults to the generation-31 entry).
@@ -55,10 +70,13 @@
 > **Stage 2 is NOT closed.** Conditional pass only. Report it as `STAGE 2 — OPEN`
 > until its full close-out gate passes and Alex accepts it.
 >
-> **Governing documents for the incoming PM:** `CURRENT_STATE_AUDIT.md`,
-> `PM_OPERATING_RULES.md`, `STAGE2_CLOSEOUT_WORK_ORDER.md`, `GRAND_PLAN.md`,
-> `MASTER_REQUIREMENTS.md`, and the dated operator-decision entries at the end of
-> this file.
+> **Governing documents for the incoming PM (current paths):**
+> `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`, `docs/instructions/PM_OPERATING_RULES.md`,
+> `docs/plans/GRAND_PLAN.md`, `docs/plans/MASTER_REQUIREMENTS.md`,
+> `docs/reports/gen32-recovery-diagnosis.md`, the recovery kickoff
+> `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`, and the dated operator-decision
+> entries at the end of this file. (`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the
+> prior-cycle gen-32 work order — historical Stage 2 support, **not** the current brief.)
 
 # ═══════════════════════════════════════════════════════════════════
 

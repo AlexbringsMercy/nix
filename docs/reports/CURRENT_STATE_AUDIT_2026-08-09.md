@@ -35,10 +35,10 @@ Known state (authoritative, from the recovery investigation and operator gate):
   present but dormant (see §B).
 - **Rail previews and exact-window rail selection work** and are a **preservation
   requirement** for any window-model fix.
-- **Known generation-32 defects D1–D9** are diagnosed and **OPEN** — see
-  `docs/reports/gen32-recovery-diagnosis.md`. D8 (focus-dependent Kitty scroll) is
-  **unresolved** (no accepted root cause). None of D1–D9 is implemented, built, or
-  physically accepted.
+- **Accepted gen-32 recovery findings — defect record D1–D9**, all **OPEN**: D1–D7 and D9
+  are diagnosed to the level recorded; **D8 (focus-dependent Kitty scroll) is UNRESOLVED —
+  no accepted root cause.** None of D1–D9 is implemented, built, or physically accepted. See
+  `docs/reports/gen32-recovery-diagnosis.md`.
 - **Recovery consultation completed**: two independent blind Codex reviews converged on the
   diagnosis (`docs/reports/codex-consultation-record.md`). Accepted **diagnosis only** — not
   a fix.
@@ -89,6 +89,7 @@ built, boot-deployed, rebooted, and physically accepted.
 
 - No runtime behaviour of any post-gen-31 correction is verified — none has been built or
   activated.
-- D1–D9 are **diagnosed**, not fixed; Stage 2 remains physically failed/open.
+- D1–D7 and D9 are **diagnosed** and D8 is **unresolved** — none is fixed; Stage 2 remains
+  physically failed/open.
 - The active generation id above is a read-only observation this session; re-verify live
   before any deployment decision.

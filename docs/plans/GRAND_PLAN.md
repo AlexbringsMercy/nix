@@ -17,14 +17,14 @@
 
 1. **This document is the source of truth.** If an instruction here is ambiguous, the answer is in the cited source repo — open it and read it. It is never "write your own version."
 2. **Every component has a source attribution (repo + path).** "Adapt" means: vendor the cited files, make the minimal changes listed in the adaptation delta, keep the original structure recognizable. If you find yourself writing a new file that does what a cited file already does, stop — you are off the plan.
-3. **Any subagent you spawn must read `~/nix/SESSION_PREAMBLE.md` first.** No exceptions. That file explains why.
+3. **Any subagent you spawn must read `docs/prompts/SESSION_PREAMBLE.md` first.** No exceptions. That file explains why.
 4. **[GATE] markers are live test gates.** Work stops at a gate until the listed checks pass on the physical machine, with Alex present for anything visual or feel-based.
 5. **Report honestly.** If a test fails, the log says it failed. If a step was skipped, the log says so. If a source file turned out different from this plan's description, flag it — do not silently improvise.
 6. **Do not regress §11 of MASTER_REQUIREMENTS** (font rendering, cursor states, tap-to-click, two-finger scroll, boot WiFi, Kitty Ctrl+C/V, dual-boot rollback, agent execution, Chrome Wayland).
 7. **Protected state (never clobber):** see §8.7. The Media Center stack, the TV firewall rule, the Xbox controller Bluetooth tuning, Bluetooth pairings in `/var/lib/bluetooth`, `/etc/nixos/firmware/brcm`, the T2 invariants of MASTER §10, and the user-owned Claude Code and Codex installations/config/session state. A Nix activation may provide runtimes and PATH ordering; it may not silently replace, shadow, or downgrade an agent binary.
 8. **Source-role fidelity is binding.** A donor may supply structure, behavior, visuals, motion, or a backend only in the role assigned by this plan. Do not preserve a donor's unrelated modules merely because they ship together, and do not make a secondary donor the owner of a surface without Alex's explicit approval.
 9. **Freeze expensive batches before compiling.** Before a Hyprland/plugin or other hour-class build, publish a compact manifest showing every intended item is code-complete, reviewed, and included. A validation build may run early only for a stated technical reason; it is not an intermediate deployment. Coherent closure = one build, one boot-only deployment, one reboot, one gate unless Alex approves otherwise.
-10. **Parallel future-stage work is allowed and expected.** During builds, reboots, operator waits, or current-stage testing, later-stage implementation may proceed in an isolated branch/worktree when dependencies permit. Keep commits and build inputs stage-pure; do not merge or deploy future-stage work into the current gate until intended.
+10. **Deployed closures stay stage-pure.** Later-stage or incomplete work must never enter the current gate/closure. Dormant or in-progress source lives in **ordinary directories on `main`** (e.g. `modules/home/aurora-shell/stage-3-in-progress/`), **not** on a permanent branch or worktree. A temporary branch/worktree may be used when a bounded task genuinely needs isolation during a build, reboot, or operator wait, but branches and worktrees are **not** permanent project or stage containers.
 11. **Ordinary UI actions require ordinary UI paths.** Hotkeys are optional shortcuts, never the only practical way to minimize/restore, switch windows, open controls, or recover state.
 12. **Native application behavior is the update UX contract.** When an application's native Linux build has its own update/check/install/relaunch UI, that exact in-app path is the required primary experience and the invisible backend adapts to it. No extension, injected replacement button, global app-update notification, terminal command, or central updater is an accepted substitute. A separate graphical updater path is allowed only after source/runtime/package evidence proves the native Linux build truly has no updater UI.
 
@@ -138,12 +138,15 @@ modules/home/
                                #   because we patch it; keep upstream git history via subtree for diffability
   hyprland/                    # Lua config (bindings, rules, gestures, glass, plugins)
   dolphin/  kitty/  fish/  starship/  theming/  dev-workspace/  lock/  boot/
-GRAND_PLAN.md                  # this file
+docs/                          # all project documentation: plans/ reports/ references/
+                               #   research/ briefs/ prompts/ instructions/ archive/
+                               #   (this file lives at docs/plans/GRAND_PLAN.md; index: docs/README.md)
+README.md                      # repository entry point
 ```
 
 The old `modules/home/{waybar,rofi,wallpaper,quickshell}` trees are deleted in Stage 1 (their good backends are carried into aurora-shell first — see the manifest above).
 
-**The remote (operator confirmation 2026-07-21): everything goes back to the original boot repo.** `~/nix` *is* that repo — `github.com/AlexbringsMercy/nix`, the bare-bones config that first booted this machine — and the complete OS lives in it: the aurora-shell fork, every vendored component (attribution headers per file; `docs/references/SOURCES.md` remains the provenance ledger), all modules, this plan, and the research corpus. **Stage 0 sets the upstream and pushes; every stage gate ends with a push**, so the entire OS is reproducible from GitHub at any point mid-build; the working branch merges to `main` at Stage 10 acceptance. Never pushed, by design: the Apple/Broadcom firmware tree (stays machine-local through the non-Git wrapper — the reason the portable evaluation exists), secrets (restic password file, the calendar ICS URL — a gitignored `secrets/` path consumed by modules), and wallpaper binaries (existing rule; the library lives in `~/Pictures`, backed up by restic instead).
+**The remote (operator confirmation 2026-07-21): everything goes back to the original boot repo.** `~/nix` *is* that repo — `github.com/AlexbringsMercy/nix`, the bare-bones config that first booted this machine — and the complete OS lives in it: the aurora-shell fork, every vendored component (attribution headers per file; `docs/references/SOURCES.md` remains the provenance ledger), all modules, this plan, and the research corpus. **Stage 0 sets the upstream and pushes; every stage gate ends with a push**, so the entire OS is reproducible from GitHub at any point mid-build. Work happens directly on the canonical `main` branch — the former per-agent working branch was normalized onto `main` and retired (2026-08-09), so there is no long-lived working branch waiting to merge. Never pushed, by design: the Apple/Broadcom firmware tree (stays machine-local through the non-Git wrapper — the reason the portable evaluation exists), secrets (restic password file, the calendar ICS URL — a gitignored `secrets/` path consumed by modules), and wallpaper binaries (existing rule; the library lives in `~/Pictures`, backed up by restic instead).
 
 ### 2.4 The IPC map (how buttons and hotkeys stay redundant)
 
@@ -876,7 +879,7 @@ Explicitly **not built as final architecture:** DMS as the primary rail; iNiR/to
 
 ## 10. THE BUILD SEQUENCE
 
-Each stage ends at a gate; later-stage work may proceed in isolated worktrees, but each deployed closure stays intentional and stage-pure.
+Each stage ends at a gate; each deployed closure stays intentional and stage-pure. Incomplete later-stage source is kept dormant in ordinary directories on `main` (a temporary worktree only if a bounded task genuinely needs isolation), never as a permanent stage branch.
 
 - **Stage 0 — Reconcile & baseline.** Existing gate/debt remains.
 - **Stage 1 — Chassis up.** Caelestia chassis/services/surfaces running; existing acceptance debt remains recorded. Glass A/B is not accepted here; it is Stage 4.
@@ -933,7 +936,7 @@ Record in `docs/reports/EXECUTION_LOG.md` with the active generation and operato
 9. `follow_mouse = 2` behavior is the default.
 10. Three visible workspaces + `+`; active extras expand responsively.
 11. Rail default visibility waits for a completed top+left visual A/B; both modes remain available.
-12. Future-stage implementation may proceed in isolated worktrees during waits; current closure remains stage-pure.
+12. Current closure remains stage-pure; incomplete future-stage source stays dormant in ordinary directories on `main` (temporary isolation only if genuinely needed), not in a permanent branch/worktree.
 13. Pinch zoom already physically passed; no retest unless touched.
 14. Four-finger up opens Hyprexpo Overview; the Caelestia dashboard UI and its edge/gesture triggers are retired.
 15. Aurora is the project/shell codename, not a palette; the teal/purple/green preset is named Northern Lights.
