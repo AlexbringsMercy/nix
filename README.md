@@ -1,53 +1,59 @@
-# macbook NixOS configuration
+# MacBook NixOS configuration
 
-Declarative NixOS, Home Manager, Hyprland Lua, and QuickShell setup for
-Alex's 2020 Intel/T2 MacBook Air.
+Declarative NixOS + Home Manager + Hyprland (native Lua) + QuickShell
+configuration for Alex's 2020 Intel/T2 MacBook Air.
 
-> **Status note (2026-07-29).** `GRAND_PLAN.md` is the only current design
-> authority. For verified machine state read `CURRENT_STATE_AUDIT.md`; for the
-> build's current status and rules read `EXECUTION_LOG.md`,
-> `PM_OPERATING_RULES.md`, and `STAGE2_CLOSEOUT_WORK_ORDER.md`. The
-> build/deploy instructions in this file remain accurate and are the supported
-> path. **Stage 2 is OPEN.**
-
-The MacBook uses the pinned public flake in this repository plus a machine-local
-wrapper at `/home/alex/.config/nixos-local`. The wrapper supplies proprietary
-Apple/Broadcom firmware from `/etc/nixos/firmware/brcm` without ever adding it
-to Git.
+- **Target:** 2020 MacBook Air (Intel i3, T2 security chip), single display.
+- **Canonical branch:** `main` (GitHub: `AlexbringsMercy/nix`). This is the only
+  active branch; the former `codex/macbook-desktop` line was normalized onto
+  `main` and retired.
+- **Stage:** **Stage 2 is OPEN.** `docs/plans/GRAND_PLAN.md` is the sole design
+  authority. Verified machine state: `docs/reports/CURRENT_STATE_AUDIT.md`. What
+  physically happened: `docs/reports/EXECUTION_LOG.md`.
+- **All documentation lives under [`docs/`](docs/README.md) — start there.**
 
 ## Desktop architecture
 
 Hyprland 0.55 native Lua with narrow carried compositor patches, plus caelestia
 forked as **`aurora-shell`** — one systemd-supervised QuickShell instance owning
 a top widget bar and a left application rail, with a wallpaper-derived light/dark
-semantic palette. See **`GRAND_PLAN.md`** for the authoritative architecture,
-surface ownership, and stage sequence; it is the only design authority.
+semantic palette. See `docs/plans/GRAND_PLAN.md` for authoritative architecture,
+surface ownership, and stage sequence.
 
-> **Historical note.** Earlier revisions of this file described a Waybar-era
-> desktop — a permanent glass Waybar owning launcher/tasks/status, independent
-> QuickShell dropdowns opened from it, and Matugen/Waypaper/awww theming. That
-> architecture is **retired**: Waybar, Rofi, SwayOSD, Matugen-as-authority,
-> Waypaper and awww are all superseded. The description is preserved only in
-> `archive/superseded-docs/` and `archive/superseded-handoffs/`. Do not resume
-> from it or cite it as current.
+## How the build is wired
+
+The MacBook is **not** rebuilt directly against this repository's flake. It is
+rebuilt through a tiny **machine-local wrapper** at `~/.config/nixos-local`,
+whose only job is to inject proprietary Apple/Broadcom firmware from
+`/etc/nixos/firmware/brcm` **without ever adding it to Git**.
+
+- **External firmware prerequisite.** `/etc/nixos/firmware/brcm` must exist
+  (extracted from macOS; never committed). On a fresh machine, restore it from
+  backup before the first rebuild.
+- **The wrapper consumes this repo via `git+file:///home/alex/nix`, never raw
+  `path:`.** The git fetcher ships only committed, tracked content and honours
+  `.gitignore`, so the ~11 GB ignored `repos/` research clones never enter the
+  Nix store. The canonical template and recreation steps for the wrapper live at
+  [`hosts/macbook/nixos-local/`](hosts/macbook/nixos-local/README.md).
+- This repository's own `flake.nix` still self-evaluates
+  `nixosConfigurations.macbook` (firmware `null`) so `nix flake check` works from
+  a clone.
 
 ## Validate and build
 
-Run the complete preflight without activating the live desktop:
+Preflight (evaluates the flake and builds the firmware-backed system without
+touching the live desktop; verifies the T2 kernel, firmware, QuickShell and
+`nix-ld` are in the closure):
 
 ```sh
 ./checks/preflight.sh
 ```
 
-The preflight evaluates the public flake, builds the firmware-backed system with
-conservative concurrency, and verifies the T2 kernel, local firmware,
-QuickShell, and `nix-ld` are all present in the closure.
-
-To install an exact validated closure as a **boot** generation without switching
+Install an exact validated closure as a **boot** generation without switching
 underneath the active terminal:
 
 ```fish
-# Repin the wrapper to the current commit first — the wrapper tracks
+# Repin the wrapper to the current commit first — it tracks
 # git+file:///home/alex/nix, so it builds COMMITTED work only.
 nix flake update --flake /home/alex/.config/nixos-local
 set out (nix build --no-link --print-out-paths \
@@ -57,41 +63,31 @@ sudo nix-env --profile /nix/var/nix/profiles/system --set "$out"
 sudo "$out/bin/switch-to-configuration" boot
 ```
 
-> **Never pass `--override-input macbook-config path:/home/alex/nix`.** The `path:`
-> fetcher ignores `.gitignore` and copies the entire worktree into the store —
-> including the 11 GB `repos/` research clones — **on every evaluation**. Three such
-> copies (33 GB) accumulated unnoticed and filled the disk to 98%, which is what
-> killed the 2026-07-29 compositor build: `ar: unable to copy file
-> 'libhyprland_lib.a'; reason: No space left on device`. The wrapper's own
-> `flake.nix` comment warns about exactly this. Use the committed `git+file:` input
-> and repin, as above. If you genuinely need uncommitted work in a build, commit it
-> first — that is also what `PM_OPERATING_RULES.md` requires.
+The `rebuild-macbook` / `test-macbook` fish abbreviations (see
+`modules/home/fish.nix`) wrap this and pass
+`--override-input macbook-config git+file:///home/alex/nix`, which re-fetches the
+current committed HEAD.
 
-Setting the system profile is what creates the new numbered generation.
-`switch-to-configuration boot` then writes that generation's systemd-boot
-entry; invoking it without advancing the profile only rewrites the current
-generation's entry.
+> **Never pass `--override-input macbook-config path:/home/alex/nix`.** The
+> `path:` fetcher ignores `.gitignore` and copies the entire worktree — including
+> the 11 GB `repos/` clones — into the store on **every** evaluation. Three such
+> copies (33 GB) once filled the disk to 98% and killed the 2026-07-29 compositor
+> build (`No space left on device`). Always use the committed `git+file:` input.
 
-Reboot normally to test the new generation. Older generations remain selectable
-from systemd-boot. Do not run standalone `home-manager switch`; Home Manager is
-integrated into the NixOS generation and backs up colliding files during the
-first activation.
+Reboot to test the new generation; older generations remain selectable from
+systemd-boot. Do not run standalone `home-manager switch` — Home Manager is
+integrated into the NixOS generation.
 
 ## Documentation
 
-- `GRAND_PLAN.md` — the authoritative build plan (supersedes `BUILD_PLAN.md`)
-- `MASTER_REQUIREMENTS.md` — the requirements ledger, incl. execution governance
-- `CURRENT_STATE_AUDIT.md` — verified machine and repository state
-- `PM_OPERATING_RULES.md` — operating contract for the project-manager session
-- `STAGE2_CLOSEOUT_WORK_ORDER.md` — the current open work order
-- `SESSION_PREAMBLE.md` — mandatory reading for every session and subagent
-- `visual-design-reference.md` — visual *intent* only; subordinate to `GRAND_PLAN.md`
-- `macbook-build-spec.md` — machine, build, and deployment constraints
-- `archive/superseded-handoffs/` — retired handoffs and plans (history only)
-- `archive/superseded-docs/` — superseded audits and references (history only)
-- `docs/controls.md` — pointer paths and optional shortcuts
-- `docs/wallpapers.md` — local collection and adaptive-color pipeline
-- `docs/recovery.md` — symlink-safe dotfile restore and generation rollback
-- `docs/updating.md` — controlled input updates after acceptance
-- `SOURCES.md` — recorded community provenance and adaptations
-- `EXECUTION_LOG.md` — implementation and validation record
+The full corpus is organized and indexed under **[`docs/README.md`](docs/README.md)**
+(plans · reports · references · research · briefs · prompts · instructions ·
+archive). Quick entry points:
+
+- Design authority — `docs/plans/GRAND_PLAN.md`
+- Requirements — `docs/plans/MASTER_REQUIREMENTS.md`
+- Current open work order — `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`
+- Verified state — `docs/reports/CURRENT_STATE_AUDIT.md`
+- Operating contract — `docs/instructions/PM_OPERATING_RULES.md`
+- Source map — `docs/references/NIXOS_CURRENT_SOURCE_INDEX.md`
+- Reproducibility — `docs/reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md`

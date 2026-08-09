@@ -18,8 +18,9 @@ import qs.services
 // The end-state architecture moves workspaces/tray/clock/statusIcons/power to
 // the ilyamiro top bar (GRAND_PLAN.md §10.2 items 1-2), and the rail drops them
 // then. They are RETAINED here until that top bar actually ships, because it
-// lives on branch `stage3/topbar` and is deliberately not in the Stage 2
-// closure — removing them now would delete the only clock, tray, status and
+// lives dormant on `main` at aurora-shell `stage-3-in-progress/topbar/` and is
+// deliberately not in the Stage 2 closure — removing them now would delete the
+// only clock, tray, status and
 // power menu on the machine rather than de-duplicating anything. They retire
 // WITH the top bar, not before. Same rule that keeps special:min-* visible
 // until its replacement exists.

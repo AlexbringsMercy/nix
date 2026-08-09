@@ -3,7 +3,10 @@ set -euo pipefail
 
 repo=${1:-/home/alex/nix}
 local_flake=${2:-/home/alex/.config/nixos-local}
-repo_ref="path:$repo"
+# Aurora: the git-backed input ships committed content only and honours .gitignore,
+# so the ignored repos/ clones never enter the store. Never use raw `path:$repo`.
+repo_ref="git+file://$repo"
+# The wrapper dir is a tiny, non-git config dir (flake.nix + flake.lock); path: is correct here.
 local_ref="path:$local_flake"
 
 git -C "$repo" diff --check HEAD --

@@ -14,8 +14,13 @@
       set -gx PATH "$HOME/.local/bin" $PATH
     '';
     shellAliases = {
-      rebuild-macbook = "sudo nixos-rebuild switch --flake /home/alex/.config/nixos-local#macbook --override-input macbook-config path:/home/alex/nix --override-input firmware path:/etc/nixos/firmware";
-      test-macbook = "sudo nixos-rebuild test --flake /home/alex/.config/nixos-local#macbook --override-input macbook-config path:/home/alex/nix --override-input firmware path:/etc/nixos/firmware";
+      # Aurora: override macbook-config with the git-backed input, never raw `path:`.
+      # `git+file` is git-aware — it ships only committed, tracked content and honours
+      # `.gitignore`, so the ~11 GB ignored `repos/` clones never enter the Nix store.
+      # A raw `path:/home/alex/nix` fetch copies the whole worktree and has OOM/ENOSPC'd
+      # this machine. Firmware stays a separate machine-local input (not in Git).
+      rebuild-macbook = "sudo nixos-rebuild switch --flake /home/alex/.config/nixos-local#macbook --override-input macbook-config git+file:///home/alex/nix --override-input firmware path:/etc/nixos/firmware";
+      test-macbook = "sudo nixos-rebuild test --flake /home/alex/.config/nixos-local#macbook --override-input macbook-config git+file:///home/alex/nix --override-input firmware path:/etc/nixos/firmware";
       qs-panels = "qs -c aurora-shell ipc call panels status";
     };
   };
