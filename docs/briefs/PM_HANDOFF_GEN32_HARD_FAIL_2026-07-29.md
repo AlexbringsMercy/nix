@@ -4,6 +4,14 @@
 This session is no longer trusted to continue diagnosis or coordination. Nothing in this
 document is an accepted root cause. Verify live ground truth; do not inherit this blindly.
 
+> **UPDATE 2026-08-09 — this is a dated 2026-07-29 record; read the current authority docs.**
+> Since this handoff: the recovery consultation was **completed** (two independent blind
+> reviews converged; accepted diagnosis **D1–D9** in `docs/reports/gen32-recovery-diagnosis.md`
+> — so the "no accepted Codex review exists" statements below are **historical**, not current).
+> The repository was normalized to branch **`main`** (the `codex/macbook-desktop` line was
+> retired). Current machine/repository state: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`.
+> The machine is still on generation 32; Stage 2 and all defects remain **OPEN**.
+
 ---
 
 ## 1. Ground truth

@@ -13,8 +13,13 @@ All source under `topbar/` was taken verbatim from:
     "stage3(wip): ilyamiro top widget bar — islands, expansions, Hyprexpo entry"
 
 That branch was an isolated Stage 3 worktree that forked from the mainline at
-`de96b77`. Its unique commit has been absorbed here and the branch/worktree
-retired — its history remains reachable through `main`.
+`de96b77`. Its 23 QML files were copied **byte-identically** into this directory
+on `main`, and the branch and its worktree were then retired. The original commit
+`dbd3c72af19031a84929a582e642e65a91da48ac` was **not** merged into `main`, so the
+commit itself is **not reachable through `main`** — only its **source content** is
+preserved here. The full SHA above is the durable provenance record; recover the
+original commit (e.g. its withheld `shell.qml` change) from a backup/clone if ever
+needed.
 
 ## What it is
 

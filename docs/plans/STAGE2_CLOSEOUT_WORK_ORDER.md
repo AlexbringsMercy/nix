@@ -28,7 +28,7 @@ the 2026-07-29 session is a valid compile/staging milestone but not the final
 Stage 2 candidate**, because it predates the approved snap/minimize/rail/focus
 decisions recorded in `docs/plans/GRAND_PLAN.md` §10.2.
 
-Authority: `docs/reports/CURRENT_STATE_AUDIT.md` for state, `docs/plans/GRAND_PLAN.md` for design,
+Authority: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` for state, `docs/plans/GRAND_PLAN.md` for design,
 `docs/reports/EXECUTION_LOG.md` (2026-07-28 operator decisions, plus the 2026-07-29 §10.2
 architecture decisions) for the governance that binds this order,
 `docs/instructions/PM_OPERATING_RULES.md` for how to work.

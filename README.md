@@ -8,7 +8,7 @@ configuration for Alex's 2020 Intel/T2 MacBook Air.
   active branch; the former `codex/macbook-desktop` line was normalized onto
   `main` and retired.
 - **Stage:** **Stage 2 is OPEN.** `docs/plans/GRAND_PLAN.md` is the sole design
-  authority. Verified machine state: `docs/reports/CURRENT_STATE_AUDIT.md`. What
+  authority. Verified machine state: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`. What
   physically happened: `docs/reports/EXECUTION_LOG.md`.
 - **All documentation lives under [`docs/`](docs/README.md) — start there.**
 
@@ -87,7 +87,7 @@ archive). Quick entry points:
 - Design authority — `docs/plans/GRAND_PLAN.md`
 - Requirements — `docs/plans/MASTER_REQUIREMENTS.md`
 - Current open work order — `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`
-- Verified state — `docs/reports/CURRENT_STATE_AUDIT.md`
+- Verified state — `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`
 - Operating contract — `docs/instructions/PM_OPERATING_RULES.md`
 - Source map — `docs/references/NIXOS_CURRENT_SOURCE_INDEX.md`
 - Reproducibility — `docs/reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md`

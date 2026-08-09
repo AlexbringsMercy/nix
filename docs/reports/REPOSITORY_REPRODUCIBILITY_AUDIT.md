@@ -141,7 +141,7 @@ wrapper. The wrapper only injects proprietary firmware.
 | Item | Path | Class | Disposition |
 |---|---|---|---|
 | Proprietary T2 Broadcom firmware (163 files) | `/etc/nixos/firmware/brcm` | A/B — proprietary, machine-local | **Correctly excluded.** Gitignored + separately located. Restore-from-backup prerequisite. |
-| Machine-local rebuild wrapper flake | `~/.config/nixos-local/{flake.nix,flake.lock}` | **F/hybrid** — load-bearing source, but binds machine paths | **Not committed** (would embed absolute paths / add a second flake). Reproduced verbatim below → now remotely backed up via this doc. Reference migration owed (§7). |
+| Machine-local rebuild wrapper — **live instance** | `~/.config/nixos-local/{flake.nix,flake.lock}` | B — machine-local instance | **Live copy intentionally not committed** (binds machine paths). Its **canonical template is tracked** at `hosts/macbook/nixos-local/flake.nix` (+ README); the live copy is recreated from it. No migration owed — see §7. |
 | Generated theme cache | `~/.cache/aurora-theme/{kitty.conf,hyprlock.conf,gtk.css,…}` | C — generated | Rebuilt at runtime from tracked matugen templates. Not source. |
 | Lock-screen avatar | `~/.face` | B — machine-local user state | Cosmetic; restore from backup if desired. |
 | User-managed agent installs | `~/.local/bin/claude`, `~/.local/bin/codex` (symlinks) | E — intentionally user-managed | Not git-owned by design. Do not replace with Nix copies. |

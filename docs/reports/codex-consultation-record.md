@@ -4,14 +4,22 @@ Standing directive established 2026-07-29 by the operator, after Stage 2 produce
 regressions across snap, minimize, drag, resize, focus, rail state and screenshots despite
 source review and clean automated checks.
 
-## Status
+## Status (updated 2026-08-09)
 
-**NO ACCEPTED CODEX REVIEW EXISTS. CONSULTATION IS OPEN.**
+**Recovery consultation was completed after the 2026-07-29 hard-fail handoff.** Two
+independent blind GPT-5.6 Sol `xhigh` reviews — **Review A** (compositor / coordinate
+spaces / focus / drag / resize / scroll) and **Review B** (snap / minimize / restore /
+rail state machine) — ran **before** being seeded with Claude's preferred diagnosis and
+**substantially converged**. Their accepted diagnosis is recorded as defects **D1–D9**
+in [`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md).
 
-No Codex diagnosis was obtained for any defect cluster. Nothing may be inferred from the
-partial artefacts listed below — they are **incomplete and non-authoritative**.
+**This is accepted _diagnosis only_ — not implemented, not built, not physically
+accepted.** Every Stage 2 defect remains **OPEN**.
 
-All Codex processes started by the 2026-07-29 PM session were terminated; **zero remain**.
+The **2026-07-29 orchestration-failure section further down is historical** — it records
+the old PM's failed invocations and remains accurate for that date. It no longer
+describes current consultation status. See the **2026-08-09 resolution** section at the
+bottom of this file.
 
 ## Scope
 
@@ -103,9 +111,47 @@ A trivial control prompt returned correctly, so the CLI and the model function.
   point; it predates the hovered-scroll defect, which must be added.
 - Codex session rollouts: `~/.codex/sessions/2026/07/29/rollout-*.jsonl`
 
-## Open consultations for the next PM
+## Open consultations (as of 2026-07-29 — resolved 2026-08-09, see below)
 
 1. **Compositor / coordinate spaces / focus / drag / resize** — must include the unequal
    hovered-but-unfocused scroll path.
 2. **Snap / minimize / restore / rail state machine.**
 3. **Bluetooth** — compare the failed and successful Xbox traces. Must not block the window work.
+
+---
+
+## 2026-08-09 — recovery consultation completed
+
+The next PM completed the mandated blind-review workflow. Artifacts (runtime state, **not
+tracked in Git**) live under `~/.local/state/aurora-build/pm/gen32-recovery/`.
+
+**Two independent blind Pass-1 reviews — completed and converged:**
+
+| Review | Cluster | Artifact | Outcome |
+|---|---|---|---|
+| A | Compositor / input / focus / drag / resize / scroll | `reviewA-compositor-input.md`, `reviewA-final.md` | completed |
+| B | Snap / minimize / restore / rail state machine | `reviewB-state-machine-rail.md`, `reviewB-final.md` | completed |
+
+Both were run before being shown Claude's preferred diagnosis (`claude-diagnosis.md`) and
+**substantially converged** with it and each other. The converged, load-bearing findings
+are recorded as **D1–D9** in [`gen32-recovery-diagnosis.md`](gen32-recovery-diagnosis.md),
+and the corrected **reservation/reflow** snap model (superseding the old pair model) is in
+`docs/plans/GRAND_PLAN.md` §6.2. Claude's revised diagnosis is
+`claude-diagnosis-v2-reservation-reflow.md`.
+
+**Adversarial (Pass-2) review — artifacts present; not asserted as an accepted gate here.**
+An initial adversarial review was superseded (`reviewC-SUPERSEDED-final.md`) and re-run
+against the reservation/reflow model (`reviewC2-adversarial-reservation-reflow.md`,
+`reviewC2-final.md`). These artifacts exist, but this record does **not** claim a fully
+accepted adversarial sign-off — the operator's acceptance gate for implementation is
+separate and remains open.
+
+**Bluetooth consultation (Review D) — artifact present; conclusions unchanged.** A
+Bluetooth review artifact exists (`reviewD-xbox-bluetooth.md`, `reviewD-final.md`), but it
+did **not** establish a root cause or reliable repeatability. The authoritative Xbox status
+is `docs/reports/xbox-bluetooth-diagnostic.md`: immediate connection proven, ≥13 min stable
+once, repeatability **unproven**, root cause **unknown**. No spontaneous disconnect is
+proven.
+
+**Boundary:** accepted diagnosis ≠ implemented/physically-accepted fix. No Stage 2 defect
+has been implemented, built, or physically accepted. All remain OPEN.

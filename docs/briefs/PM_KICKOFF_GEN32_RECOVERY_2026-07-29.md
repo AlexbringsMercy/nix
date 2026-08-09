@@ -2,6 +2,12 @@
 
 Start here. You do not need to read any prior chat transcript.
 
+> **UPDATE 2026-08-09 — dated 2026-07-29 record.** The recovery consultation is now
+> **complete** (accepted diagnosis **D1–D9** in `docs/reports/gen32-recovery-diagnosis.md`);
+> the canonical branch is **`main`**; current state is
+> `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`. The read-list below names some
+> pre-migration paths — use `docs/README.md` for current locations. Stage 2 remains OPEN.
+
 ## Situation in one paragraph
 
 Generation 32 is booted and **physically FAILED** despite an automated structural gate of

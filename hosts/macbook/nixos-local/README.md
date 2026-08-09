@@ -52,4 +52,4 @@ The `rebuild-macbook` / `test-macbook` abbreviations pass
 current committed HEAD at eval time and sidesteps a stale wrapper lock.
 
 See also: `docs/instructions/recovery.md`, `docs/instructions/updating.md`,
-`docs/reports/repository-reproducibility-audit.md`.
+`docs/reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md`.

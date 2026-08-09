@@ -8,9 +8,12 @@ for the repository's provenance and reproducibility state see
 - **GitHub:** `AlexbringsMercy/nix`
 - **Branch:** `main` (canonical; also the GitHub default)
 - **Local checkout:** `/home/alex/nix`
-- **Actual rebuild entry point:** machine-local wrapper `~/.config/nixos-local`
-  (NOT in git — see the audit §6). The repo self-evaluates
-  `nixosConfigurations.macbook` without it.
+- **Actual rebuild entry point:** the machine-local wrapper **live instance** at
+  `~/.config/nixos-local/` is intentionally machine-local (binds machine paths, not
+  committed). Its **canonical source/template is tracked in Git** at
+  `hosts/macbook/nixos-local/flake.nix` (+ `README.md` with recreation steps); the
+  firmware path stays an external prerequisite. There is **no wrapper source debt**.
+  The repo also self-evaluates `nixosConfigurations.macbook` without the wrapper.
 
 ---
 
@@ -71,7 +74,7 @@ for the repository's provenance and reproducibility state see
 |---|---|
 | `docs/plans/GRAND_PLAN.md` | Overall plan |
 | `docs/plans/MASTER_REQUIREMENTS.md` | Requirements |
-| `docs/reports/CURRENT_STATE_AUDIT.md` | Current state |
+| `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` | Current state |
 | `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` | Stage 2 closeout work order |
 | `docs/instructions/PM_OPERATING_RULES.md` | PM operating rules |
 | `docs/prompts/SESSION_PREAMBLE.md` | Session preamble (subagents must read first) |

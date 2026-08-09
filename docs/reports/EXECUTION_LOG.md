@@ -3134,3 +3134,97 @@ This PM session was terminated mid-diagnosis. All Codex processes were killed, t
 The operator should avoid snap on gen 32 until corrected.**
 
 **Stage 2 remains OPEN.**
+
+---
+
+## 2026-08-09 — recovery consultation completed (diagnosis accepted; no fix built)
+
+The mandated blind-review workflow was completed after the 2026-07-29 handoff. Two
+independent blind GPT-5.6 Sol `xhigh` reviews — **Review A** (compositor / coordinate
+spaces / focus / drag / resize / scroll) and **Review B** (snap / minimize / restore / rail
+state machine) — ran before being seeded with Claude's preferred diagnosis and
+**substantially converged** with it. An adversarial pass was re-run against the corrected
+snap model (artifacts `reviewC2-*`), and a Bluetooth review artifact (`reviewD-*`) exists.
+Artifacts (runtime state, not tracked): `~/.local/state/aurora-build/pm/gen32-recovery/`.
+
+The converged, load-bearing findings are recorded as **D1–D9** in
+`docs/reports/gen32-recovery-diagnosis.md`:
+
+- **D1** ~5 s snap freeze — synchronous `hyprctl` self-IPC inside a Lua callback deadlocks to
+  the ~5 s socket timeout (`screen.reserved` absent → `io.popen` fallback).
+- **D2a/D2b** under-rail geometry (zero reserved-space fallback on timeout) and an independent
+  geometry error (borders/per-edge gaps mis-accounted).
+- **D3** a fresh-workspace window wrongly classed as "surplus" and minimized (pair/partner
+  model regression).
+- **D4** partial-transaction/focus failure (13 mutations, discarded result channels, no
+  rollback).
+- **D5** restore cannot recover prior placement (backend stores only weak ref + fullscreen).
+- **D6** titlebar drag jump (tiled-node vs floating-client coordinate spaces).
+- **D7** resize — evidence **refined**: the old "pointer capture never arms" hypothesis is
+  **obsolete**; actual behavior is cursor→diagonal on mouse-down (D7a), outer-edge anchoring
+  as the opposite/inner edge (D7b), top/bottom arm-but-no-resize (D7c), and a hidden
+  center-right layer surface intercepting input (D7d).
+- **D8** focus-dependent Kitty scroll — **still UNRESOLVED**; invariant recorded (a window's
+  effective scroll for its app baseline must not change because keyboard focus is elsewhere;
+  no global multiplier / unfocused boost / removing Chrome tuning).
+- **D9** Media Center rail entry rendered full-opacity at `windowCount == 0`; rail listens for
+  `minimize` while Hyprland emits `minimized` and the plugin emits neither.
+
+**This is accepted diagnosis only — nothing implemented, built, or physically accepted.** All
+D1–D9 remain **OPEN**; Stage 2 remains **OPEN**. Consultation record:
+`docs/reports/codex-consultation-record.md`.
+
+The recovery also **clarified the required snap product behavior** as a **reservation / reflow**
+model (not a pair model): a half-snap reserves a half at higher layout priority; ordinary
+windows reflow; minimize happens only when both halves are reserved by explicit owners and no
+ordinary tiled region remains. Recorded in `docs/plans/GRAND_PLAN.md` §6.2.
+
+**Xbox evidence correction:** immediate connection is proven (917 ms) and held ≥13 min once,
+with `ServicesResolved=true` and ~90% battery and no errors; **repeatability is unproven**,
+root cause **unknown**, and **no spontaneous disconnect is proven** (the controller may simply
+have been powered off normally). `docs/reports/xbox-bluetooth-diagnostic.md`.
+
+## 2026-08-09 — repository normalization + finalization (no build/activation)
+
+Repository-truth work, entirely on `main`, no NixOS build/activation/reboot:
+
+- **Normalization:** the real project was fast-forwarded from the obsolete bootstrap onto
+  `main`; the long-lived `codex/macbook-desktop` branch was retired (local + remote). Repo:
+  `AlexbringsMercy/nix`, default branch `main`. See
+  `docs/reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md`.
+- **Stage 3 absorbed:** the unique `stage3/topbar` commit `dbd3c72`'s 23 QML files were placed
+  **dormant** at `modules/home/aurora-shell/stage-3-in-progress/topbar/` (not built, not
+  imported; `shell.qml` activation withheld). The branch and `/home/alex/aurora-stage3`
+  worktree were retired; the original commit is **not** reachable through `main` — only its
+  byte-identical source is preserved, with the SHA recorded as provenance.
+- **Rebuild input fixed (source only):** `modules/home/fish.nix`, `checks/preflight.sh`, and
+  active build instructions now use `git+file:///home/alex/nix` instead of raw
+  `path:/home/alex/nix`. **Not yet live** — see the live-vs-source caveat below.
+- **Machine-local wrapper:** canonical template tracked at `hosts/macbook/nixos-local/`.
+- **Documentation** reorganized under `docs/{plans,reports,references,research,briefs,prompts,
+  instructions,archive}` with a `docs/README.md` index.
+
+## 2026-08-09 — documentation truth-repair session (this entry)
+
+Corrected remaining truth defects found in independent review; **no** Stage 2 implementation,
+**no** NixOS build, **no** activation, **no** reboot, **no** portability work:
+
+- Recorded the completed recovery consultation and D1–D9 (above; new report
+  `docs/reports/gen32-recovery-diagnosis.md`).
+- Clarified GRAND_PLAN §6.2 snap semantics to the reservation/reflow model (removed obsolete
+  pair-model wording); refined D7 resize evidence; recorded the D8 Kitty-scroll invariant;
+  corrected the Xbox evidence.
+- **Current-state audit:** the polluted `CURRENT_STATE_AUDIT.md` (July gen-31 snapshot with
+  August repo metadata grafted in) was restored to its July truth and archived at
+  `docs/archive/superseded-docs/2026-08-09/CURRENT_STATE_AUDIT-2026-07-29-gen31.md`; a new
+  current audit `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` was written and made the
+  authority in the index/nav docs.
+- Reconciled the reproducibility audit (wrapper template tracked; no debt), the source index
+  (live wrapper vs tracked template), the Stage 3 README ("reachable through main" corrected),
+  a case-sensitive link, and a `visual-design-reference` classification/path contradiction.
+
+**Live-vs-source caveat:** the running generation is **gen 32** (`62aim1mw…`, verified
+read-only this session). None of the August source corrections (including the rebuild alias)
+are live; they take effect only when a future **accepted** generation is built and installed.
+
+**Stage 2 remains OPEN. D1–D9 remain OPEN. No Stage 3.**

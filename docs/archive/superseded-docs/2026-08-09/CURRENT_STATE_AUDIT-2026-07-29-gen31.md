@@ -1,5 +1,11 @@
 # CURRENT STATE AUDIT — 2026-07-29, generation 31
 
+> **SUPERSEDED 2026-08-09 — archived historical snapshot.** The current machine/source
+> state is `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`. This file is preserved as the
+> July generation-31 snapshot; its §1 repository rows describe the **July** repository
+> state (branch `codex/macbook-desktop`, before the August normalization onto `main`) and
+> must be read as history, not current fact.
+
 > ## ⚠ OUT OF DATE — the machine is now on generation 32, which PHYSICALLY FAILED
 >
 > This file is a **generation 31** snapshot taken on the afternoon of 2026-07-29. The
@@ -37,15 +43,19 @@ progress toward `built`; it is only written. Any check not actually run is
 
 | Fact | Value | Evidence |
 |---|---|---|
-| Branch | `main` (canonical; was `codex/macbook-desktop` when this row was first written 2026-07-28 — that line was normalized onto `main` and retired 2026-08-09) | `git branch -vv` |
-| HEAD | `main` tip (advanced past the `39a5285` correction batch; see `git log -1`) | `git log -1` |
-| Sync with origin | **0 ahead / 0 behind** | `git rev-list --left-right --count origin/main...HEAD` |
-| Tree state | Clean on a normalized `main` | `git status --porcelain` |
-| Worktrees | `/home/alex/nix` (Stage 2) on `main` — the `/home/alex/aurora-stage3` Stage 3 worktree and its `stage3/topbar` branch were retired 2026-08-09 | `git worktree list` |
+| Branch | `codex/macbook-desktop` | `git branch -vv` |
+| HEAD | `39a5285` — "stage2: correction batch for the failed runtime gate" | `git log -1` |
+| Sync with origin | **0 ahead / 0 behind** | `git rev-list --left-right --count origin/codex/macbook-desktop...HEAD` |
+| Tree state before this session's documentation work | Clean except a deleted `GRAND_PLAN.md` and the operator's supplied revision file | `git status --porcelain` |
+| Worktrees | `/home/alex/nix` (Stage 2) · `/home/alex/aurora-stage3` on `stage3/topbar` @ `dbd3c72` | `git worktree list` |
 
-Stage 3 work is now absorbed onto `main` as **dormant** source at
-`modules/home/aurora-shell/stage-3-in-progress/topbar/` (not built, not imported)
-and is **not** in the Stage 2 closure.
+Stage 3 work is correctly isolated in its own worktree and is **not** in the
+Stage 2 closure.
+
+> _Historical note (this row is the July state). The repository was later normalized:
+> `codex/macbook-desktop` was fast-forwarded onto `main` and retired, and the
+> `stage3/topbar` worktree/branch was retired with its source absorbed dormant onto
+> `main`. See `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`._
 
 ---
 

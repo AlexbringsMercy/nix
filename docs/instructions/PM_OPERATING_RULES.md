@@ -8,7 +8,7 @@ unchanged and remain binding; only stale state metadata and the read list were
 corrected.
 
 This file tells you how to work. It does not tell you what is true about the
-machine — `docs/reports/CURRENT_STATE_AUDIT.md` does that — and it does not tell you what to
+machine — `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` does that — and it does not tell you what to
 build — `docs/plans/GRAND_PLAN.md` and `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` do that.
 
 ---
@@ -20,7 +20,7 @@ When two sources disagree, the higher-ranked one wins. Say which one you used.
 1. **Current machine evidence** — `readlink -f /run/current-system`, `nix path-info`
    validity, `hyprctl`, `udevadm`, `libinput`, `systemctl`, the actual files on
    disk. A verified read beats every second-hand claim, including this file's.
-2. **`docs/reports/CURRENT_STATE_AUDIT.md`** — the verified state snapshot. Do not modify it;
+2. **`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`** — the verified state snapshot. Do not modify it;
    supersede it with a new dated audit if it goes stale.
 3. **The latest dated entries in `docs/reports/EXECUTION_LOG.md`** — what physically happened,
    plus the operator decisions register.
@@ -33,8 +33,11 @@ When two sources disagree, the higher-ranked one wins. Say which one you used.
    never architecture, surface-ownership, or palette authority.
 8. **Archived material** (`docs/archive/superseded-handoffs/`,
    `docs/archive/superseded-docs/`) — historical provenance only. Never an active
-   instruction. `ISSUE_LOG.md` and the pre-Grand-Plan `docs/references/visual-design-reference.md`
-   live here now; both are dated audits of the retired Waybar/Rofi-era system.
+   instruction. `docs/archive/superseded-docs/2026-07-29/ISSUE_LOG.md` and the
+   pre-Grand-Plan `docs/archive/superseded-docs/2026-07-29/visual-design-reference.md`
+   live there; both are dated audits of the retired Waybar/Rofi-era system. (The
+   **current** visual-intent doc is the live `docs/references/visual-design-reference.md`
+   in item 7 above.)
 
 Two things sit outside the ranking because they are absolute:
 
@@ -143,7 +146,7 @@ deploy command sequence, the armed-resume loop, and the accumulated
 already-paid-for lessons — is in the archived
 `docs/archive/superseded-handoffs/2026-07-28/PM_HANDOFF.md`. Read it for **machinery
 only**; its state claims (generation 25, "gen 26 staged and never tested") are
-stale and lose to `docs/reports/CURRENT_STATE_AUDIT.md`.
+stale and lose to `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`.
 
 ---
 
@@ -190,7 +193,7 @@ generation from the machine — never copy a number from a document.
 ## 5. First actions for the incoming PM
 
 1. Read, in order: `docs/prompts/SESSION_PREAMBLE.md` · this file ·
-   `docs/reports/CURRENT_STATE_AUDIT.md` · `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` · `docs/plans/GRAND_PLAN.md` ·
+   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` · `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` · `docs/plans/GRAND_PLAN.md` ·
    `docs/plans/MASTER_REQUIREMENTS.md` · `docs/references/macbook-build-spec.md` · the `docs/reports/EXECUTION_LOG.md`
    current-authority header, the operator decisions registers, and every entry
    from the current Stage 2 correction work forward · `docs/references/SOURCES.md`.

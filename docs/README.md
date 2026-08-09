@@ -18,7 +18,7 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 [`instructions/PM_OPERATING_RULES.md`](instructions/PM_OPERATING_RULES.md) §1.
 
 1. **Current machine evidence** — live reads (`/run/current-system`, `hyprctl`, …).
-2. [`reports/CURRENT_STATE_AUDIT.md`](reports/CURRENT_STATE_AUDIT.md) — verified state snapshot.
+2. [`reports/CURRENT_STATE_AUDIT_2026-08-09.md`](reports/CURRENT_STATE_AUDIT_2026-08-09.md) — verified state snapshot.
 3. Latest dated entries in [`reports/EXECUTION_LOG.md`](reports/EXECUTION_LOG.md) — what happened + operator decisions.
 4. [`plans/GRAND_PLAN.md`](plans/GRAND_PLAN.md) — design authority for everything not yet built.
 5. [`plans/MASTER_REQUIREMENTS.md`](plans/MASTER_REQUIREMENTS.md) — requirements ledger.
@@ -40,11 +40,12 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 
 | Doc | Role |
 |---|---|
-| [CURRENT_STATE_AUDIT.md](reports/CURRENT_STATE_AUDIT.md) | Verified machine + repository state |
+| [CURRENT_STATE_AUDIT_2026-08-09.md](reports/CURRENT_STATE_AUDIT_2026-08-09.md) | **Current** verified machine + repository state (supersedes the archived July gen-31 audit) |
+| [gen32-recovery-diagnosis.md](reports/gen32-recovery-diagnosis.md) | Accepted recovery diagnosis — defects **D1–D9** (all OPEN) + approved reservation/reflow snap semantics |
 | [EXECUTION_LOG.md](reports/EXECUTION_LOG.md) | Full implementation/validation history + operator decisions |
 | [REPOSITORY_REPRODUCIBILITY_AUDIT.md](reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md) | Repo normalization + reproducibility verdict |
 | [stage2-runtime-gate.md](reports/stage2-runtime-gate.md) | The runtime gate that was stopped on the gen 32 hard fail |
-| [codex-consultation-record.md](reports/codex-consultation-record.md) | Adversarial Codex consultation record (OPEN) |
+| [codex-consultation-record.md](reports/codex-consultation-record.md) | Codex consultation record — recovery reviews **completed** 2026-08-09 (diagnosis accepted; fixes still OPEN) |
 | [xbox-bluetooth-diagnostic.md](reports/xbox-bluetooth-diagnostic.md) | Xbox controller Bluetooth diagnostic |
 | [issue-log-migration-2026-07-29.md](reports/issue-log-migration-2026-07-29.md) | Record of the ISSUE_LOG archival/migration |
 
