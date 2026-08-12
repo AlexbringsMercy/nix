@@ -2,18 +2,24 @@
 
 **Status: `STAGE 2 — OPEN`.**
 
-> ## ⚠ SUPERSEDED FOR THE CURRENT CYCLE — GENERATION 32 HARD FAIL (2026-07-29)
+> ## ⚠ PRIOR-CYCLE WORK ORDER — GENERATION 32 HARD FAIL (2026-07-29)
 >
 > This work order drove the generation-32 build. Generation 32 **activated and then failed
 > the physical gate** on ten defects, several of them regressions against generation 31
 > (titlebar drag, tiled resize). Its close-out criteria are therefore **not met** and this
 > document is **not** the brief for the next cycle.
 >
-> The current brief is **`docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`**, with ground truth and
-> the failure matrix in **`docs/briefs/PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`**.
+> The snap/minimize sections below use the **pair model** that gen32 was built against. The
+> recovery investigation afterward established the **reservation/reflow** model as binding
+> current authority — see `docs/plans/GRAND_PLAN.md` §6.2 and
+> `docs/reports/gen32-recovery-diagnosis.md`. Current recovery resume path:
+> `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` →
+> `docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md` →
+> `docs/plans/GRAND_PLAN.md`. The dated July incident briefs under `docs/briefs/` are
+> supporting historical context.
 >
 > Requirements below that were **met and must not be regressed** — notably rail previews and
-> exact grouped window selection — are listed in handoff §4.
+> exact grouped window selection — are listed in the handoff brief §4.
 
 The exact implementation brief for the incoming PM. Written 2026-07-28 against
 confirmed ground truth (canonical branch is now `main`; written on the former
@@ -28,14 +34,14 @@ the 2026-07-29 session is a valid compile/staging milestone but not the final
 Stage 2 candidate**, because it predates the approved snap/minimize/rail/focus
 decisions recorded in `docs/plans/GRAND_PLAN.md` §10.2.
 
-Authority: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` for state, `docs/plans/GRAND_PLAN.md` for design,
+Authority: `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` for state, `docs/plans/GRAND_PLAN.md` for design,
 `docs/reports/EXECUTION_LOG.md` (2026-07-28 operator decisions, plus the 2026-07-29 §10.2
 architecture decisions) for the governance that binds this order,
 `docs/instructions/PM_OPERATING_RULES.md` for how to work.
 
 ---
 
-## 1. Current truth
+## 1. Baseline at work-order authoring (gen26 era, revised 2026-07-29)
 
 - **Stage 0** carries two physical-check debts: **TV reachability** and **Xbox
   controller pairing**. Both were deferred at the Stage 0 gate and then never run.
@@ -51,8 +57,8 @@ architecture decisions) for the governance that binds this order,
   (`snap_geometry`/`half_snap`): `Super+Left`/`Super+Right` float, exact-resize,
   and exact-move the active window to a computed half, and a second press on an
   already-snapped half toggles it back into the dwindle tree. It does **not**
-  handle the reservation/reflow model described in `docs/plans/GRAND_PLAN.md` §6.2
-  (clarified 2026-08-09 — not a pair model), and has no reservation-release
+  minimize a prior occupant on an occupied-side snap, does **not** minimize
+  surplus same-workspace windows on pair completion, and has no pair-dissolution
   logic beyond the single second-press toggle. This is the Stage 2 starting point
   for deliverable G below, not the finished behavior.
 - **The current minimize backend is the model `docs/plans/GRAND_PLAN.md` §6.2 rejects.**
@@ -238,19 +244,17 @@ This is a small config change plus a gate row, not a research programme.
   (`docs/plans/GRAND_PLAN.md` §6.2, §10.2 items 7–8):
   - `Super+Left`/`Super+Right` always produce exact left/right halves,
     independent of dwindle-tree shape or window count.
-  - Snapping a window onto an **already-reserved side demotes the previous owner
-    to ordinary** — the previous owner joins the opposite half's reflow pool
-    (or overflow/minimized if that half is also reserved).
-  - **Both halves reserved** by explicit half-snap owners and no ordinary tiled
-    region remaining → remaining ordinary windows minimize. Ordinary windows
-    are **not** minimized merely because one half is reserved.
-  - **Releasing a reservation** — dragging/unsnapping/maximizing/closing an owner —
-    returns that region to the ordinary reflow pool and re-tiles normally,
-    restoring prior placement/state where technically possible.
-- **Snap gate:** one, two, and 3+ windows; target side already reserved;
-  left/right; second-press return; single-owner reflow (other windows stay
-  visible); both-halves-reserved minimize; owner demotion on cross-side snap;
-  restore; drag; close; maximize; new window while a half is reserved.
+  - Snapping a window onto an **occupied side minimizes the previous occupant**
+    (via deliverable F's backend).
+  - **Completing a pair** (both halves occupied) **minimizes all other visible
+    same-workspace windows.** The opposite half remains stable.
+  - **Restoring a surplus minimized window**, or **dragging / unsnapping /
+    maximizing / closing either pair member, dissolves the pair** and returns the
+    workspace to ordinary Hyprland tiling, restoring prior placement/state where
+    technically possible.
+- **Snap gate:** one, two, and 3+ windows; target side already occupied;
+  left/right; second-press return; restore surplus; drag; close; maximize; new
+  window after a pair.
 
 ### H. Minimum final left-rail application slice *(added 2026-07-29)*
 
@@ -317,11 +321,11 @@ skipped item becomes an implied pass.**
 | 4 | `follow_mouse = 2` — pointer scroll/interaction follows the hovered window without stealing keyboard focus; a click still transfers keyboard focus | |
 | 5 | Deterministic snap, single window — `Super+Left` / `Super+Right` land fully in frame, exact halves, no top-left drift | |
 | 6 | Deterministic snap, return — a second arrow press on a snapped half releases it back into ordinary tiling | |
-| 7 | Reservation/reflow, one side reserved — ordinary windows stay visible and reflow in the opposite half; they are not minimized | |
-| 8 | Reservation/reflow, both sides reserved — both halves owned by explicit half-snap owners and no ordinary region remains → surplus minimizes | |
-| 9 | Snap onto already-reserved side — previous owner is demoted to ordinary and joins reflow pool | |
-| 10 | Reservation release — dragging/unsnapping/maximizing/closing an owner releases the reservation and returns the region to ordinary tiling | |
-| 11 | New window while a half is reserved — new window tiles in the available region | |
+| 7 | Deterministic snap, occupied side — snapping onto an occupied side minimizes the previous occupant into the same-workspace rail | |
+| 8 | Deterministic snap, completed pair — snapping the second half minimizes all other same-workspace windows; the opposite half stays stable | |
+| 9 | Pair dissolution, restore — restoring a surplus minimized window dissolves the pair and returns to ordinary tiling | |
+| 10 | Pair dissolution, drag/unsnap/maximize/close — each action on a pair member dissolves the pair, restoring prior placement/state where possible | |
+| 11 | New window after a pair — a new window does not tile underneath either snapped half | |
 | 12 | Minimize backend — minimizing a window leaves layout/render/input and is not represented as a `special:` workspace | |
 | 13 | Minimize backend — minimized windows retain original workspace, tiling/floating state, and geometry where possible | |
 | 14 | Left rail — launcher entry present and opens the launcher | |

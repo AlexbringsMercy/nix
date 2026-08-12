@@ -52,26 +52,32 @@ drag a window by its titlebar.
 
 ---
 
-## B. Snap reservation/reflow and surplus minimize
+## B. Snap, surplus minimize and pair dissolution
 
-> **Snap-model clarification (2026-08-09):** the snap model is **reservation/reflow**,
-> not a pair model. See `docs/plans/GRAND_PLAN.md` §6.2 and
-> `docs/reports/gen32-recovery-diagnosis.md`.
+> **Historical note:** this gate was written and run against the **pair model** that gen32
+> implemented. The recovery investigation afterward **rejected** the pair model in favor of
+> **reservation/reflow** semantics. Current binding snap authority:
+> `docs/plans/GRAND_PLAN.md` §6.2 and `docs/reports/gen32-recovery-diagnosis.md`.
+> The next correction cycle's gate will use reservation/reflow test rows.
 
-**Do:** with one window, `Super+Left`, then `Super+Left` again. Add a second window;
-verify both stay visible (one reserved, one reflowed). Then snap the second right.
-Add a third. Then, in turn: restore a minimized window · drag/unsnap an owner ·
-maximize one · close one · open a new window while a half is reserved.
+**Do:** with one window, `Super+Left`, then `Super+Left` again. Add a second window
+and snap it right. Add a third. Then, in turn: restore a minimized surplus window ·
+drag a pair member · maximize one · close one · open a new window while a pair is
+complete.
 
 **Pass:**
 - halves are **exact** — fully in frame, no upper-left drift, clear of the rail;
 - second press returns the window to ordinary tiling;
-- one side reserved: ordinary windows **stay visible** and reflow in the opposite half;
-- both sides reserved by explicit owners, no ordinary region left: surplus minimizes;
-- snap onto an already-reserved side **demotes** the previous owner to ordinary;
-- releasing a reservation (drag/unsnap/maximize/close) returns the region to
-  ordinary tiling;
-- a new window tiles in the available region.
+- snapping onto an **occupied** side minimizes the previous occupant;
+- completing a pair minimizes **all other** same-workspace windows; the opposite
+  half stays put;
+- each of restore / drag / maximize / close **dissolves** the pair back to ordinary
+  tiling;
+- a new window does **not** tile underneath either half.
+
+**Specifically re-test (defect fixed this cycle):** minimize a window unrelated to
+the pair, then **close it while still minimized**. The pair must **survive** — it
+previously dissolved.
 
 ---
 

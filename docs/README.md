@@ -10,7 +10,7 @@ Manager + Hyprland + QuickShell build for Alex's 2020 T2 MacBook Air.
   absorbed onto `main` (see below).
 - **Stage:** **Stage 2 is OPEN.**
 - **Current Stage 2 recovery resume path:**
-  [`reports/CURRENT_STATE_AUDIT_2026-08-09.md`](reports/CURRENT_STATE_AUDIT_2026-08-09.md)
+  [`reports/CURRENT_STATE_AUDIT_2026-08-11.md`](reports/CURRENT_STATE_AUDIT_2026-08-11.md)
   → [`reports/gen32-recovery-diagnosis.md`](reports/gen32-recovery-diagnosis.md)
   → [`reports/codex-consultation-record.md`](reports/codex-consultation-record.md)
   → [`plans/GRAND_PLAN.md`](plans/GRAND_PLAN.md). The gen-32 close-out work order
@@ -26,7 +26,7 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 [`instructions/PM_OPERATING_RULES.md`](instructions/PM_OPERATING_RULES.md) §1.
 
 1. **Current machine evidence** — live reads (`/run/current-system`, `hyprctl`, …).
-2. [`reports/CURRENT_STATE_AUDIT_2026-08-09.md`](reports/CURRENT_STATE_AUDIT_2026-08-09.md) — verified state snapshot.
+2. [`reports/CURRENT_STATE_AUDIT_2026-08-11.md`](reports/CURRENT_STATE_AUDIT_2026-08-11.md) — verified state snapshot.
 3. Latest dated entries in [`reports/EXECUTION_LOG.md`](reports/EXECUTION_LOG.md) — what happened + operator decisions.
 4. [`plans/GRAND_PLAN.md`](plans/GRAND_PLAN.md) — design authority for everything not yet built.
 5. [`plans/MASTER_REQUIREMENTS.md`](plans/MASTER_REQUIREMENTS.md) — requirements ledger.
@@ -41,14 +41,15 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 | [GRAND_PLAN.md](plans/GRAND_PLAN.md) | The design authority: architecture, surface ownership, stage sequence |
 | [MASTER_REQUIREMENTS.md](plans/MASTER_REQUIREMENTS.md) | Requirements ledger + execution governance |
 | [STAGE2_CLOSEOUT_WORK_ORDER.md](plans/STAGE2_CLOSEOUT_WORK_ORDER.md) | Stage 2 requirements/scope — the **prior-cycle (gen-32) work order**, superseded for the current cycle; **not** the current brief (see "Current Stage 2 recovery resume path" above) |
-| [stage2-closeout.md](plans/stage2-closeout.md) | Stage 2 operator close-out gate (`STAGE 2 — OPEN`) |
+| [stage2-closeout.md](plans/stage2-closeout.md) | **Prior-cycle** Stage 2 operator gate (authored pre-gen32; uses the pair model that gen32 was built against; superseded — see banner) |
 | [stage2-correction-manifest.md](plans/stage2-correction-manifest.md) | Frozen correction manifest (produced gen 32, which hard-failed) |
 
 ## `reports/` — observed state, results, evidence
 
 | Doc | Role |
 |---|---|
-| [CURRENT_STATE_AUDIT_2026-08-09.md](reports/CURRENT_STATE_AUDIT_2026-08-09.md) | **Current** verified machine + repository state (supersedes the archived July gen-31 audit) |
+| [CURRENT_STATE_AUDIT_2026-08-11.md](reports/CURRENT_STATE_AUDIT_2026-08-11.md) | **Current** verified machine + repository state |
+| [CURRENT_STATE_AUDIT_2026-08-09.md](reports/CURRENT_STATE_AUDIT_2026-08-09.md) | Superseded verified snapshot from 2026-08-09 (historical) |
 | [gen32-recovery-diagnosis.md](reports/gen32-recovery-diagnosis.md) | Accepted gen-32 recovery **findings** — defect record **D1–D9** (all OPEN; D1–D7 and D9 diagnosed, **D8 UNRESOLVED**) + approved reservation/reflow snap semantics |
 | [EXECUTION_LOG.md](reports/EXECUTION_LOG.md) | Full implementation/validation history + operator decisions |
 | [REPOSITORY_REPRODUCIBILITY_AUDIT.md](reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md) | Repo normalization + reproducibility verdict |

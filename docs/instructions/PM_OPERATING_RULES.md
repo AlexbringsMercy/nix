@@ -4,11 +4,11 @@
 2026-07-28; **canonical branch `main`** (the `codex/macbook-desktop` line was
 fast-forwarded onto `main` and retired 2026-08-09); **Stage 2 OPEN.** Mutable
 machine/generation state is deliberately **not** hard-coded here — defer to
-`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` (the machine is currently on
+`docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` (the machine is currently on
 generation 32, hard-failed). The rules themselves are unchanged and remain binding.
 
 This file tells you how to work. It does not tell you what is true about the
-machine — `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` does that — and it does not tell you what to
+machine — `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` does that — and it does not tell you what to
 build — `docs/plans/GRAND_PLAN.md` (design authority) and the Stage 2 requirements in
 `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (the prior-cycle gen-32 work order) do that.
 
@@ -21,7 +21,7 @@ When two sources disagree, the higher-ranked one wins. Say which one you used.
 1. **Current machine evidence** — `readlink -f /run/current-system`, `nix path-info`
    validity, `hyprctl`, `udevadm`, `libinput`, `systemctl`, the actual files on
    disk. A verified read beats every second-hand claim, including this file's.
-2. **`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`** — the verified state snapshot. Do not modify it;
+2. **`docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`** — the verified state snapshot. Do not modify it;
    supersede it with a new dated audit if it goes stale.
 3. **The latest dated entries in `docs/reports/EXECUTION_LOG.md`** — what physically happened,
    plus the operator decisions register.
@@ -150,7 +150,7 @@ deploy command sequence, the armed-resume loop, and the accumulated
 already-paid-for lessons — is in the archived
 `docs/archive/superseded-handoffs/2026-07-28/PM_HANDOFF.md`. Read it for **machinery
 only**; its state claims (generation 25, "gen 26 staged and never tested") are
-stale and lose to `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`.
+stale and lose to `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`.
 
 ---
 
@@ -197,7 +197,7 @@ generation from the machine — never copy a number from a document.
 ## 5. First actions for the incoming PM
 
 1. Read, in order: `docs/prompts/SESSION_PREAMBLE.md` · this file ·
-   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` ·
+   `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` ·
    `docs/reports/gen32-recovery-diagnosis.md` (defect record D1–D9) ·
    `docs/reports/codex-consultation-record.md` (consultation status) ·
    `docs/plans/GRAND_PLAN.md` ·
@@ -224,7 +224,7 @@ generation from the machine — never copy a number from a document.
    generation link, a newer boot entry, and whether the current source's closure is
    actually valid in the store.
 3. Report the stage status honestly. Today that is **`STAGE 2 — OPEN`**.
-4. Start on the gen-32 **recovery resume path**: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`
+4. Start on the gen-32 **recovery resume path**: `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`
    → `docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md`
    → `docs/plans/GRAND_PLAN.md`, honouring the Stage 2 requirements in
    `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (prior-cycle work order, **not** the current

@@ -74,7 +74,7 @@ for the repository's provenance and reproducibility state see
 |---|---|
 | `docs/plans/GRAND_PLAN.md` | Overall plan |
 | `docs/plans/MASTER_REQUIREMENTS.md` | Requirements |
-| `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` | Current state |
+| `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` | Current state |
 | `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` | Stage 2 closeout work order |
 | `docs/instructions/PM_OPERATING_RULES.md` | PM operating rules |
 | `docs/prompts/SESSION_PREAMBLE.md` | Session preamble (subagents must read first) |
@@ -89,7 +89,7 @@ for the repository's provenance and reproducibility state see
 
 ## Handoff / recovery (point-in-time, generation 32)
 
-The current recovery resume path starts at `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` →
+The current recovery resume path starts at `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` →
 `docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md` →
 `docs/plans/GRAND_PLAN.md`. The dated July incident briefs below are supporting historical context:
 

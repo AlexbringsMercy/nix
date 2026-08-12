@@ -120,52 +120,58 @@ None of these exist today. Each needs a sourced, proposed solution. These are th
 
 ---
 
-## 5. BUG LOG — CURRENT DEFECTS
-Every item must be fixed. Grouped by area.
+## 5. BUG LOG — OBSERVED DEFECTS
+
+> **Status as of 2026-08-11.** Many items below were first recorded against the pre-Aurora
+> Waybar/Rofi-era system. Several have since been resolved by architecture changes (Stages
+> 0–2), root-caused by the gen32 recovery investigation, or transformed into named defects
+> D1–D9. Items are annotated inline with their current status. For the authoritative current
+> defect record see `docs/reports/gen32-recovery-diagnosis.md`; for current machine state see
+> `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`.
 
 ### Input & typing
-- disable_while_typing still not effective — cursor clicks into text while typing. Empirical before/after test required. (Tap-to-click and two-finger scrolling DO work today — do not regress.)
-- Backspace/delete key repeat far too fast, not progressive — tune repeat delay/rate.
-- Scrolling speed wildly inconsistent: fine in terminal, way too fast and jumpy in Chrome and everywhere else.
+- disable_while_typing still not effective — cursor clicks into text while typing. Empirical before/after test required. (Tap-to-click and two-finger scrolling DO work today — do not regress.) **(status 2026-08-11):** root cause found — the T2 trackpad carries `ID_INPUT_TOUCHPAD_INTEGRATION=external` (USB), so DWT was a silent no-op. A hwdb reclassification fix is written and was included in gen32 (DWT became `enabled` on gen31+), but gen32 hard-failed. The fix is not physically accepted. Further palm threshold tuning may be needed after the fix is live.
+- Backspace/delete key repeat far too fast, not progressive — tune repeat delay/rate. **(status 2026-08-11):** `repeat_delay 350` / `repeat_rate 22` set in gen26. Empirical feel-check never run — remains UNVERIFIED.
+- Scrolling speed wildly inconsistent: fine in terminal, way too fast and jumpy in Chrome and everywhere else. **(status 2026-08-11 — SUPERSEDED by D8):** gen32 recovery evidence refined this. Chrome focused vs hovered-unfocused is essentially **equal** (not "too fast"). Kitty hovered-unfocused is dramatically **slower** than focused Kitty — the opposite of the original characterization. This reproduces even when another Kitty has keyboard focus. The issue is **D8 — UNRESOLVED, no accepted root cause.** Do not fix with a global multiplier, generic unfocused boost, or by removing Chrome tuning. See `docs/reports/gen32-recovery-diagnosis.md` D8.
 - Four-finger gestures dead (see 4.8). **(corrected 2026-07-29):** pinch-to-zoom is no longer listed as inconsistent — it has since physically passed and is not a retest item unless touched (see corrected 4.8).
 
 ### Window management
-- Opening a 3rd+ window sometimes resizes and CLOSES an existing window.
-- Border/corner resize only works in one direction — can expand, can't shrink from a corner (e.g. upper-right corner only goes upper-right).
-- Hover-based focus makes targeting the bar's close button error-prone — must avoid hovering other windows en route (fixed by per-window buttons + saner focus behavior).
-- Workspace 2 button does nothing.
-- Cannot move windows between workspaces at all (see 4.16).
-- CLI agents (Claude Code/Codex) cannot close their own terminal windows — blocked pending manual accept, silently breaking sessions that then need resuming. Remove whatever confirm-on-close is responsible (kitty confirm_os_window_close / Hyprland behavior).
-- Apps launched from Waybar die when Waybar restarts (Chrome took the browser tabs and a Claude session with it) — launches must be detached (setsid/disown pattern).
+- Opening a 3rd+ window sometimes resizes and CLOSES an existing window. **(status 2026-08-11):** this was the Waybar `KillMode=control-group` bug. Resolved by Stage 1 cutover to `aurora-shell.service` with `KillMode=process` — shell restart confirmed not to kill user apps (Stage 1 gate, gen18).
+- Border/corner resize only works in one direction — can expand, can't shrink from a corner (e.g. upper-right corner only goes upper-right). **(status 2026-08-11 — SUPERSEDED by D7):** gen32 recovery evidence refined this into four sub-defects: D7a (cursor changes to diagonal on mouse-down), D7b (outer edges anchor as opposite/inner), D7c (top/bottom arm but don't resize), D7d (hidden layer surface intercepts input). The original broad description is obsolete. See `docs/reports/gen32-recovery-diagnosis.md` D7. All OPEN.
+- Hover-based focus makes targeting the bar's close button error-prone — must avoid hovering other windows en route (fixed by per-window buttons + saner focus behavior). **(status 2026-08-11):** addressed by `follow_mouse = 2` (pointer scroll follows hover, keyboard focus stays on click) plus hyprbars per-window titlebar buttons. Written in gen32; gen32 hard-failed on other defects. The focus model is untested in an accepted generation.
+- Workspace 2 button does nothing. **(status 2026-08-11):** this was the Waybar legacy-dispatch-string bug. Resolved by replacing Waybar with the QuickShell-based aurora-shell (Stage 1).
+- Cannot move windows between workspaces at all (see 4.16). **(status 2026-08-11):** planned via cross-surface drag from rail app/window to top-bar workspace pill (GRAND_PLAN §5.1/§6.2). Not yet implemented.
+- CLI agents (Claude Code/Codex) cannot close their own terminal windows — blocked pending manual accept, silently breaking sessions that then need resuming. Remove whatever confirm-on-close is responsible (kitty confirm_os_window_close / Hyprland behavior). **(status 2026-08-11):** `confirm_os_window_close = 0` is in the plan (GRAND_PLAN §6.4). Status against running gen32 unknown.
+- Apps launched from Waybar die when Waybar restarts (Chrome took the browser tabs and a Claude session with it) — launches must be detached (setsid/disown pattern). **(status 2026-08-11):** resolved. aurora-shell.service uses `KillMode=process`; Waybar itself is retired from final architecture. The class of bug (bar cgroup kills children) is dead by construction.
 
 ### Bar & panels
-- Top bar cramped: tiny hit targets forced into 3 pills. Sections are acceptable ONLY if properly sized and spaced (ilyamiro's sectioned bar is fine; the current one is not). Media controls must be practically usable — explicit min-width (~34px+) on buttons.
-- CPU button and Memory button both open the same CPU window.
-- Compact calendar is a wall of text — needs actual visual structure.
-- No compact audio panel on volume click/hover.
-- Screenshot/wallpaper controls tucked under the battery window where they don't belong — create a System button grouping (capture, record, wallpaper, settings).
-- Notifications look bad, and routine events (home WiFi connect on every boot) must not notify at all.
+**(status 2026-08-11):** the bar/panel bugs below were recorded against the retired Waybar/Rofi-era UI. The entire top-bar architecture was replaced by the ilyamiro-derived QuickShell top bar, and the left application rail replaced the old Waybar task list (GRAND_PLAN §5.1). Many of these items are resolved by the architecture change; those that survive as requirements are captured in GRAND_PLAN §5.
+
+- Top bar cramped: tiny hit targets forced into 3 pills. **(resolved by architecture):** the ilyamiro top bar uses independent islands with proper sizing.
+- CPU button and Memory button both open the same CPU window. **(resolved by architecture):** separate independent top-bar islands.
+- Compact calendar is a wall of text. **(carried forward):** calendar/weather expansion redesigned in GRAND_PLAN §5.1–§5.2; not yet built (Stage 3).
+- No compact audio panel on volume click/hover. **(carried forward):** audio island and expanded panel planned (GRAND_PLAN §5.2); not yet built (Stage 3).
+- Screenshot/wallpaper controls tucked under the battery window. **(resolved by architecture):** System surface (GRAND_PLAN §5.7) owns capture/record/wallpaper/settings.
+- Notifications look bad, and routine events (home WiFi connect on every boot) must not notify at all. **(carried forward):** notification restyling and semantic event filter planned (GRAND_PLAN §5.6); not yet built.
 
 ### Launcher
-- Apps button/launcher visually broken (pink/beige alternating rows, dashed border).
-- No click-away dismissal — Escape-only today. Clicking elsewhere must close it.
-- Cmd+Space must open the launcher (currently bound to window focus).
+- Apps button/launcher visually broken (pink/beige alternating rows, dashed border). **(resolved by architecture):** Rofi retired; caelestia launcher with HyprlandFocusGrab is the replacement (GRAND_PLAN §5.5).
+- No click-away dismissal — Escape-only today. **(resolved by architecture):** the caelestia launcher uses `HyprlandFocusGrab` for click-away dismissal.
+- Cmd+Space must open the launcher (currently bound to window focus). **(resolved):** rebound in Stage 2B.
 
 ### Visual
-- Glass is near-opaque black — apply the confirmed template-alpha fix (blur has been running behind opaque panels the whole time).
-- Palette not universal; gradients exist in only ~2 spots and look cheap ("half-decent custom Android build").
-- EasyEffects appears as a user-facing app window — it is backend-only EQ infrastructure and must be invisible (and its presets moved from the deprecated config dir to the XDG data dir).
-- File manager (Thunar) looks dated — complete its theming or replace it (Nemo/Nautilus evaluation, see §6).
-- Wallpaper switcher is custom jank — replace with skwd-wall.
-- No morphing/smooth animations anywhere yet despite being a core requirement.
+- Glass is near-opaque black — apply the confirmed template-alpha fix. **(carried forward):** glass A/B is Stage 4 scope (decision 16). Current glass is not accepted.
+- Palette not universal; gradients exist in only ~2 spots and look cheap. **(carried forward):** full wallpaper-derived semantic palette is Stage 4 scope (GRAND_PLAN §3–§4).
+- EasyEffects appears as a user-facing app window — it is backend-only EQ infrastructure and must be invisible (and its presets moved from the deprecated config dir to the XDG data dir). **(partially addressed):** EQ preset path correction written; EasyEffects visibility not yet resolved.
+- File manager (Thunar) looks dated. **(carried forward):** Dolphin is the planned replacement (GRAND_PLAN §5.17); Stage 6 scope.
+- Wallpaper switcher is custom jank — replace with skwd-wall. **(carried forward):** skwd-wall is the planned replacement (GRAND_PLAN §4.1); Stage 4 scope. Temporary picker discoverability deferred by decision 28.
+- No morphing/smooth animations anywhere yet despite being a core requirement. **(carried forward):** motion system planned (GRAND_PLAN §3.3); work begins with Stage 3 top bar.
 
 ### Capture & keys
-- Screenshots broken: purple overlay film baked into captures (slurp selection-color bug).
-- Cmd+Shift+S = adjustable region select → clipboard + timestamped PNG; Print = full screen; identical UX to Win+Shift+S.
-- Kitty: Ctrl+T opens new tab; Ctrl+Shift+T reopens last closed tab.
-- Weather set to Austin, TX.
-
-**(corrected 2026-07-29 — daily-QoL plan revision):** "Print = full screen" is superseded — **Alex's keyboard has no Print key**, so `Print` is optional redundancy only and never the required full-screen path. Whenever screenshot mode opens it presents one compact Windows-style toolbar **centred at the top** with **Region · Window · Full screen** and a visually obvious active mode. Region stays adjustable; Window captures the selected window's **exact** bounds; Full screen captures the active display in **one click**. The toolbar and picker are excluded from captured output **by construction, not by timing**, never appear as app-rail entries, and cancel/completion **restores the exact previously focused window** rather than stranding focus on the capture target. Owner: GRAND_PLAN §5.12; in the current Stage 2 correction batch.
+- Screenshots broken: purple overlay film baked into captures (slurp selection-color bug). **(status 2026-08-11):** root cause found and proven (slurp's selection overlay composited into the frame, finding 19a). The final Areapicker architecture replaced slurp in gen32. Gen32 hard-failed on other defects; screenshot behavior on gen32 was partially tested (focus issues remain — see D4/EXECUTION_LOG gate failure items 7).
+- Cmd+Shift+S = adjustable region select → clipboard + timestamped PNG; Print = full screen; identical UX to Win+Shift+S. **(corrected 2026-07-29 — daily-QoL plan revision):** "Print = full screen" is superseded — **Alex's keyboard has no Print key**, so `Print` is optional redundancy only and never the required full-screen path. Whenever screenshot mode opens it presents one compact Windows-style toolbar **centred at the top** with **Region · Window · Full screen** (GRAND_PLAN §5.12, decision 27).
+- Kitty: Ctrl+T opens new tab; Ctrl+Shift+T reopens last closed tab. **(clarified 2026-07-29):** "Ctrl+Shift+T reopens last closed tab" means the last closed Kitty terminal tab, not editor files. Owned by Stage 8 (dev workspace). Native Kitty tab-restore is confirmed impossible.
+- Weather set to Austin, TX. **(resolved):** weather location corrected.
 
 ---
 
@@ -380,5 +386,7 @@ disagree, this section wins.
    inconvenient, and no skipped check becomes an implied pass. The table format
    is in `docs/instructions/PM_OPERATING_RULES.md`.
 
-The current Stage 2 close-out brief is `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`. The
-incoming PM's operating contract is `docs/instructions/PM_OPERATING_RULES.md`.
+The Stage 2 requirements/scope are in `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (the
+prior-cycle gen-32 work order — not the current execution brief). The current recovery
+resume path starts at `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`. The incoming
+PM's operating contract is `docs/instructions/PM_OPERATING_RULES.md`.

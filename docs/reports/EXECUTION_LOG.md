@@ -7,9 +7,9 @@
 
 > **CURRENT AUTHORITY (2026-08-11).** Canonical repo `/home/alex/nix`, remote
 > `AlexbringsMercy/nix`, branch **`main`** (the only branch). Verified machine/repo state:
-> **`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`**. The machine is on **generation 32**
+> **`docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`**. The machine is on **generation 32**
 > (it booted and then **physically hard-failed**); **Stage 2 is OPEN**. Current recovery
-> resume path: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` →
+> resume path: `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` →
 > `docs/reports/gen32-recovery-diagnosis.md` (defect record **D1–D9**; D1–D7/D9 have root causes
 > identified, **D8 is UNRESOLVED**) → `docs/reports/codex-consultation-record.md` (blind Pass-1
 > reviews complete; adversarial Pass-2 gate not yet asserted as accepted) →
@@ -40,7 +40,7 @@
 > the wallpaper authority, staged gates controlling execution.
 >
 > **Start here:** `## Stage 0 — Reconcile & baseline (2026-07-21)`, then read
-> forward to the end. Then read `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` for
+> forward to the end. Then read `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` for
 > verified machine state — this log records what was *attempted*, not what is *running*.
 >
 > **Four corrections to entries below, proven against the machine:**
@@ -74,7 +74,7 @@
 > until its full close-out gate passes and Alex accepts it.
 >
 > **Governing documents for the incoming PM (current paths):**
-> `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`, `docs/instructions/PM_OPERATING_RULES.md`,
+> `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`, `docs/instructions/PM_OPERATING_RULES.md`,
 > `docs/plans/GRAND_PLAN.md`, `docs/plans/MASTER_REQUIREMENTS.md`,
 > `docs/reports/gen32-recovery-diagnosis.md`, `docs/reports/codex-consultation-record.md`,
 > and the dated operator-decision entries at the end of this file. The July kickoff/handoff
@@ -3250,3 +3250,70 @@ read-only this session). None of the August source corrections (including the re
 are live; they take effect only when a future **accepted** generation is built and installed.
 
 **Stage 2 remains OPEN. D1–D9 remain OPEN. No Stage 3.**
+
+## 2026-08-11 — final authority-role and current-truth reconciliation (no build/activation)
+
+Documentation/authority/repository-truth pass. Full reads of all 20 mandated active-authority
+documents. **No** implementation, **no** NixOS build, **no** activation, **no** reboot, **no**
+physical gate, **no** Stage 3, **no** portability work.
+
+### Historical role corrections (one-role-per-document principle)
+
+Three prior-cycle gen32 artifacts had been post-hoc rewritten from the pair-model snap
+semantics gen32 was actually built against into reservation/reflow semantics established only
+after the gen32 hard-fail recovery investigation. This falsified what gen32 actually
+implemented. Corrected:
+
+- **`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`** — restored §1 baseline, §G deliverable, and
+  §4 gate rows 7–11 to their historical pair-model language. Renamed `§1. Current truth` →
+  `§1. Baseline at work-order authoring (gen26 era, revised 2026-07-29)`. Replaced the stale
+  banner pointing to the July kickoff as "the current brief" with a proper superseded banner
+  pointing to current authority and noting the snap-model correction.
+- **`docs/plans/stage2-closeout.md`** — restored snap gate-table rows to their historical
+  pair-model form. Added a superseded banner marking the document as the prior-cycle gate
+  (authored pre-gen32). Changed "Generation running: 26" to "Generation running (at time of
+  authoring): 26" to prevent misreading as current.
+- **`docs/reports/stage2-runtime-gate.md`** — restored §B to its historical pair-model test
+  procedure (what was actually tested/stopped on gen32). Added a banner noting the snap model
+  was later corrected to reservation/reflow and pointing to current authority.
+
+Current reservation/reflow snap authority remains in `docs/plans/GRAND_PLAN.md` §6.2 and
+`docs/reports/gen32-recovery-diagnosis.md` — unchanged by these historical restorations.
+
+### MASTER_REQUIREMENTS.md §5 BUG LOG reconciliation
+
+Renamed "CURRENT DEFECTS" → "OBSERVED DEFECTS" and annotated every item with current status
+based on gen32 recovery evidence, architecture changes, and operator decisions:
+
+- **Scrolling** — superseded by D8 (UNRESOLVED); original characterization ("fine in terminal,
+  too fast in Chrome") was wrong relative to current evidence (Chrome focused/unfocused is
+  equal; Kitty unfocused is dramatically slower).
+- **3rd-window close bug** — resolved (KillMode=process, Stage 1).
+- **Corner/border resize** — superseded by D7a–d (all OPEN).
+- **Hover focus** — addressed by follow_mouse=2 + hyprbars; not yet in an accepted generation.
+- **Workspace 2 dead** — resolved (Waybar retired, Stage 1).
+- **Waybar child kill** — resolved (aurora-shell, Stage 1).
+- **Bar/panel** items — most resolved by architecture change to ilyamiro top bar + caelestia
+  rail; remaining items carried forward to their planned stages.
+- **Launcher** items — resolved by Rofi retirement + caelestia launcher.
+- **Screenshot** — root cause found (slurp overlay); Areapicker replaces slurp.
+
+Also fixed the last line's stale claim that the work order is "the current Stage 2 close-out
+brief" → clarified it is the prior-cycle work order.
+
+### New current-state audit
+
+Created `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`. Key improvement: mutable Git HEAD is
+no longer embedded as a frozen fact. The audit directs readers to verify exact HEAD from Git
+directly, preventing the audit from becoming stale merely because a documentation commit
+advances `main`. Machine state (gen32 `62aim1mw…`) re-verified read-only.
+
+The 2026-08-09 audit is preserved as a historical verified snapshot with a superseded note.
+All navigation/authority references updated to the new audit.
+
+### docs/README.md classification
+
+`stage2-closeout.md` reclassified from "Stage 2 operator close-out gate" to "Prior-cycle Stage
+2 operator gate (authored pre-gen32; uses the pair model gen32 was built against; superseded)."
+
+**Stage 2 remains OPEN. D1–D9 remain OPEN. No Stage 3. No portability work.**

@@ -1,8 +1,9 @@
-# CURRENT STATE AUDIT — 2026-08-09
+# CURRENT STATE AUDIT — 2026-08-11
 
-_Superseded by `CURRENT_STATE_AUDIT_2026-08-11.md`. This file is preserved as the verified
-snapshot from that date. The July generation-31 audit is archived at
-`docs/archive/superseded-docs/2026-08-09/CURRENT_STATE_AUDIT-2026-07-29-gen31.md`._
+_The current verified machine + repository snapshot. Supersedes
+`CURRENT_STATE_AUDIT_2026-08-09.md` (now a historical verified snapshot for that
+date). Per `docs/instructions/PM_OPERATING_RULES.md` §1, supersede this with a newer
+dated audit when it goes stale; do not edit it in place to make it current._
 
 **Stage status: `STAGE 2 — OPEN`.**
 
@@ -13,12 +14,12 @@ passed · accepted.** Any check not actually run is `UNVERIFIED`.
 
 ## A. Live / known machine state
 
-Repository-finalization scope this session was documentation/source-truth only. The machine
-was inspected **read-only** (no build, activation, or reboot).
+This session was documentation/repository-truth only. The machine was inspected
+**read-only** (no build, activation, or reboot).
 
 | Fact | Value | Evidence |
 |---|---|---|
-| `/run/current-system` | `62aim1mw2c26siwlymv9r5xa0qqa5ryw-nixos-system-macbook-26.11…` | `readlink -f` (this session) |
+| `/run/current-system` | `62aim1mw2c26siwlymv9r5xa0qqa5ryw-nixos-system-macbook-26.11…` | `readlink -f` (this session, 2026-08-11) |
 | `/run/booted-system` | `62aim1mw…` — **identical** to current | `readlink -f` |
 | System profile default | `62aim1mw…` | `readlink -f /nix/var/nix/profiles/system` |
 | **Active generation** | **generation 32** (store id `62aim1mw…`) — the generation that booted and **physically hard-failed** | matches the gen-32 id recorded across the recovery docs |
@@ -50,7 +51,9 @@ Known state (authoritative, from the recovery investigation and operator gate):
 
 ---
 
-## B. Repository state (verified this session)
+## B. Repository state
+
+Stable repository topology (verify exact mutable HEAD from `git log -1` directly):
 
 | Fact | Value |
 |---|---|
@@ -58,9 +61,8 @@ Known state (authoritative, from the recovery investigation and operator gate):
 | Remote | `AlexbringsMercy/nix` (GitHub default branch `main`) |
 | Branch | `main` (the only active branch) |
 | Upstream | `origin/main` |
-| HEAD at start of this session | `f78a462f8a3af279a2a38ba232b64ad8c4a1e9c0` (advanced by this session's documentation-truth commit — see `git log -1`) |
-| Sync | local `main` == `origin/main`, **0 ahead / 0 behind** |
-| Tree | clean |
+| Sync model | local `main` tracks `origin/main`; verify exact HEAD and ahead/behind from Git directly — this audit does not freeze a specific commit as eternal truth |
+| Tree | clean at time of audit |
 | Retired | `codex/macbook-desktop` (normalized onto `main`) and `stage3/topbar` + `/home/alex/aurora-stage3` worktree — both gone locally and remotely |
 | Stage 3 source | **dormant** on `main` at `modules/home/aurora-shell/stage-3-in-progress/topbar/` (not built, not imported) |
 | Machine-local wrapper | live instance at `~/.config/nixos-local/` (not committed, by design); **canonical template tracked** at `hosts/macbook/nixos-local/` |
@@ -72,16 +74,15 @@ Source map: `docs/references/NIXOS_CURRENT_SOURCE_INDEX.md`.
 
 ## C. Live-vs-source caveat (important)
 
-**Tracked source has been corrected, but nothing was built or activated this session.** In
-particular, `modules/home/fish.nix`'s `rebuild-macbook`/`test-macbook` aliases now use the
-Git-backed `git+file:///home/alex/nix` input instead of raw `path:` — **in the tracked
-source only.** The running generation (gen 32, built 2026-07-29) predates this and every
-other August correction, so the **live shell may still expose the old alias** until a future
-**accepted** generation installs the corrected configuration.
+**Tracked source has been corrected, but nothing was built or activated since the gen-32
+deployment on 2026-07-29.** In particular, `modules/home/fish.nix`'s
+`rebuild-macbook`/`test-macbook` aliases now use the Git-backed `git+file:///home/alex/nix`
+input instead of raw `path:` — **in the tracked source only.** The running generation (gen 32,
+built 2026-07-29) predates every August correction, so the **live shell may still expose the
+old alias** until a future **accepted** generation installs the corrected configuration.
 
-This caveat is intentional. It is **not** resolved by building — no build/activation/reboot
-is in scope for repository finalization. It closes only when a future Stage 2 closure is
-built, boot-deployed, rebooted, and physically accepted.
+This caveat is intentional. It closes only when a future Stage 2 closure is built,
+boot-deployed, rebooted, and physically accepted.
 
 ---
 
@@ -93,3 +94,6 @@ built, boot-deployed, rebooted, and physically accepted.
   physically failed/open.
 - The active generation id above is a read-only observation this session; re-verify live
   before any deployment decision.
+- This audit does not embed a specific Git HEAD as current truth; documentation-only commits
+  advance `main` without changing machine state, so the exact HEAD should be verified from Git
+  directly (`git rev-parse HEAD`).
