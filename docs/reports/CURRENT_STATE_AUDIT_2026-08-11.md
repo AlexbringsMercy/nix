@@ -88,7 +88,8 @@ boot-deployed, rebooted, and physically accepted.
 
 ## D. What this audit does not claim
 
-- No runtime behaviour of any post-gen-31 correction is verified — none has been built or
+- Gen32 was built, activated, and physically tested — its failures produced the accepted
+  recovery findings (D1–D9). No **post-gen32 / August source correction** has been built or
   activated.
 - D1–D7 and D9 are **diagnosed** and D8 is **unresolved** — none is fixed; Stage 2 remains
   physically failed/open.

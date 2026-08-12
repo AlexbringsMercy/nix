@@ -75,7 +75,7 @@ for the repository's provenance and reproducibility state see
 | `docs/plans/GRAND_PLAN.md` | Overall plan |
 | `docs/plans/MASTER_REQUIREMENTS.md` | Requirements |
 | `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` | Current state |
-| `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` | Stage 2 closeout work order |
+| `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` | Prior-cycle gen-32 work order / Stage 2 scope provenance (not current implementation authority — snap sections use the pair model gen32 was built against; current snap authority is GRAND_PLAN §6.2) |
 | `docs/instructions/PM_OPERATING_RULES.md` | PM operating rules |
 | `docs/prompts/SESSION_PREAMBLE.md` | Session preamble (subagents must read first) |
 | `docs/reports/EXECUTION_LOG.md` | Execution history |
@@ -85,7 +85,13 @@ for the repository's provenance and reproducibility state see
 | `docs/research/RESEARCH_GUIDE.md`, `docs/research/VISUAL_RESEARCH.md`, `docs/references/visual-design-reference.md` | Research / visual reference |
 | `README.md`, `docs/README.md` | Repo overview / documentation index |
 | `docs/instructions/` | Recovery, controls, updating, wallpapers, PM operating rules |
-| `docs/reports/` | Consultation record, xbox-bluetooth diagnostic, runtime gate, reproducibility audit |
+| `docs/reports/gen32-recovery-diagnosis.md` | Accepted recovery findings D1–D9 + current reservation/reflow snap semantics |
+| `docs/reports/codex-consultation-record.md` | Consultation/review-gate status |
+| `docs/reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md` | Repo normalization + reproducibility verdict |
+| `docs/reports/xbox-bluetooth-diagnostic.md` | Xbox controller Bluetooth diagnostic |
+| `docs/reports/stage2-runtime-gate.md` | Gen-32 runtime gate — ran and stopped on physical hard fail (historical execution evidence) |
+| `docs/plans/stage2-closeout.md` | Prior-cycle pre-gen32 operator gate (historical; uses the pair model gen32 was built against) |
+| `docs/plans/stage2-correction-manifest.md` | Frozen manifest that produced gen32 (historical build evidence) |
 
 ## Handoff / recovery (point-in-time, generation 32)
 

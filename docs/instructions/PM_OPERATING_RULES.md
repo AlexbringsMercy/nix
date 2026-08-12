@@ -9,8 +9,13 @@ generation 32, hard-failed). The rules themselves are unchanged and remain bindi
 
 This file tells you how to work. It does not tell you what is true about the
 machine — `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md` does that — and it does not tell you what to
-build — `docs/plans/GRAND_PLAN.md` (design authority) and the Stage 2 requirements in
-`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (the prior-cycle gen-32 work order) do that.
+build — `docs/plans/GRAND_PLAN.md` (design authority), `docs/plans/MASTER_REQUIREMENTS.md`
+(requirements ledger), and `docs/reports/gen32-recovery-diagnosis.md` (accepted recovery
+findings and current snap/minimize semantics) do that.
+`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the prior-cycle gen-32 work order — useful for
+Stage 2 scope/provenance, but **not current implementation authority** where it conflicts
+with later corrections (notably: its snap sections use the pair model gen32 was built against;
+current binding snap authority is the reservation/reflow model in `docs/plans/GRAND_PLAN.md` §6.2).
 
 ---
 
@@ -204,9 +209,12 @@ generation from the machine — never copy a number from a document.
    `docs/plans/MASTER_REQUIREMENTS.md` · `docs/references/macbook-build-spec.md` · the `docs/reports/EXECUTION_LOG.md`
    current-authority header, the operator decisions registers, and every entry
    from the current Stage 2 correction work forward · `docs/references/SOURCES.md`.
-   The Stage 2 **requirements/scope** (including what must not regress — rail previews,
-   exact grouped selection) live in `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`, which
-   produced generation 32 and is now **prior-cycle support, not the current brief**.
+   Stage 2 preservation requirements (rail previews, exact grouped selection) are
+   carried forward into current authority (`docs/plans/GRAND_PLAN.md` §5.3/§6.2,
+   `docs/reports/gen32-recovery-diagnosis.md`). The prior-cycle work order
+   `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is useful for Stage 2 scope/provenance
+   but is **not current implementation authority** — its snap sections use the pair
+   model gen32 was built against, not the current reservation/reflow model.
    The dated July incident briefs (`docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`
    and `docs/briefs/PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`) are useful supporting
    context — read them for provenance, but **do not treat the kickoff's task list as
@@ -226,9 +234,9 @@ generation from the machine — never copy a number from a document.
 3. Report the stage status honestly. Today that is **`STAGE 2 — OPEN`**.
 4. Start on the gen-32 **recovery resume path**: `docs/reports/CURRENT_STATE_AUDIT_2026-08-11.md`
    → `docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md`
-   → `docs/plans/GRAND_PLAN.md`, honouring the Stage 2 requirements in
-   `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (prior-cycle work order, **not** the current
-   brief). Do not start Stage 3.
+   → `docs/plans/GRAND_PLAN.md`. Current design and requirements authority is
+   `GRAND_PLAN.md` + `MASTER_REQUIREMENTS.md` + `gen32-recovery-diagnosis.md`, not
+   the prior-cycle work order. Do not start Stage 3.
 
 **Latest binding operator decisions** (full text in `docs/reports/EXECUTION_LOG.md`):
 decisions 20–23 (frozen manifest, no-premature-removal, dashboard entry paths,

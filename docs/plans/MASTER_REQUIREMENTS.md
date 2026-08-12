@@ -3,7 +3,7 @@
 
 **What this is:** The single authoritative requirements document for the complete OS build. Every research session, gap review, plan, and execution stage works against this document. A plan that leaves any item here unaddressed is incomplete. Output that can't be traced back to this document is out of scope.
 
-**Machine:** 2020 MacBook Air Retina 13" — Intel i3 1.1GHz dual-core (Ice Lake), Intel Iris Plus, 8GB LPDDR4X, 250GB SSD (120GB macOS / 121.7GB NixOS dual-boot), 2560x1600 @ 1.5x scale, Apple T2, Broadcom WiFi/BT, Apple keyboard (Cmd = Super). Single display. NixOS 26.11, Hyprland 0.55 (native Lua config), QuickShell, Waybar, Kitty, Fish.
+**Machine:** 2020 MacBook Air Retina 13" — Intel i3 1.1GHz dual-core (Ice Lake), Intel Iris Plus, 8GB LPDDR4X, 250GB SSD (120GB macOS / 121.7GB NixOS dual-boot), 2560x1600 @ 1.5x scale, Apple T2, Broadcom WiFi/BT, Apple keyboard (Cmd = Super). Single display. NixOS 26.11, Hyprland 0.55 (native Lua config), QuickShell (aurora-shell), Kitty, Fish.
 
 ---
 
