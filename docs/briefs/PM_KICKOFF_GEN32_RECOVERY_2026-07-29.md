@@ -2,12 +2,14 @@
 
 Start here. You do not need to read any prior chat transcript.
 
-> **UPDATE 2026-08-09 — dated 2026-07-29 record.** The recovery consultation is now
-> **complete** (accepted findings — defect record **D1–D9**, D1–D7/D9 diagnosed and **D8
-> unresolved** — in `docs/reports/gen32-recovery-diagnosis.md`);
-> the canonical branch is **`main`**; current state is
-> `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`. The read-list below names some
-> pre-migration paths — use `docs/README.md` for current locations. Stage 2 remains OPEN.
+> **UPDATE 2026-08-11 — dated 2026-07-29 record; this is NO LONGER the current entry
+> point.** The blind diagnostic reviews described in this kickoff's task list have been
+> **completed** (accepted findings — defect record **D1–D9**, D1–D7/D9 diagnosed and **D8
+> unresolved** — in `docs/reports/gen32-recovery-diagnosis.md`; adversarial Pass-2 artifact
+> exists but is not asserted as an accepted gate sign-off). The canonical branch is **`main`**;
+> current state is `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`. The current recovery
+> resume path starts at that audit, **not** this kickoff — see `docs/README.md`. **Do not
+> re-execute the task list below; it describes work that is now complete.** Stage 2 remains OPEN.
 
 ## Situation in one paragraph
 

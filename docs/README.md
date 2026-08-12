@@ -9,12 +9,14 @@ Manager + Hyprland + QuickShell build for Alex's 2020 T2 MacBook Air.
   and the `stage3/topbar` worktree/branch was retired after its unique source was
   absorbed onto `main` (see below).
 - **Stage:** **Stage 2 is OPEN.**
-- **Current Stage 2 entry path:** [`briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`](briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md)
-  → [`reports/CURRENT_STATE_AUDIT_2026-08-09.md`](reports/CURRENT_STATE_AUDIT_2026-08-09.md)
+- **Current Stage 2 recovery resume path:**
+  [`reports/CURRENT_STATE_AUDIT_2026-08-09.md`](reports/CURRENT_STATE_AUDIT_2026-08-09.md)
   → [`reports/gen32-recovery-diagnosis.md`](reports/gen32-recovery-diagnosis.md)
+  → [`reports/codex-consultation-record.md`](reports/codex-consultation-record.md)
   → [`plans/GRAND_PLAN.md`](plans/GRAND_PLAN.md). The gen-32 close-out work order
   ([`plans/STAGE2_CLOSEOUT_WORK_ORDER.md`](plans/STAGE2_CLOSEOUT_WORK_ORDER.md)) holds the Stage 2
-  requirements/scope but is **prior-cycle** — not the current brief.
+  requirements/scope but is **prior-cycle** — not the current brief. The dated July
+  incident briefs under [`briefs/`](briefs/) are supporting historical context.
 - Repository entry point: [`../README.md`](../README.md). Source-tree map:
   [`references/NIXOS_CURRENT_SOURCE_INDEX.md`](references/NIXOS_CURRENT_SOURCE_INDEX.md).
 
@@ -38,7 +40,7 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 |---|---|
 | [GRAND_PLAN.md](plans/GRAND_PLAN.md) | The design authority: architecture, surface ownership, stage sequence |
 | [MASTER_REQUIREMENTS.md](plans/MASTER_REQUIREMENTS.md) | Requirements ledger + execution governance |
-| [STAGE2_CLOSEOUT_WORK_ORDER.md](plans/STAGE2_CLOSEOUT_WORK_ORDER.md) | Stage 2 requirements/scope — the **prior-cycle (gen-32) work order**, superseded for the current cycle; **not** the current brief (see "Current Stage 2 entry path" above) |
+| [STAGE2_CLOSEOUT_WORK_ORDER.md](plans/STAGE2_CLOSEOUT_WORK_ORDER.md) | Stage 2 requirements/scope — the **prior-cycle (gen-32) work order**, superseded for the current cycle; **not** the current brief (see "Current Stage 2 recovery resume path" above) |
 | [stage2-closeout.md](plans/stage2-closeout.md) | Stage 2 operator close-out gate (`STAGE 2 — OPEN`) |
 | [stage2-correction-manifest.md](plans/stage2-correction-manifest.md) | Frozen correction manifest (produced gen 32, which hard-failed) |
 
@@ -51,7 +53,7 @@ When two documents disagree, the higher-ranked source wins. Full contract in
 | [EXECUTION_LOG.md](reports/EXECUTION_LOG.md) | Full implementation/validation history + operator decisions |
 | [REPOSITORY_REPRODUCIBILITY_AUDIT.md](reports/REPOSITORY_REPRODUCIBILITY_AUDIT.md) | Repo normalization + reproducibility verdict |
 | [stage2-runtime-gate.md](reports/stage2-runtime-gate.md) | The runtime gate that was stopped on the gen 32 hard fail |
-| [codex-consultation-record.md](reports/codex-consultation-record.md) | Codex consultation record — recovery reviews **completed** 2026-08-09 (diagnosis accepted; fixes still OPEN) |
+| [codex-consultation-record.md](reports/codex-consultation-record.md) | Codex consultation record — blind Pass-1 diagnostic reviews **completed** 2026-08-09 (diagnosis accepted; adversarial Pass-2 gate not yet asserted as accepted; fixes still OPEN) |
 | [xbox-bluetooth-diagnostic.md](reports/xbox-bluetooth-diagnostic.md) | Xbox controller Bluetooth diagnostic |
 | [issue-log-migration-2026-07-29.md](reports/issue-log-migration-2026-07-29.md) | Record of the ISSUE_LOG archival/migration |
 
@@ -96,8 +98,10 @@ and [VISUAL_RESEARCH.md](research/VISUAL_RESEARCH.md).
 - [PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md](briefs/PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md)
 - [PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md](briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md)
 
-These are dated incident briefs; their git-state metadata predates the 2026-08-09
-branch normalization (canonical branch is now `main`).
+These are dated incident briefs — supporting historical context, **not** the current
+recovery entry point. Their git-state metadata predates the 2026-08-09 branch
+normalization (canonical branch is now `main`). The kickoff's task list describes
+work that is now complete (blind reviews done, root-cause report written).
 
 ## `archive/` — superseded / historical (never an active instruction)
 

@@ -859,7 +859,7 @@ Everything below is development or substantial adaptation. Unlisted development 
 | M14 | Network password-path and NetworkUsage fixes | S | §5.2 |
 | M15 | Alt+Tab live cycler | M | §5.16 |
 | M16 | Clipboard service/panel + ilyamiro grid/morph | M | §5.13 |
-| M17 | Native/same-workspace minimize state + rail restore/dimming + snap-pair state integration | **M–L** | §5.3/§6.2 |
+| M17 | Native/same-workspace minimize state + rail restore/dimming + snap reservation/reflow integration | **M–L** | §5.3/§6.2 |
 | M18 | Dev workspace toggle/status/launchers | S–M | §7 |
 | M19 | Camera watcher + mic status | S | §8.1 |
 | M20 | Health/captive portal wiring | S | §8.4 |
@@ -931,8 +931,8 @@ Record in `docs/reports/EXECUTION_LOG.md` with the active generation and operato
 4. Multiple windows use hover previews and exact selection.
 5. Minimized windows retain original workspace; `special:min-*` rejected.
 6. One-click rail restore is mandatory; restore hotkey optional only.
-7. Exact left/right snap; occupied-side replacement minimizes prior occupant; completed pair minimizes all surplus same-workspace windows.
-8. Restoring surplus or changing the pair dissolves it and resumes ordinary tiling.
+7. Exact left/right snap uses the reservation/reflow model (§6.2): a half-snap reserves a half; ordinary windows reflow in the opposite half and stay visible; minimize occurs only when both halves are reserved by explicit owners and no ordinary tiled region remains.
+8. Snapping onto an already-reserved half demotes the previous owner to ordinary; releasing a reservation returns the region to ordinary tiling.
 9. `follow_mouse = 2` behavior is the default.
 10. Three visible workspaces + `+`; active extras expand responsively.
 11. Rail default visibility waits for a completed top+left visual A/B; both modes remain available.
@@ -970,7 +970,7 @@ Optional layer (in the plan, first to cut):
 3. **Top-bar owner:** ilyamiro structure/widgets nearly 1:1, with only explicit Aurora system additions; no running/minimized apps.
 4. **Left-rail owner:** caelestia structure/app previews; DMS/iNiR supply missing behavior patterns only; agridyne supplies major visual direction.
 5. **Palette chain:** skwd triggers; the project's patched caelestia engine generates and publishes the complete auto-light/auto-dark semantic palette; iNiR/agridyne map consumers; Hellwal is fallback; Matugen is not system authority. Aurora is a codename, not the color policy; Northern Lights is one preset.
-6. **Minimize/snap:** same-workspace minimized state, left-rail recovery, deterministic two-pane pair with surplus minimize.
+6. **Minimize/snap:** same-workspace minimized state, left-rail recovery, deterministic two-pane reservation/reflow snap (§6.2).
 7. **Lock:** agridyne visual direction + Vast engine + selected ilyamiro interaction/motion + DMS lifecycle/status donors.
 8. **Lid, agents, protected state:** existing §8 decisions remain unchanged.
 9. **Application updates:** native app-owned UI first, invisible per-app Nix/vendor bridge underneath, graphical fallback only after proving no native Linux updater, three-version cap.
@@ -994,7 +994,7 @@ Optional layer (in the plan, first to cut):
 | Vast shell | Lock depth planes and gated unlock engine | Not entire lock visual identity or shell architecture |
 | `hyprwm/hyprland-plugins` | hyprbars, Hyprexpo; carried narrow patches with ABI-matched Hyprland | Super+RMB is not acceptance; Hyprexpo is overview, not dashboard |
 | `luisbocanegra/kurve` | Optional left-rail cava visualizer | Not required for rail/minimize acceptance |
-| `end4-dots-hyprland` | hypridle and selected animation/base snap references | Does not override approved deterministic pair rules |
+| `end4-dots-hyprland` | hypridle and selected animation/base snap references | Does not override approved reservation/reflow snap rules |
 | `cxOrz/dotfiles-hyprland` | Selected panel/service and OSD patterns | Not primary system-panel architecture |
 | `linuxbeginnings-hyprland-dots` / ML4W | Diffuse radial wallpaper-derived gradient technique | Not overall theme authority; hues come from the active scheme |
 | `saatvik333-hyprland-dotfiles` | Terminal/dev experience quality reference and sourced pieces where cited | Not shell/bar architecture |
@@ -1041,7 +1041,7 @@ A1→§2.1/§5.1 · D1→§2.1 (comparison run, drawers win) · D2→§5.9 (stag
 
 ## 15. BUG LOG TRACEABILITY (§5 of MASTER → where it dies)
 
-Input: DWT→§6.2 hwdb · repeat/scroll→§6.2 · pointer-scroll focus→§6.2 `follow_mouse=2` · gestures/pinch→§6.2. Windows: drag jump→§6.2 patch · corner resize→§6.2 mandatory patch · third-window/two-pane behavior→§6.2 deterministic pair · minimize/recovery→§5.3/§6.2 same-workspace rail · workspace bloat→§5.1 dynamic 3+ · move-between-workspaces→§5.1/§6.2 cross-surface drag. Bars/panels: app duplication→§5.1 removed · rail status duplication→§5.1 removed · ilyamiro source fidelity→§5.1–§5.2/§5.9 · calendar/dashboard duplication→§5.1/§5.4 retired · CPU/RAM distinction→§5.1 · capture actions→§5.7. Visual: glass→§3.2/Stage4 · full wallpaper-derived light/dark palette→§3–§4 · lock source ownership→§5.10 · motion→§3.3. Capture: pink film/slurp→§5.12 · region/window/full toolbar and focus restoration→§5.12. Lifecycle/QoL: agent version shadowing→§8.7–§8.8/Stage2 clarification · native app updates and three-version retention→§8.8/Stage6 · actionable typo suggestions→§8.4/Stage6/Stage9. Launcher/files/notifications remain in their existing sections.
+Input: DWT→§6.2 hwdb · repeat/scroll→§6.2 · pointer-scroll focus→§6.2 `follow_mouse=2` · gestures/pinch→§6.2. Windows: drag jump→§6.2 patch · corner resize→§6.2 mandatory patch · third-window/two-pane behavior→§6.2 reservation/reflow snap · minimize/recovery→§5.3/§6.2 same-workspace rail · workspace bloat→§5.1 dynamic 3+ · move-between-workspaces→§5.1/§6.2 cross-surface drag. Bars/panels: app duplication→§5.1 removed · rail status duplication→§5.1 removed · ilyamiro source fidelity→§5.1–§5.2/§5.9 · calendar/dashboard duplication→§5.1/§5.4 retired · CPU/RAM distinction→§5.1 · capture actions→§5.7. Visual: glass→§3.2/Stage4 · full wallpaper-derived light/dark palette→§3–§4 · lock source ownership→§5.10 · motion→§3.3. Capture: pink film/slurp→§5.12 · region/window/full toolbar and focus restoration→§5.12. Lifecycle/QoL: agent version shadowing→§8.7–§8.8/Stage2 clarification · native app updates and three-version retention→§8.8/Stage6 · actionable typo suggestions→§8.4/Stage6/Stage9. Launcher/files/notifications remain in their existing sections.
 
 ---
 

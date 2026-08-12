@@ -51,8 +51,8 @@ architecture decisions) for the governance that binds this order,
   (`snap_geometry`/`half_snap`): `Super+Left`/`Super+Right` float, exact-resize,
   and exact-move the active window to a computed half, and a second press on an
   already-snapped half toggles it back into the dwindle tree. It does **not**
-  minimize a prior occupant on an occupied-side snap, does **not** minimize
-  surplus same-workspace windows on pair completion, and has no pair-dissolution
+  handle the reservation/reflow model described in `docs/plans/GRAND_PLAN.md` §6.2
+  (clarified 2026-08-09 — not a pair model), and has no reservation-release
   logic beyond the single second-press toggle. This is the Stage 2 starting point
   for deliverable G below, not the finished behavior.
 - **The current minimize backend is the model `docs/plans/GRAND_PLAN.md` §6.2 rejects.**
@@ -238,17 +238,19 @@ This is a small config change plus a gate row, not a research programme.
   (`docs/plans/GRAND_PLAN.md` §6.2, §10.2 items 7–8):
   - `Super+Left`/`Super+Right` always produce exact left/right halves,
     independent of dwindle-tree shape or window count.
-  - Snapping a window onto an **occupied side minimizes the previous occupant**
-    (via deliverable F's backend).
-  - **Completing a pair** (both halves occupied) **minimizes all other visible
-    same-workspace windows.** The opposite half remains stable.
-  - **Restoring a surplus minimized window**, or **dragging / unsnapping /
-    maximizing / closing either pair member, dissolves the pair** and returns the
-    workspace to ordinary Hyprland tiling, restoring prior placement/state where
-    technically possible.
-- **Snap gate:** one, two, and 3+ windows; target side already occupied;
-  left/right; second-press return; restore surplus; drag; close; maximize; new
-  window after a pair.
+  - Snapping a window onto an **already-reserved side demotes the previous owner
+    to ordinary** — the previous owner joins the opposite half's reflow pool
+    (or overflow/minimized if that half is also reserved).
+  - **Both halves reserved** by explicit half-snap owners and no ordinary tiled
+    region remaining → remaining ordinary windows minimize. Ordinary windows
+    are **not** minimized merely because one half is reserved.
+  - **Releasing a reservation** — dragging/unsnapping/maximizing/closing an owner —
+    returns that region to the ordinary reflow pool and re-tiles normally,
+    restoring prior placement/state where technically possible.
+- **Snap gate:** one, two, and 3+ windows; target side already reserved;
+  left/right; second-press return; single-owner reflow (other windows stay
+  visible); both-halves-reserved minimize; owner demotion on cross-side snap;
+  restore; drag; close; maximize; new window while a half is reserved.
 
 ### H. Minimum final left-rail application slice *(added 2026-07-29)*
 
@@ -315,11 +317,11 @@ skipped item becomes an implied pass.**
 | 4 | `follow_mouse = 2` — pointer scroll/interaction follows the hovered window without stealing keyboard focus; a click still transfers keyboard focus | |
 | 5 | Deterministic snap, single window — `Super+Left` / `Super+Right` land fully in frame, exact halves, no top-left drift | |
 | 6 | Deterministic snap, return — a second arrow press on a snapped half releases it back into ordinary tiling | |
-| 7 | Deterministic snap, occupied side — snapping onto an occupied side minimizes the previous occupant into the same-workspace rail | |
-| 8 | Deterministic snap, completed pair — snapping the second half minimizes all other same-workspace windows; the opposite half stays stable | |
-| 9 | Pair dissolution, restore — restoring a surplus minimized window dissolves the pair and returns to ordinary tiling | |
-| 10 | Pair dissolution, drag/unsnap/maximize/close — each action on a pair member dissolves the pair, restoring prior placement/state where possible | |
-| 11 | New window after a pair — a new window does not tile underneath either snapped half | |
+| 7 | Reservation/reflow, one side reserved — ordinary windows stay visible and reflow in the opposite half; they are not minimized | |
+| 8 | Reservation/reflow, both sides reserved — both halves owned by explicit half-snap owners and no ordinary region remains → surplus minimizes | |
+| 9 | Snap onto already-reserved side — previous owner is demoted to ordinary and joins reflow pool | |
+| 10 | Reservation release — dragging/unsnapping/maximizing/closing an owner releases the reservation and returns the region to ordinary tiling | |
+| 11 | New window while a half is reserved — new window tiles in the available region | |
 | 12 | Minimize backend — minimizing a window leaves layout/render/input and is not represented as a `special:` workspace | |
 | 13 | Minimize backend — minimized windows retain original workspace, tiling/floating state, and geometry where possible | |
 | 14 | Left rail — launcher entry present and opens the launcher | |

@@ -40,7 +40,7 @@ deployment. Codex exists specifically to challenge Claude before those actions o
 ## When consultation is mandatory
 
 Before implementation for any change involving: Hyprland or plugin source patches · snap,
-tiling, minimize, restore or pair bookkeeping · titlebar drag, resize or coordinate conversion ·
+tiling, minimize, restore or snap/reservation bookkeeping · titlebar drag, resize or coordinate conversion ·
 keyboard/Wayland focus · synchronous IPC or subprocesses inside compositor callbacks · rail
 toplevel identity/grouping/restoration · screenshot lifecycle or focus restoration · any
 correction touching code that previously regressed · any proposed fix whose failure could freeze

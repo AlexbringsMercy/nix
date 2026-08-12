@@ -5,10 +5,11 @@ This session is no longer trusted to continue diagnosis or coordination. Nothing
 document is an accepted root cause. Verify live ground truth; do not inherit this blindly.
 
 > **UPDATE 2026-08-09 — this is a dated 2026-07-29 record; read the current authority docs.**
-> Since this handoff: the recovery consultation was **completed** (two independent blind
-> reviews converged; accepted findings — defect record **D1–D9** (D1–D7/D9 diagnosed, **D8
-> unresolved**) — in `docs/reports/gen32-recovery-diagnosis.md`
-> — so the "no accepted Codex review exists" statements below are **historical**, not current).
+> Since this handoff: the blind diagnostic review was **completed** (two independent blind
+> Pass-1 reviews converged; accepted findings — defect record **D1–D9** (D1–D7/D9 diagnosed,
+> **D8 unresolved**) — in `docs/reports/gen32-recovery-diagnosis.md`;
+> an adversarial Pass-2 artifact exists but is not asserted as an accepted gate sign-off;
+> so the "no accepted Codex review exists" statements below are **historical**, not current).
 > The repository was normalized to branch **`main`** (the `codex/macbook-desktop` line was
 > retired). Current machine/repository state: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`.
 > The machine is still on generation 32; Stage 2 and all defects remain **OPEN**.

@@ -197,15 +197,21 @@ generation from the machine — never copy a number from a document.
 ## 5. First actions for the incoming PM
 
 1. Read, in order: `docs/prompts/SESSION_PREAMBLE.md` · this file ·
-   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` · the gen-32 recovery entry point
-   `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md` and the defect record
-   `docs/reports/gen32-recovery-diagnosis.md` · `docs/plans/GRAND_PLAN.md` ·
+   `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` ·
+   `docs/reports/gen32-recovery-diagnosis.md` (defect record D1–D9) ·
+   `docs/reports/codex-consultation-record.md` (consultation status) ·
+   `docs/plans/GRAND_PLAN.md` ·
    `docs/plans/MASTER_REQUIREMENTS.md` · `docs/references/macbook-build-spec.md` · the `docs/reports/EXECUTION_LOG.md`
    current-authority header, the operator decisions registers, and every entry
    from the current Stage 2 correction work forward · `docs/references/SOURCES.md`.
    The Stage 2 **requirements/scope** (including what must not regress — rail previews,
    exact grouped selection) live in `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md`, which
    produced generation 32 and is now **prior-cycle support, not the current brief**.
+   The dated July incident briefs (`docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`
+   and `docs/briefs/PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`) are useful supporting
+   context — read them for provenance, but **do not treat the kickoff's task list as
+   current instructions** (its blind-review and root-cause-report tasks are now
+   complete).
    **`ISSUE_LOG.md` is no longer on this list** — it is an archived dated audit of
    the retired Waybar/Rofi-era system; its still-live items were migrated into the
    current gate (see `docs/reports/issue-log-migration-2026-07-29.md`). State the list to
@@ -218,8 +224,8 @@ generation from the machine — never copy a number from a document.
    generation link, a newer boot entry, and whether the current source's closure is
    actually valid in the store.
 3. Report the stage status honestly. Today that is **`STAGE 2 — OPEN`**.
-4. Start on the gen-32 **recovery entry path**: `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`
-   → `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` → `docs/reports/gen32-recovery-diagnosis.md`
+4. Start on the gen-32 **recovery resume path**: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`
+   → `docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md`
    → `docs/plans/GRAND_PLAN.md`, honouring the Stage 2 requirements in
    `docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` (prior-cycle work order, **not** the current
    brief). Do not start Stage 3.

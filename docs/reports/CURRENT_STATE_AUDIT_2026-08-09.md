@@ -39,9 +39,11 @@ Known state (authoritative, from the recovery investigation and operator gate):
   are diagnosed to the level recorded; **D8 (focus-dependent Kitty scroll) is UNRESOLVED —
   no accepted root cause.** None of D1–D9 is implemented, built, or physically accepted. See
   `docs/reports/gen32-recovery-diagnosis.md`.
-- **Recovery consultation completed**: two independent blind Codex reviews converged on the
-  diagnosis (`docs/reports/codex-consultation-record.md`). Accepted **diagnosis only** — not
-  a fix.
+- **Recovery diagnostic review completed**: two independent blind GPT-5.6 Sol Pass-1 reviews
+  converged on the diagnosis (`docs/reports/codex-consultation-record.md`). An adversarial
+  Pass-2 review artifact exists, but this audit does **not** assert a fully accepted
+  adversarial sign-off — the operator's implementation gate is separate and remains open.
+  Accepted **diagnosis only** — not a fix.
 - **Xbox controller reliability is OPEN**: immediate connection proven (917 ms) and ≥13 min
   stable once; repeatability **unproven**, root cause **unknown**; no spontaneous disconnect
   proven. Full gate in `docs/reports/xbox-bluetooth-diagnostic.md`.

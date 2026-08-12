@@ -5,13 +5,16 @@
 # ⚠ CURRENT AUTHORITY — READ BEFORE THE HISTORICAL LOG
 # ═══════════════════════════════════════════════════════════════════
 
-> **CURRENT AUTHORITY (2026-08-09).** Canonical repo `/home/alex/nix`, remote
+> **CURRENT AUTHORITY (2026-08-11).** Canonical repo `/home/alex/nix`, remote
 > `AlexbringsMercy/nix`, branch **`main`** (the only branch). Verified machine/repo state:
 > **`docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`**. The machine is on **generation 32**
-> (it booted and then **physically hard-failed**); **Stage 2 is OPEN**. Current recovery entry
-> point: `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md` → the current audit →
+> (it booted and then **physically hard-failed**); **Stage 2 is OPEN**. Current recovery
+> resume path: `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` →
 > `docs/reports/gen32-recovery-diagnosis.md` (defect record **D1–D9**; D1–D7/D9 have root causes
-> identified, **D8 is UNRESOLVED**) → `docs/plans/GRAND_PLAN.md`. All authority docs live under
+> identified, **D8 is UNRESOLVED**) → `docs/reports/codex-consultation-record.md` (blind Pass-1
+> reviews complete; adversarial Pass-2 gate not yet asserted as accepted) →
+> `docs/plans/GRAND_PLAN.md`. The dated July kickoff/handoff briefs under `docs/briefs/` are
+> supporting historical context, not the current starting point. All authority docs live under
 > `docs/…`. **`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the prior-cycle (gen-32) work order,
 > not the current execution brief.** Everything below this block is **historical** — including the
 > 2026-07-29 correction set that named generation 31 as active. Trust the current audit and the
@@ -73,10 +76,11 @@
 > **Governing documents for the incoming PM (current paths):**
 > `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md`, `docs/instructions/PM_OPERATING_RULES.md`,
 > `docs/plans/GRAND_PLAN.md`, `docs/plans/MASTER_REQUIREMENTS.md`,
-> `docs/reports/gen32-recovery-diagnosis.md`, the recovery kickoff
-> `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`, and the dated operator-decision
-> entries at the end of this file. (`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the
-> prior-cycle gen-32 work order — historical Stage 2 support, **not** the current brief.)
+> `docs/reports/gen32-recovery-diagnosis.md`, `docs/reports/codex-consultation-record.md`,
+> and the dated operator-decision entries at the end of this file. The July kickoff/handoff
+> briefs under `docs/briefs/` are supporting historical context.
+> (`docs/plans/STAGE2_CLOSEOUT_WORK_ORDER.md` is the prior-cycle gen-32 work order —
+> historical Stage 2 support, **not** the current brief.)
 
 # ═══════════════════════════════════════════════════════════════════
 
@@ -3155,7 +3159,7 @@ The operator should avoid snap on gen 32 until corrected.**
 
 ---
 
-## 2026-08-09 — recovery consultation completed (diagnosis accepted; no fix built)
+## 2026-08-09 — recovery diagnostic review completed (diagnosis accepted; adversarial Pass-2 gate open; no fix built)
 
 The mandated blind-review workflow was completed after the 2026-07-29 handoff. Two
 independent blind GPT-5.6 Sol `xhigh` reviews — **Review A** (compositor / coordinate

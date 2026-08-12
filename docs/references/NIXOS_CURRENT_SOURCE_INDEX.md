@@ -89,6 +89,10 @@ for the repository's provenance and reproducibility state see
 
 ## Handoff / recovery (point-in-time, generation 32)
 
+The current recovery resume path starts at `docs/reports/CURRENT_STATE_AUDIT_2026-08-09.md` →
+`docs/reports/gen32-recovery-diagnosis.md` → `docs/reports/codex-consultation-record.md` →
+`docs/plans/GRAND_PLAN.md`. The dated July incident briefs below are supporting historical context:
+
 - `docs/briefs/PM_HANDOFF_GEN32_HARD_FAIL_2026-07-29.md`
 - `docs/briefs/PM_KICKOFF_GEN32_RECOVERY_2026-07-29.md`
 - `docs/instructions/recovery.md`

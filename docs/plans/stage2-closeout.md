@@ -134,14 +134,14 @@ Alex's own words at the gate sitting, not from PM inference.
 | `Super+Right` = exact right half, with one window open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
 | Same exact geometry with two windows open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
 | Same exact geometry with three or more windows open | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
-| Snapping onto an **occupied** side minimizes the previous occupant | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
-| Completing a pair minimizes all surplus same-workspace windows | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| One side reserved: ordinary windows **stay visible** and reflow in the opposite half | N | N | N | N | UNVERIFIED | N | Reservation/reflow model (2026-08-09 clarification) |
+| Both sides reserved by explicit owners: remaining ordinary windows minimize | N | N | N | N | UNVERIFIED | N | Reservation/reflow model |
 | Minimized surplus remains represented in the rail | N | N | N | N | UNVERIFIED | N | Must stay recoverable |
-| Clicking a surplus task restores it **and dissolves the pair** | N | N | N | N | UNVERIFIED | N | Returns to ordinary tiling |
-| Dragging a pair member dissolves/reconciles the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
-| Unsnapping a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
-| Maximizing a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
-| Closing a pair member dissolves the pair | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
+| Snap onto an already-reserved side **demotes** the previous owner to ordinary | N | N | N | N | UNVERIFIED | N | Previous owner joins reflow pool, not minimized |
+| Restoring a minimized window when a half frees up re-tiles normally | N | N | N | N | UNVERIFIED | N | Returns to ordinary tiling |
+| Dragging/unsnapping an owner releases that reservation | N | N | N | N | UNVERIFIED | N | Reservation/reflow model |
+| Maximizing an owner releases that reservation | N | N | N | N | UNVERIFIED | N | Reservation/reflow model |
+| Closing an owner releases that reservation | N | N | N | N | UNVERIFIED | N | Reservation/reflow model |
 | Prior state/placement restored where possible | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
 | **No window is ever silently closed or lost** | N | N | N | N | UNVERIFIED | N | Hard requirement across every snap path |
 | App groups behave correctly through snap/minimize/restore | N | N | N | N | UNVERIFIED | N | Added 2026-07-29 |
@@ -221,7 +221,7 @@ against **2.8 GB** recorded in the pre-batch audit. Retiring the dashboard UI re
 a large standing allocation on an 8 GB machine.
 
 **Still `UNVERIFIED` — needs Alex's hands:** drag anchor, corner resize both
-directions, snap determinism and pair dissolution, rail click-to-restore and grouped
+directions, snap reservation/reflow behavior, rail click-to-restore and grouped
 previews, `follow_mouse = 2` feel, DWT palm suppression while typing, screenshot
 colour/clipboard/error paths, wallpaper smoke row, and the Stage 0/1 debts
 (TV, controller, VA-API).
