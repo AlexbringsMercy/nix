@@ -122,7 +122,8 @@
     # build may warn/mismatch against this T2 host's exact kernel; treat it
     # as best-effort, not guaranteed to attach cleanly.
     patchelf
-    binutils
+    # binutils is not listed: gcc-wrapper already exposes ld/as/ar/objdump/strings/…
+    # and both wrappers sit at meta.priority 10, so they cannot coexist in the profile.
     protobuf
     buf
     flatbuffers
@@ -139,7 +140,7 @@
     #    toolbox below is the general-purpose interpreter for ad hoc
     #    scripts/notebooks — see modules/home/lib/workstation-python.nix) --
     uv
-    (python3.withPackages (import ./lib/workstation-python.nix))
+    (lib.lowPrio (python3.withPackages (import ./lib/workstation-python.nix))) # standalone CLIs (httpx, playwright) win over the env's scripts
     pip-audit
 
     # -- NODE (nodejs_22 stays system-level, modules/nixos/base.nix) --
@@ -161,7 +162,7 @@
     # -- RUST (rustup manages toolchains; run `rustup default stable`
     #    once after this rebuild completes) --
     rustup
-    rust-analyzer
+    (lib.lowPrio rust-analyzer) # rustup's proxy owns bin/rust-analyzer
     cargo-binstall
     cargo-nextest
     cargo-watch
@@ -205,7 +206,7 @@
     phpPackages.composer
     zig
     lua5_4
-    luajit
+    (lib.lowPrio luajit) # `lua` is PUC Lua; luajit stays reachable as `luajit`
     rWrapper
     mise
 
