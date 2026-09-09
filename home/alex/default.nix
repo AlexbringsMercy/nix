@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/home/packages.nix
+    ../../modules/home/workbench.nix
     ../../modules/home/hyprland
     ../../modules/home/kitty
     # Aurora: the vendored chassis replaces the Waybar, Rofi, and old QuickShell surfaces.
