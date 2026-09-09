@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 # Alex's "CLI-agent workstation tooling" plan (2026-09-08 scope expansion),
 # general-purpose language/build/runtime/LSP slice. Security/supply-chain/RE
 # tooling lives in modules/home/security-tooling.nix and docker/k8s/cloud-IaC
@@ -85,10 +85,20 @@
 
     # -- NATIVE BUILD --
     gcc
-    llvmPackages_latest.clang
+    # clang ships its own bin/cc, c++, cpp and ld wrappers, which collide
+    # with gcc's in home-manager's unified profile buildEnv ("two given
+    # paths contain a conflicting subpath", rebuild attempt 2026-09-09).
+    # gcc owns those generic names; clang is kept at low priority so clang,
+    # clang++, clang-cl etc. stay on PATH under their own names.
+    # llvmPackages_latest.clang is NOT installed: its bin/cc collides with gcc's in
+    # the profile buildEnv even at low priority (rebuild attempts 2026-09-09).
+    # clangd/clang-format come from clang-tools; use `nix shell nixpkgs#clang` when
+    # a repo needs the clang driver itself.
     llvmPackages_latest.clang-tools # clangd + clang-format
-    llvmPackages_latest.lld
-    llvmPackages_latest.libclang
+    (lib.lowPrio llvmPackages_latest.lld)
+    # llvmPackages_latest.libclang is the unwrapped clang package: its bin/ (cpp,
+    # clang-doc, …) collides with gcc and clang-tools in the profile. Library-only
+    # consumers get it per project (`nix shell nixpkgs#llvmPackages_latest.libclang`).
     cmake
     ninja
     meson
