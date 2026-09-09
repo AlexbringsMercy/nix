@@ -36,7 +36,16 @@
     ];
   };
 
-  swapDevices = [ ];
+  # 7.45 GiB gap freed by shrinking the macOS APFS container on 2026-09-09
+  # (nvme0n1p4). Disk swap at low priority: zram (priority 100) fills first,
+  # this catches the overflow that used to OOM-freeze the 7.6 GB laptop.
+  # When macOS is reinstalled fresh the gap grows and /nix moves there.
+  swapDevices = [
+    {
+      device = "/dev/disk/by-label/nixswap";
+      priority = 10;
+    }
+  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
