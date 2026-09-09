@@ -54,7 +54,7 @@
     binwalk
     yara
     # imhex, ilspycmd: skipped — see docs/tooling-notes.md.
-    # ghidra: deliberately deferred to a Phase 2 pass (large download); see notes.
+    ghidra
     # frida-tools: deliberately deferred — install later with
     #   `uv tool install frida-tools`.
 

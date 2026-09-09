@@ -38,11 +38,9 @@
     bazelisk
 
     # -- CLOUD PROVIDER CLIs --
-    # awscli2, azure-cli, google-cloud-sdk: dropped, disk-budget cut
-    # (2026-09-08) — each pulls a substantial Python dependency tree.
-    #   `uv tool install awscli` / `pip install --user azure-cli` / the
-    #   Google Cloud SDK's own installer, or `uv tool install gcloud`-style
-    #   wrappers, later if actually needed.
+    awscli2
+    azure-cli
+    google-cloud-sdk
     oci-cli
 
     # -- DEPLOY TARGETS --

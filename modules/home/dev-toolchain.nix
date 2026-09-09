@@ -192,11 +192,9 @@
     gofumpt
 
     # -- OTHER LANGUAGE RUNTIMES --
-    # dotnet-sdk_10: dropped, disk-budget cut (2026-09-08) — large SDK
-    # download. `mise use dotnet@10` or manual install later if needed.
+    dotnet-sdk
     temurin-bin-21
-    # temurin-bin-17: dropped, disk-budget cut — keeping only one JDK
-    # (temurin-bin-21). `mise use java@temurin-17` later if a project needs it.
+    (lib.lowPrio temurin-bin-17) # java/javac/jar belong to temurin-bin-21; 17 stays reachable via its store path or mise
     maven
     gradle
     kotlin
@@ -257,7 +255,9 @@
     libavif
     pngquant
     resvg
-    # inkscape: dropped, disk-budget cut — pulls a large GTK/graphics stack.
+    inkscape
+    libreoffice-fresh
+    calibre
     potrace
     pandoc
     typst
