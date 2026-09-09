@@ -1,0 +1,2955 @@
+{
+  "generated": "2026-09-09T03:48:55.659922Z",
+  "host": "macbook",
+  "nixpkgs_rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+  "installed": [
+    {
+      "tool": "git-lfs",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-lfs",
+      "version": "3.7.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "git-filter-repo",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-filter-repo",
+      "version": "2.47.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "delta",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "delta",
+      "version": "0.19.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "difftastic",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "difftastic",
+      "version": "0.69.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lazygit",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "lazygit",
+      "version": "0.62.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "git-sizer",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-sizer",
+      "version": "1.5.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "git-cliff",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-cliff",
+      "version": "2.13.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "git-absorb",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-absorb",
+      "version": "0.9.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pre-commit",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "pre-commit",
+      "version": "4.5.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "jujutsu",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "jujutsu",
+      "version": "0.42.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "glab",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "glab",
+      "version": "1.101.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "git-crypt",
+      "category": "SOURCE CONTROL",
+      "nix_attr": "git-crypt",
+      "version": "0.8.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ripgrep-all",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "ripgrep-all",
+      "version": "0.10.10",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "fzf",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "fzf",
+      "version": "0.73.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bat",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "bat",
+      "version": "0.26.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "eza",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "eza",
+      "version": "0.23.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "zoxide",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "zoxide",
+      "version": "0.9.9",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "broot",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "broot",
+      "version": "1.57.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yazi",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "yazi",
+      "version": "26.5.6",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yq-go",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "yq-go",
+      "version": "4.53.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dasel",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "dasel",
+      "version": "3.8.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gron",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "gron",
+      "version": "0.7.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "fx",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "fx",
+      "version": "39.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "jless",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "jless",
+      "version": "0.9.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "htmlq",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "htmlq",
+      "version": "0.4.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "xmlstarlet",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "xmlstarlet",
+      "version": "1.6.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "csvkit",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "csvkit",
+      "version": "2.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "qsv",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "qsv",
+      "version": "20.1.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "miller",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "miller",
+      "version": "6.18.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "visidata",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "visidata",
+      "version": "3.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sd",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "sd",
+      "version": "1.1.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "choose",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "choose",
+      "version": "1.3.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tokei",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "tokei",
+      "version": "14.0.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "scc",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "scc",
+      "version": "3.7.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "universal-ctags",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "universal-ctags",
+      "version": "6.2.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tree-sitter",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "tree-sitter",
+      "version": "0.26.8",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ast-grep",
+      "category": "SEARCH / TEXT / DATA",
+      "nix_attr": "ast-grep",
+      "version": "0.43.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "hyperfine",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "hyperfine",
+      "version": "1.20.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "just",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "just",
+      "version": "1.51.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "go-task",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "go-task",
+      "version": "3.48.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "watchexec",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "watchexec",
+      "version": "2.5.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mprocs",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "mprocs",
+      "version": "0.9.6",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "process-compose",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "process-compose",
+      "version": "1.110.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dust",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "dust",
+      "version": "1.2.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "duf",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "duf",
+      "version": "0.9.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "procs",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "procs",
+      "version": "0.14.11",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bottom",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "bottom",
+      "version": "0.12.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "aria2",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "aria2",
+      "version": "1.37.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "xh",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "xh",
+      "version": "0.25.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "httpie",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "httpie",
+      "version": "3.2.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "hurl",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "hurl",
+      "version": "8.0.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "grpcurl",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "grpcurl",
+      "version": "1.9.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "websocat",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "websocat",
+      "version": "1.14.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "caddy",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "caddy",
+      "version": "2.11.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "miniserve",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "miniserve",
+      "version": "0.35.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dufs",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "dufs",
+      "version": "0.46.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rclone",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "rclone",
+      "version": "1.74.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "restic",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "restic",
+      "version": "0.19.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "zstd",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "zstd",
+      "version": "1.5.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "xz",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "xz",
+      "version": "5.8.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "brotli",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "brotli",
+      "version": "1.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ouch",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "ouch",
+      "version": "0.8.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rsync",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "rsync",
+      "version": "3.4.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "socat",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "socat",
+      "version": "1.8.1.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "moreutils",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "moreutils",
+      "version": "0.70",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "parallel",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "parallel",
+      "version": "20260422",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "entr",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "entr",
+      "version": "5.8",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tmux",
+      "category": "EXEC / PRODUCTIVITY",
+      "nix_attr": "tmux",
+      "version": "3.6a",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gcc",
+      "category": "NATIVE BUILD",
+      "nix_attr": "gcc",
+      "version": "15.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "clang",
+      "category": "NATIVE BUILD",
+      "nix_attr": "llvmPackages_latest.clang",
+      "version": "22.1.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "clang-tools",
+      "category": "NATIVE BUILD",
+      "nix_attr": "llvmPackages_latest.clang-tools",
+      "version": "22.1.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lld",
+      "category": "NATIVE BUILD",
+      "nix_attr": "llvmPackages_latest.lld",
+      "version": "22.1.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libclang",
+      "category": "NATIVE BUILD",
+      "nix_attr": "llvmPackages_latest.libclang",
+      "version": "22.1.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cmake",
+      "category": "NATIVE BUILD",
+      "nix_attr": "cmake",
+      "version": "4.1.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ninja",
+      "category": "NATIVE BUILD",
+      "nix_attr": "ninja",
+      "version": "1.13.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "meson",
+      "category": "NATIVE BUILD",
+      "nix_attr": "meson",
+      "version": "1.10.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gnumake",
+      "category": "NATIVE BUILD",
+      "nix_attr": "gnumake",
+      "version": "4.4.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nasm",
+      "category": "NATIVE BUILD",
+      "nix_attr": "nasm",
+      "version": "3.01",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yasm",
+      "category": "NATIVE BUILD",
+      "nix_attr": "yasm",
+      "version": "1.3.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "perl",
+      "category": "NATIVE BUILD",
+      "nix_attr": "perl",
+      "version": "5.42.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pkg-config",
+      "category": "NATIVE BUILD",
+      "nix_attr": "pkg-config",
+      "version": "0.29.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sccache",
+      "category": "NATIVE BUILD",
+      "nix_attr": "sccache",
+      "version": "0.15.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mold",
+      "category": "NATIVE BUILD",
+      "nix_attr": "mold",
+      "version": "2.41.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "autoconf",
+      "category": "NATIVE BUILD",
+      "nix_attr": "autoconf",
+      "version": "2.73",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "automake",
+      "category": "NATIVE BUILD",
+      "nix_attr": "automake",
+      "version": "1.18.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libtool",
+      "category": "NATIVE BUILD",
+      "nix_attr": "libtool",
+      "version": "2.5.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gdb",
+      "category": "NATIVE BUILD",
+      "nix_attr": "gdb",
+      "version": "17.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lldb",
+      "category": "NATIVE BUILD",
+      "nix_attr": "lldb",
+      "version": "21.1.8",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "valgrind",
+      "category": "NATIVE BUILD",
+      "nix_attr": "valgrind",
+      "version": "3.26.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "strace",
+      "category": "NATIVE BUILD",
+      "nix_attr": "strace",
+      "version": "7.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ltrace",
+      "category": "NATIVE BUILD",
+      "nix_attr": "ltrace",
+      "version": "0.7.91",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "perf",
+      "category": "NATIVE BUILD",
+      "nix_attr": "perf",
+      "version": "7.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "patchelf",
+      "category": "NATIVE BUILD",
+      "nix_attr": "patchelf",
+      "version": "0.15.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "binutils",
+      "category": "NATIVE BUILD",
+      "nix_attr": "binutils",
+      "version": "2.46",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "protobuf",
+      "category": "NATIVE BUILD",
+      "nix_attr": "protobuf",
+      "version": "34.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "buf",
+      "category": "NATIVE BUILD",
+      "nix_attr": "buf",
+      "version": "1.70.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "flatbuffers",
+      "category": "NATIVE BUILD",
+      "nix_attr": "flatbuffers",
+      "version": "25.12.19",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "conan",
+      "category": "NATIVE BUILD",
+      "nix_attr": "conan",
+      "version": "2.28.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vcpkg",
+      "category": "NATIVE BUILD",
+      "nix_attr": "vcpkg",
+      "version": "2026.05.25",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "openssl",
+      "category": "NATIVE BUILD",
+      "nix_attr": "openssl",
+      "version": "3.6.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "zlib",
+      "category": "NATIVE BUILD",
+      "nix_attr": "zlib",
+      "version": "1.3.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "icu",
+      "category": "NATIVE BUILD",
+      "nix_attr": "icu",
+      "version": "76.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libxml2",
+      "category": "NATIVE BUILD",
+      "nix_attr": "libxml2",
+      "version": "2.15.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libxslt",
+      "category": "NATIVE BUILD",
+      "nix_attr": "libxslt",
+      "version": "1.1.45",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "postgresql",
+      "category": "NATIVE BUILD",
+      "nix_attr": "postgresql",
+      "version": "17.10",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "uv",
+      "category": "NATIVE BUILD",
+      "nix_attr": "uv",
+      "version": "0.11.19",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pip-audit",
+      "category": "NATIVE BUILD",
+      "nix_attr": "pip-audit",
+      "version": "2.10.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "fnm",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "fnm",
+      "version": "1.39.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bun",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "bun",
+      "version": "1.3.13",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "deno",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "deno",
+      "version": "2.8.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "typescript-language-server",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "typescript-language-server",
+      "version": "5.3.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "biome",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "biome",
+      "version": "2.4.16",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lighthouse",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "lighthouse",
+      "version": "8.1.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "svgo",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "svgo",
+      "version": "4.0.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mermaid-cli",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "mermaid-cli",
+      "version": "11.12.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "marp-cli",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "marp-cli",
+      "version": "4.4.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "repomix",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "repomix",
+      "version": "1.14.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "npm-check-updates",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "npm-check-updates",
+      "version": "19.3.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "web-ext",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "web-ext",
+      "version": "8.10.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "prettier",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "prettier",
+      "version": "3.8.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rustup",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "rustup",
+      "version": "1.29.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rust-analyzer",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "rust-analyzer",
+      "version": "2026-06-01",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-binstall",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-binstall",
+      "version": "1.20.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-nextest",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-nextest",
+      "version": "0.9.137",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-watch",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-watch",
+      "version": "8.5.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-edit",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-edit",
+      "version": "0.13.11",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-audit",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-audit",
+      "version": "0.22.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-deny",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-deny",
+      "version": "0.19.8",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-outdated",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-outdated",
+      "version": "0.19.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-machete",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-machete",
+      "version": "0.9.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-llvm-cov",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-llvm-cov",
+      "version": "0.8.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-expand",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-expand",
+      "version": "1.0.122",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-bloat",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-bloat",
+      "version": "0.12.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-generate",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-generate",
+      "version": "0.23.9",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-msrv",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-msrv",
+      "version": "0.19.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cargo-cross",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "cargo-cross",
+      "version": "0.2.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wasm-pack",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "wasm-pack",
+      "version": "0.15.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wasm-bindgen-cli",
+      "category": "NODE (nodejs_22 stays system-level, modules/nixos/base.nix)",
+      "nix_attr": "wasm-bindgen-cli",
+      "version": "0.2.121",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "go",
+      "category": "GO",
+      "nix_attr": "go",
+      "version": "1.26.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gopls",
+      "category": "GO",
+      "nix_attr": "gopls",
+      "version": "0.22.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "golangci-lint",
+      "category": "GO",
+      "nix_attr": "golangci-lint",
+      "version": "2.12.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "go-tools",
+      "category": "GO",
+      "nix_attr": "go-tools",
+      "version": "2026.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gotestsum",
+      "category": "GO",
+      "nix_attr": "gotestsum",
+      "version": "1.13.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "goreleaser",
+      "category": "GO",
+      "nix_attr": "goreleaser",
+      "version": "2.16.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "delve",
+      "category": "GO",
+      "nix_attr": "delve",
+      "version": "1.26.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "govulncheck",
+      "category": "GO",
+      "nix_attr": "govulncheck",
+      "version": "1.3.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gofumpt",
+      "category": "GO",
+      "nix_attr": "gofumpt",
+      "version": "0.10.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "temurin-bin-21",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "temurin-bin-21",
+      "version": "21.0.11",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "maven",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "maven",
+      "version": "3.9.12",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gradle",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "gradle",
+      "version": "8.14.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "kotlin",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "kotlin",
+      "version": "2.4.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "jdt-language-server",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "jdt-language-server",
+      "version": "1.58.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ruby",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "ruby",
+      "version": "3.4.9",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "php",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "php",
+      "version": "8.4.22",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "composer",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "phpPackages.composer",
+      "version": "2.10.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "zig",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "zig",
+      "version": "0.16.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lua5_4",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "lua5_4",
+      "version": "5.4.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "luajit",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "luajit",
+      "version": "2.1.1774638290",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rWrapper",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "rWrapper",
+      "version": "R-4.6.0-wrapper",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mise",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "mise",
+      "version": "2026.6.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "playwright-test",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "playwright-test",
+      "version": "1.60.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "chromium",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "chromium",
+      "version": "149.0.7827.114",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "firefox",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "firefox",
+      "version": "152.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mkcert",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "mkcert",
+      "version": "1.4.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "step-cli",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "step-cli",
+      "version": "0.30.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "iperf3",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "iperf3",
+      "version": "3.21",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mtr",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "mtr",
+      "version": "0.96",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dnsutils",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "dnsutils",
+      "version": "9.20.23",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "doggo",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "doggo",
+      "version": "1.1.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tailscale",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "tailscale",
+      "version": "1.98.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wireguard-tools",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "wireguard-tools",
+      "version": "1.0.20260223",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cloudflared",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "cloudflared",
+      "version": "2026.6.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "k6",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "k6",
+      "version": "2.0.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "oha",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "oha",
+      "version": "1.14.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vegeta",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "nix_attr": "vegeta",
+      "version": "12.13.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "duckdb",
+      "category": "DATABASES",
+      "nix_attr": "duckdb",
+      "version": "1.5.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mariadb",
+      "category": "DATABASES",
+      "nix_attr": "mariadb",
+      "version": "11.4.9",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "redis",
+      "category": "DATABASES",
+      "nix_attr": "redis",
+      "version": "8.8.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mongosh",
+      "category": "DATABASES",
+      "nix_attr": "mongosh",
+      "version": "2.8.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "usql",
+      "category": "DATABASES",
+      "nix_attr": "usql",
+      "version": "0.21.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pgcli",
+      "category": "DATABASES",
+      "nix_attr": "pgcli",
+      "version": "4.5.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "litecli",
+      "category": "DATABASES",
+      "nix_attr": "litecli",
+      "version": "1.17.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sqlfluff",
+      "category": "DATABASES",
+      "nix_attr": "sqlfluff",
+      "version": "4.2.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "atlas",
+      "category": "DATABASES",
+      "nix_attr": "atlas",
+      "version": "1.2.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dbmate",
+      "category": "DATABASES",
+      "nix_attr": "dbmate",
+      "version": "2.33.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mkvtoolnix-cli",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "mkvtoolnix-cli",
+      "version": "99.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yt-dlp",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "yt-dlp",
+      "version": "2026.06.09",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gallery-dl",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "gallery-dl",
+      "version": "1.32.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sox",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "sox",
+      "version": "unstable-2021-05-09",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "handbrake",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "handbrake",
+      "version": "1.10.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mpv",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "mpv",
+      "version": "0.41.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vips",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "vips",
+      "version": "8.18.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "exiftool",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "exiftool",
+      "version": "13.59",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gifski",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "gifski",
+      "version": "1.34.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gifsicle",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "gifsicle",
+      "version": "1.96",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libavif",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "libavif",
+      "version": "1.4.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pngquant",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "pngquant",
+      "version": "3.0.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "resvg",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "resvg",
+      "version": "0.47.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "potrace",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "potrace",
+      "version": "1.16",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pandoc",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "pandoc",
+      "version": "3.7.0.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "typst",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "typst",
+      "version": "0.15.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ghostscript",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "ghostscript",
+      "version": "10.07.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "qpdf",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "qpdf",
+      "version": "12.3.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mupdf",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "mupdf",
+      "version": "1.27.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "poppler-utils",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "poppler-utils",
+      "version": "25.10.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pdfcpu",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "pdfcpu",
+      "version": "0.12.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tesseract",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "tesseract",
+      "version": "5.5.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ocrmypdf",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "ocrmypdf",
+      "version": "17.6.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "graphviz",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "graphviz",
+      "version": "12.2.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "plantuml",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "plantuml",
+      "version": "1.2026.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "d2",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "d2",
+      "version": "0.7.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "chafa",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "chafa",
+      "version": "1.18.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "asciinema",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "asciinema",
+      "version": "3.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "agg",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "agg",
+      "version": "2.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vhs",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "vhs",
+      "version": "0.11.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "silicon",
+      "category": "DOCS / MEDIA",
+      "nix_attr": "silicon",
+      "version": "0.5.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pyright",
+      "category": "LSP / FORMAT",
+      "nix_attr": "pyright",
+      "version": "1.1.410",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lua-language-server",
+      "category": "LSP / FORMAT",
+      "nix_attr": "lua-language-server",
+      "version": "3.18.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bash-language-server",
+      "category": "LSP / FORMAT",
+      "nix_attr": "bash-language-server",
+      "version": "5.6.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yaml-language-server",
+      "category": "LSP / FORMAT",
+      "nix_attr": "yaml-language-server",
+      "version": "1.23.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "taplo",
+      "category": "LSP / FORMAT",
+      "nix_attr": "taplo",
+      "version": "0.10.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "marksman",
+      "category": "LSP / FORMAT",
+      "nix_attr": "marksman",
+      "version": "2026-02-08",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dprint",
+      "category": "LSP / FORMAT",
+      "nix_attr": "dprint",
+      "version": "0.54.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "stylua",
+      "category": "LSP / FORMAT",
+      "nix_attr": "stylua",
+      "version": "2.5.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "omnisharp-roslyn",
+      "category": "LSP / FORMAT",
+      "nix_attr": "omnisharp-roslyn",
+      "version": "1.39.14",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nixfmt",
+      "category": "LSP / FORMAT",
+      "nix_attr": "nixfmt",
+      "version": "1.3.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "file",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "file",
+      "version": "5.47",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "less",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "less",
+      "version": "692",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "which",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "which",
+      "version": "2.23",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lsof",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "lsof",
+      "version": "4.99.6",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pciutils",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "pciutils",
+      "version": "3.15.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "usbutils",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "usbutils",
+      "version": "019",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "netcat-gnu",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "netcat-gnu",
+      "version": "0.7.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "iproute2",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "iproute2",
+      "version": "7.0.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "psmisc",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "psmisc",
+      "version": "23.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "man-pages",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "man-pages",
+      "version": "6.18",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "plocate",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "plocate",
+      "version": "1.1.24",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nix-tree",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "nix-tree",
+      "version": "0.8.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "comma",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "comma",
+      "version": "2.4.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nil",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "nil",
+      "version": "2025-06-13",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "direnv",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "direnv",
+      "version": "2.37.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nix-direnv",
+      "category": "OBVIOUS BASICS the plan omitted",
+      "nix_attr": "nix-direnv",
+      "version": "3.1.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "semgrep",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "semgrep",
+      "version": "1.164.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gitleaks",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "gitleaks",
+      "version": "8.30.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "trufflehog",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "trufflehog",
+      "version": "3.95.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "osv-scanner",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "osv-scanner",
+      "version": "2.3.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "trivy",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "trivy",
+      "version": "0.71.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "syft",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "syft",
+      "version": "1.45.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "grype",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "grype",
+      "version": "0.114.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "detect-secrets",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "detect-secrets",
+      "version": "1.5.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "shellcheck",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "shellcheck",
+      "version": "0.11.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "shfmt",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "shfmt",
+      "version": "3.13.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "hadolint",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "hadolint",
+      "version": "2.14.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "actionlint",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "actionlint",
+      "version": "1.7.12",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "markdownlint-cli2",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "markdownlint-cli2",
+      "version": "0.22.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vale",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "vale",
+      "version": "3.15.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cspell",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "cspell",
+      "version": "9.7.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "typos",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "typos",
+      "version": "1.47.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yamllint",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "yamllint",
+      "version": "1.37.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yamlfmt",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "yamlfmt",
+      "version": "0.21.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "editorconfig-checker",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "editorconfig-checker",
+      "version": "3.7.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cppcheck",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "cppcheck",
+      "version": "2.21.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "cosign",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "cosign",
+      "version": "3.1.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "crane",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "crane",
+      "version": "0.21.6",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "oras",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "oras",
+      "version": "1.3.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "skopeo",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "skopeo",
+      "version": "1.23.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dive",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "dive",
+      "version": "0.13.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "lazydocker",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "lazydocker",
+      "version": "0.25.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ctop",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "ctop",
+      "version": "0.7.7",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "act",
+      "category": "QA / SECURITY / SUPPLY-CHAIN",
+      "nix_attr": "act",
+      "version": "0.2.89",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "hexyl",
+      "category": "RE / DEBUG",
+      "nix_attr": "hexyl",
+      "version": "0.17.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "vim",
+      "category": "RE / DEBUG",
+      "nix_attr": "vim",
+      "version": "9.2.0389",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "upx",
+      "category": "RE / DEBUG",
+      "nix_attr": "upx",
+      "version": "5.1.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "jadx",
+      "category": "RE / DEBUG",
+      "nix_attr": "jadx",
+      "version": "1.5.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "apktool",
+      "category": "RE / DEBUG",
+      "nix_attr": "apktool",
+      "version": "3.0.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bpftrace",
+      "category": "RE / DEBUG",
+      "nix_attr": "bpftrace",
+      "version": "0.26.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "radare2",
+      "category": "RE / DEBUG",
+      "nix_attr": "radare2",
+      "version": "6.1.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "rizin",
+      "category": "RE / DEBUG",
+      "nix_attr": "rizin",
+      "version": "0.8.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "binwalk",
+      "category": "RE / DEBUG",
+      "nix_attr": "binwalk",
+      "version": "3.1.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "yara",
+      "category": "RE / DEBUG",
+      "nix_attr": "yara",
+      "version": "4.5.5",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nmap",
+      "category": "RE / DEBUG",
+      "nix_attr": "nmap",
+      "version": "7.99",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wireshark-cli",
+      "category": "RE / DEBUG",
+      "nix_attr": "wireshark-cli",
+      "version": "4.6.6",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mitmproxy",
+      "category": "RE / DEBUG",
+      "nix_attr": "mitmproxy",
+      "version": "12.2.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sslscan",
+      "category": "RE / DEBUG",
+      "nix_attr": "sslscan",
+      "version": "2.2.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "testssl",
+      "category": "RE / DEBUG",
+      "nix_attr": "testssl",
+      "version": "3.2.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "nuclei",
+      "category": "RE / DEBUG",
+      "nix_attr": "nuclei",
+      "version": "3.9.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "httpx",
+      "category": "RE / DEBUG",
+      "nix_attr": "httpx",
+      "version": "1.9.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "subfinder",
+      "category": "RE / DEBUG",
+      "nix_attr": "subfinder",
+      "version": "2.14.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dnsx",
+      "category": "RE / DEBUG",
+      "nix_attr": "dnsx",
+      "version": "1.2.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "katana",
+      "category": "RE / DEBUG",
+      "nix_attr": "katana",
+      "version": "1.6.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ffuf",
+      "category": "RE / DEBUG",
+      "nix_attr": "ffuf",
+      "version": "2.1.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "feroxbuster",
+      "category": "RE / DEBUG",
+      "nix_attr": "feroxbuster",
+      "version": "2.13.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "zap",
+      "category": "RE / DEBUG",
+      "nix_attr": "zap",
+      "version": "2.17.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "docker-compose",
+      "category": "CONTAINERS",
+      "nix_attr": "docker-compose",
+      "version": "5.1.4",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "docker-buildx",
+      "category": "CONTAINERS",
+      "nix_attr": "docker-buildx",
+      "version": "0.31.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "kubectl",
+      "category": "KUBERNETES",
+      "nix_attr": "kubectl",
+      "version": "1.36.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "kubernetes-helm",
+      "category": "KUBERNETES",
+      "nix_attr": "kubernetes-helm",
+      "version": "4.2.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "kustomize",
+      "category": "KUBERNETES",
+      "nix_attr": "kustomize",
+      "version": "5.8.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "kind",
+      "category": "KUBERNETES",
+      "nix_attr": "kind",
+      "version": "0.31.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "k3d",
+      "category": "KUBERNETES",
+      "nix_attr": "k3d",
+      "version": "5.9.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "k9s",
+      "category": "KUBERNETES",
+      "nix_attr": "k9s",
+      "version": "0.51.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "stern",
+      "category": "KUBERNETES",
+      "nix_attr": "stern",
+      "version": "1.34.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "opentofu",
+      "category": "IaC",
+      "nix_attr": "opentofu",
+      "version": "1.12.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ansible",
+      "category": "IaC",
+      "nix_attr": "ansible",
+      "version": "2.21.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bazelisk",
+      "category": "IaC",
+      "nix_attr": "bazelisk",
+      "version": "1.28.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "oci-cli",
+      "category": "CLOUD PROVIDER CLIs",
+      "nix_attr": "oci-cli",
+      "version": "3.86.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wrangler",
+      "category": "DEPLOY TARGETS",
+      "nix_attr": "wrangler",
+      "version": "4.93.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "firebase-tools",
+      "category": "DEPLOY TARGETS",
+      "nix_attr": "firebase-tools",
+      "version": "15.19.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "netlify-cli",
+      "category": "DEPLOY TARGETS",
+      "nix_attr": "netlify-cli",
+      "version": "23.15.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "supabase-cli",
+      "category": "DEPLOY TARGETS",
+      "nix_attr": "supabase-cli",
+      "version": "2.105.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "openapi-generator-cli",
+      "category": "API TOOLING",
+      "nix_attr": "openapi-generator-cli",
+      "version": "7.22.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sops",
+      "category": "SECRETS",
+      "nix_attr": "sops",
+      "version": "3.13.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "age",
+      "category": "SECRETS",
+      "nix_attr": "age",
+      "version": "1.3.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "gnupg",
+      "category": "SECRETS",
+      "nix_attr": "gnupg",
+      "version": "2.4.9",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "bitwarden-cli",
+      "category": "SECRETS",
+      "nix_attr": "bitwarden-cli",
+      "version": "2026.5.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "dotenvx",
+      "category": "SECRETS",
+      "nix_attr": "dotenvx",
+      "version": "1.71.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ripgrep",
+      "category": "CLI tooling",
+      "nix_attr": "ripgrep",
+      "version": "15.1.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "fd",
+      "category": "CLI tooling",
+      "nix_attr": "fd",
+      "version": "10.4.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "jq",
+      "category": "CLI tooling",
+      "nix_attr": "jq",
+      "version": "1.8.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "tree",
+      "category": "CLI tooling",
+      "nix_attr": "tree",
+      "version": "2.3.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "htop",
+      "category": "CLI tooling",
+      "nix_attr": "htop",
+      "version": "3.5.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "unzip",
+      "category": "CLI tooling",
+      "nix_attr": "unzip",
+      "version": "6.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "p7zip",
+      "category": "CLI tooling",
+      "nix_attr": "p7zip",
+      "version": "17.06",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "sqlite",
+      "category": "CLI tooling",
+      "nix_attr": "sqlite",
+      "version": "3.51.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ncdu",
+      "category": "CLI tooling",
+      "nix_attr": "ncdu",
+      "version": "2.9.2",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "mediainfo",
+      "category": "CLI tooling",
+      "nix_attr": "mediainfo",
+      "version": "26.05",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ffmpeg-full",
+      "category": "Media / imaging",
+      "nix_attr": "ffmpeg-full",
+      "version": "8.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "imagemagick",
+      "category": "Media / imaging",
+      "nix_attr": "imagemagick",
+      "version": "7.1.2-23",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "libwebp",
+      "category": "Media / imaging",
+      "nix_attr": "libwebp",
+      "version": "1.6.0",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "oxipng",
+      "category": "Media / imaging",
+      "nix_attr": "oxipng",
+      "version": "10.1.1",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "pnpm",
+      "category": "Node tooling (nodejs_22 stays system-level in modules/nixos/base.nix)",
+      "nix_attr": "pnpm",
+      "version": "11.5.3",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "browsers",
+      "category": "Playwright",
+      "nix_attr": "playwright-driver.browsers",
+      "version": "playwright-browsers",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "ookla-speedtest",
+      "category": "Network diagnostics (bridge Network page; refuses substitutes)",
+      "nix_attr": "ookla-speedtest",
+      "version": "1.2.0",
+      "unfree": true,
+      "status": "installed"
+    },
+    {
+      "tool": "python3.withPackages(workstation-python.nix)",
+      "category": "PYTHON TOOLBOX",
+      "nix_attr": "python3.withPackages(import ./lib/workstation-python.nix)",
+      "version": "python 3.13 + numpy/pandas/polars/pyarrow/duckdb/scipy/scikit-learn/statsmodels/matplotlib/plotly/pillow/opencv4/pyvips/pymupdf/pypdf/pdfplumber/python-docx/openpyxl/python-pptx/requests/httpx/aiohttp/beautifulsoup4/lxml/selectolax/trafilatura/playwright/selenium/markdownify/pydantic/rich/typer/tenacity/tqdm/psutil/ruff/mypy/pytest/hypothesis/coverage/pytest-xdist/nox/tox/pipdeptree/ipython/jupyter/jupyterlab/openai/anthropic/litellm/tiktoken/tokenizers",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "docker (daemon)",
+      "category": "INFRA",
+      "nix_attr": "virtualisation.docker.enable (system)",
+      "version": "n/a",
+      "unfree": false,
+      "status": "installed"
+    },
+    {
+      "tool": "wireshark capture capability",
+      "category": "INFRA",
+      "nix_attr": "programs.wireshark.enable (system)",
+      "version": "n/a",
+      "unfree": false,
+      "status": "installed"
+    }
+  ],
+  "skipped": [
+    {
+      "name": "pa11y",
+      "category": "NODE",
+      "reason": "not in this nixpkgs snapshot",
+      "howto": "pnpm add -g pa11y"
+    },
+    {
+      "name": "knip",
+      "category": "NODE",
+      "reason": "not in this nixpkgs snapshot",
+      "howto": "pnpm add -g knip"
+    },
+    {
+      "name": "vercel",
+      "category": "DEPLOY TARGETS",
+      "reason": "not in this nixpkgs snapshot",
+      "howto": "pnpm add -g vercel"
+    },
+    {
+      "name": "redocly-cli",
+      "category": "API TOOLING",
+      "reason": "not in this nixpkgs snapshot",
+      "howto": "pnpm add -g @redocly/cli"
+    },
+    {
+      "name": "spectral",
+      "category": "API TOOLING",
+      "reason": "not in this nixpkgs snapshot",
+      "howto": "pnpm add -g @stoplight/spectral-cli"
+    },
+    {
+      "name": "schemathesis",
+      "category": "API TOOLING",
+      "reason": "not in this nixpkgs snapshot (top-level or python3Packages)",
+      "howto": "uv tool install schemathesis"
+    },
+    {
+      "name": "frida-tools",
+      "category": "RE/DEBUG",
+      "reason": "deliberately deferred, not attempted",
+      "howto": "uv tool install frida-tools"
+    },
+    {
+      "name": "camoufox",
+      "category": "PYTHON RUNTIMES",
+      "reason": "deliberately deferred per plan, not attempted",
+      "howto": "uv pip install camoufox"
+    },
+    {
+      "name": "crawl4ai",
+      "category": "PYTHON RUNTIMES",
+      "reason": "deliberately deferred per plan, not attempted",
+      "howto": "uv pip install crawl4ai"
+    },
+    {
+      "name": "burpsuite",
+      "category": "QA/SECURITY",
+      "reason": "unfree + large; zaproxy (OWASP ZAP) installed instead",
+      "howto": "n/a \u2014 use zap, or install burpsuite manually if specifically needed"
+    },
+    {
+      "name": "libreoffice",
+      "category": "DOCS/MEDIA",
+      "reason": "very large download; skipped per plan's own size caveat",
+      "howto": "add pkgs.libreoffice to modules/home/dev-toolchain.nix if actually needed"
+    },
+    {
+      "name": "calibre",
+      "category": "DOCS/MEDIA",
+      "reason": "very large download; skipped per plan's own size caveat",
+      "howto": "add pkgs.calibre to modules/home/dev-toolchain.nix if actually needed"
+    },
+    {
+      "name": "ghidra",
+      "category": "RE/DEBUG",
+      "reason": "large download; explicitly deferred to Phase 2 per plan",
+      "howto": "add pkgs.ghidra-bin later, budget ~1-2GB"
+    },
+    {
+      "name": "imhex",
+      "category": "RE/DEBUG",
+      "reason": "skip if large, per plan; not attempted",
+      "howto": "add pkgs.imhex later if wanted"
+    },
+    {
+      "name": "ilspycmd",
+      "category": "RE/DEBUG",
+      "reason": "skip unless cheap, per plan; not verified",
+      "howto": "check `nix eval nixpkgs#ilspycmd.version` later"
+    },
+    {
+      "name": "terraform",
+      "category": "IaC",
+      "reason": "no cached go-modules build for this nixpkgs snapshot on x86_64-linux \u2014 would compile Go from source (confirmed via empty-store dry-build); opentofu installed as the cached, compatible substitute",
+      "howto": "official HashiCorp installer, or `mise use terraform@latest`"
+    },
+    {
+      "name": "packer",
+      "category": "IaC",
+      "reason": "same as terraform \u2014 uncached go-modules build",
+      "howto": "official HashiCorp installer, or `mise use packer@latest`"
+    },
+    {
+      "name": "nix-index",
+      "category": "OBVIOUS BASICS",
+      "reason": "no cached build for this nixpkgs snapshot \u2014 would compile Rust from source",
+      "howto": "cargo binstall nix-index, or wait for a cached nixpkgs snapshot"
+    },
+    {
+      "name": "dotnet-sdk",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "reason": "disk-budget cut \u2014 large SDK download",
+      "howto": "mise use dotnet@10, or add pkgs.dotnet-sdk_10 back to dev-toolchain.nix"
+    },
+    {
+      "name": "temurin-bin-17",
+      "category": "OTHER LANGUAGE RUNTIMES",
+      "reason": "disk-budget cut \u2014 kept only temurin-bin-21",
+      "howto": "mise use java@temurin-17, or add pkgs.temurin-bin-17 back"
+    },
+    {
+      "name": "inkscape",
+      "category": "DOCS/MEDIA",
+      "reason": "disk-budget cut \u2014 pulls a large GTK/graphics stack",
+      "howto": "add pkgs.inkscape back to dev-toolchain.nix if needed"
+    },
+    {
+      "name": "awscli2",
+      "category": "CLOUD PROVIDER CLIs",
+      "reason": "disk-budget cut \u2014 large Python dependency tree",
+      "howto": "uv tool install awscli"
+    },
+    {
+      "name": "azure-cli",
+      "category": "CLOUD PROVIDER CLIs",
+      "reason": "disk-budget cut \u2014 large Python dependency tree",
+      "howto": "pip install --user azure-cli (no great uv-tool packaging upstream yet)"
+    },
+    {
+      "name": "google-cloud-sdk",
+      "category": "CLOUD PROVIDER CLIs",
+      "reason": "disk-budget cut \u2014 large Python dependency tree",
+      "howto": "Google's own install script (curl https://sdk.cloud.google.com | bash)"
+    }
+  ],
+  "windows_only_translations": [
+    {
+      "windows": "Everything",
+      "linux": "plocate + fd/fzf",
+      "note": "installed"
+    },
+    {
+      "windows": "Sysinternals suite",
+      "linux": "procs, htop/bottom, lsof, strace, bpftrace",
+      "note": "installed"
+    },
+    {
+      "windows": "WinDbg / x64dbg",
+      "linux": "gdb, lldb, radare2, rizin",
+      "note": "installed"
+    },
+    {
+      "windows": "Process Explorer",
+      "linux": "bottom, procs, k9s (for containers)",
+      "note": "installed"
+    },
+    {
+      "windows": "WizTree",
+      "linux": "dust, ncdu",
+      "note": "installed"
+    },
+    {
+      "windows": "PowerShell modules",
+      "linux": "n/a \u2014 fish + the CLI tools themselves",
+      "note": "n/a"
+    },
+    {
+      "windows": "WSL",
+      "linux": "n/a \u2014 this already is native Linux",
+      "note": "n/a"
+    },
+    {
+      "windows": "7-Zip",
+      "linux": "p7zip, ouch",
+      "note": "installed"
+    },
+    {
+      "windows": ".msi/.exe installers",
+      "linux": "Nix packaging itself (this whole flake)",
+      "note": "n/a"
+    }
+  ],
+  "recommended_additions": [
+    {
+      "name": "plocate",
+      "why": "fast locate(1) database \u2014 pairs with fd/fzf",
+      "status": "installed"
+    },
+    {
+      "name": "nix-tree",
+      "why": "browse a derivation's dependency closure interactively",
+      "status": "installed"
+    },
+    {
+      "name": "nixfmt",
+      "why": "the actual nix formatter binary (the flake's formatter output wraps it as nixfmt-tree)",
+      "status": "installed"
+    },
+    {
+      "name": "nil",
+      "why": "Nix language server, for editor completion on this very flake",
+      "status": "installed"
+    },
+    {
+      "name": "direnv + nix-direnv",
+      "why": "automatic per-project dev shells",
+      "status": "installed"
+    },
+    {
+      "name": "comma",
+      "why": "run any nixpkgs binary ad hoc without installing it (`, cowsay`)",
+      "status": "installed"
+    },
+    {
+      "name": "distrobox",
+      "why": "disposable containerized Linux envs on top of docker/podman, useful for testing installers the plan's tools don't cover",
+      "status": "recommended, not installed"
+    },
+    {
+      "name": "podman",
+      "why": "rootless container runtime as a docker alternative/companion",
+      "status": "recommended, not installed"
+    },
+    {
+      "name": "man-pages / man-db",
+      "why": "actual man page content, not just --help",
+      "status": "installed (man-pages)"
+    },
+    {
+      "name": "git-crypt",
+      "why": "companion to sops/age for repo-level secret files",
+      "status": "installed"
+    }
+  ],
+  "phase_2_deferred": [
+    "ghidra",
+    "dotnet-sdk",
+    "temurin-bin-17",
+    "inkscape",
+    "awscli2",
+    "azure-cli",
+    "google-cloud-sdk"
+  ],
+  "closure": {
+    "added_download_gib": 7.9,
+    "added_unpacked_gib": 27.1,
+    "measured_against": "live post-GC store (nixos-rebuild dry-build), 2026-09-09",
+    "budget_gib": 30
+  }
+}

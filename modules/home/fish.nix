@@ -15,17 +15,11 @@
 
       # Workbench: an imperative `nix profile install` python3 (bare, no
       # packages) sits on ~/.nix-profile/bin, which is earlier in PATH than
-      # the Home Manager-managed numpy/pillow/requests/matplotlib python3
-      # from modules/home/workbench.nix. Alias it explicitly here instead
-      # of reordering PATH or removing the existing profile entry.
-      alias python3 "${pkgs.python3.withPackages (
-        ps: with ps; [
-          numpy
-          pillow
-          requests
-          matplotlib
-        ]
-      )}/bin/python3"
+      # the Home Manager-managed workstation python3 (numpy/pandas/etc, see
+      # modules/home/lib/workstation-python.nix) from
+      # modules/home/dev-toolchain.nix. Alias it explicitly here instead of
+      # reordering PATH or removing the existing profile entry.
+      alias python3 "${pkgs.python3.withPackages (import ./lib/workstation-python.nix)}/bin/python3"
     '';
     shellAliases = {
       # Aurora: override macbook-config with the git-backed input, never raw `path:`.
