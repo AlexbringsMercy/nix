@@ -1,0 +1,57 @@
+local map = vim.keymap.set
+local function desc(text) return { desc = text, silent = true } end
+
+map("n", "<Esc>", "<cmd>noh<cr>", desc("Clear search highlight"))
+map("n", "<leader>q", "<cmd>qa<cr>", desc("Quit all"))
+map("n", "<leader>w", "<cmd>w<cr>", desc("Write buffer"))
+map("n", "<leader>bd", "<cmd>bdelete<cr>", desc("Delete buffer"))
+map("n", "<leader>bn", "<cmd>bnext<cr>", desc("Next buffer"))
+map("n", "<leader>bp", "<cmd>bprevious<cr>", desc("Previous buffer"))
+
+map("n", "<leader>ff", function() Snacks.picker.files() end, desc("Find files"))
+map("n", "<leader>fr", function() Snacks.picker.recent() end, desc("Recent files"))
+map("n", "<leader>fg", function() Snacks.picker.grep() end, desc("Grep project"))
+map("n", "<leader>fb", function() Snacks.picker.buffers() end, desc("Buffers"))
+map("n", "<leader>fh", function() Snacks.picker.help() end, desc("Help"))
+map("n", "<leader>fe", function() Snacks.explorer() end, desc("Explorer"))
+map("n", "<leader>fo", "<cmd>Oil<cr>", desc("Oil filesystem buffer"))
+map("n", "<leader>fR", "<cmd>GrugFar<cr>", desc("Project replace"))
+
+map("n", "<leader>gg", "<cmd>Neogit<cr>", desc("Neogit"))
+map("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", desc("Diffview"))
+map("n", "<leader>gq", "<cmd>DiffviewClose<cr>", desc("Close Diffview"))
+map("n", "<leader>gb", function() require("gitsigns").blame_line({ full = true }) end, desc("Git blame"))
+map("n", "]h", function() require("gitsigns").next_hunk() end, desc("Next Git hunk"))
+map("n", "[h", function() require("gitsigns").prev_hunk() end, desc("Previous Git hunk"))
+
+map("n", "<leader>ca", vim.lsp.buf.code_action, desc("Code action"))
+map("n", "<leader>cr", function() require("inc_rename").rename() end, desc("Rename symbol"))
+map("n", "<leader>cf", function() require("conform").format({ lsp_fallback = true }) end, desc("Format buffer"))
+map("n", "<leader>cd", vim.diagnostic.open_float, desc("Line diagnostics"))
+map("n", "<leader>cD", "<cmd>Trouble diagnostics toggle<cr>", desc("Diagnostics list"))
+map("n", "<leader>cs", function() Snacks.picker.lsp_symbols() end, desc("Document symbols"))
+map("n", "gd", vim.lsp.buf.definition, desc("Go to definition"))
+map("n", "gr", vim.lsp.buf.references, desc("References"))
+map("n", "K", vim.lsp.buf.hover, desc("Hover documentation"))
+
+map("n", "<leader>dd", function() require("dap").toggle_breakpoint() end, desc("Toggle breakpoint"))
+map("n", "<leader>dc", function() require("dap").continue() end, desc("Continue debug"))
+map("n", "<leader>do", function() require("dap").step_over() end, desc("Step over"))
+map("n", "<leader>di", function() require("dap").step_into() end, desc("Step into"))
+map("n", "<leader>dv", "<cmd>DapViewToggle<cr>", desc("Debug view"))
+
+map("n", "<leader>tt", "<cmd>Neotest run<cr>", desc("Run nearest test"))
+map("n", "<leader>tf", "<cmd>Neotest run file<cr>", desc("Run test file"))
+map("n", "<leader>ts", "<cmd>Neotest summary toggle<cr>", desc("Test summary"))
+map("n", "<leader>to", "<cmd>OverseerToggle<cr>", desc("Task list"))
+
+map("n", "<leader>aa", "<cmd>Sidekick cli select<cr>", desc("Select AI CLI"))
+map("n", "<leader>at", "<cmd>Sidekick cli toggle<cr>", desc("Toggle AI CLI"))
+map("n", "<leader>af", "<cmd>Sidekick cli send msg={file}<cr>", desc("Send file to AI"))
+map("n", "<leader>ad", "<cmd>Sidekick cli send msg={diagnostics}<cr>", desc("Send diagnostics to AI"))
+map("x", "<leader>as", "<cmd>Sidekick cli send msg={selection}<cr>", desc("Send selection to AI"))
+
+map("n", "<leader>uz", function() Snacks.zen() end, desc("Zen mode"))
+map("n", "<leader>un", function() Snacks.notifier.show_history() end, desc("Notification history"))
+map("n", "<leader>ut", "<cmd>TodoTrouble<cr>", desc("Todo list"))
+map("n", "<leader>um", "<cmd>Markview toggle<cr>", desc("Toggle Markdown render"))

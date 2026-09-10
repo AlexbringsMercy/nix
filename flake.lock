@@ -81,6 +81,26 @@
         "type": "github"
       }
     },
+    "nix-wrapper-modules": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788981141,
+        "narHash": "sha256-7xWS16u13YGlRNKWaAPzRbEyh4OLOXJe31k7h4AnXNU=",
+        "owner": "nix-community",
+        "repo": "nix-wrapper-modules",
+        "rev": "1db3c116a6aa61823f8d8f3c47c306846428fc54",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-wrapper-modules",
+        "type": "github"
+      }
+    },
     "nixos-hardware": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -129,6 +149,135 @@
         "type": "github"
       }
     },
+    "plugin-blink-cmp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775330305,
+        "narHash": "sha256-C1FpyGw0f35NdHvDUGPXxmKdOgw3SpIteK1gAjVy6Ns=",
+        "owner": "saghen",
+        "repo": "blink.cmp",
+        "rev": "78336bc89ee5365633bcf754d93df01678b5c08f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "saghen",
+        "ref": "v1.10.2",
+        "repo": "blink.cmp",
+        "type": "github"
+      }
+    },
+    "plugin-blink-lib": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788784595,
+        "narHash": "sha256-CyDv8bRHjGKpn/qDMaplDBcqwQl73ZPkhjmvzkizF/I=",
+        "owner": "saghen",
+        "repo": "blink.lib",
+        "rev": "fd9a48ebbe6ec30d5dfcc5b42c243941ccdca1aa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "saghen",
+        "repo": "blink.lib",
+        "type": "github"
+      }
+    },
+    "plugin-blink-pairs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788964716,
+        "narHash": "sha256-giIhcomC7Rn8AXwRck/ABqoGgZabON+refgA8Z4pyfg=",
+        "owner": "saghen",
+        "repo": "blink.pairs",
+        "rev": "95485092c16484d5ef5ca8b1919f0d48177a5776",
+        "type": "github"
+      },
+      "original": {
+        "owner": "saghen",
+        "repo": "blink.pairs",
+        "type": "github"
+      }
+    },
+    "plugin-gitsigns": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788962642,
+        "narHash": "sha256-WSbbfI2q4g224xJ1mDeOtnb+Oo7wR9T8VzUInPdOqI4=",
+        "owner": "lewis6991",
+        "repo": "gitsigns.nvim",
+        "rev": "f2421c550618d257048afa650413d9e542ddbe67",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewis6991",
+        "repo": "gitsigns.nvim",
+        "type": "github"
+      }
+    },
+    "plugin-grug-far": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786659852,
+        "narHash": "sha256-gkWjZM7xn2OqM6KEoqSaJ+POqcrWO93rO6aOgvsrJhc=",
+        "owner": "MagicDuck",
+        "repo": "grug-far.nvim",
+        "rev": "11595bf747edc270bce2069d1020502ad4ae56cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MagicDuck",
+        "repo": "grug-far.nvim",
+        "type": "github"
+      }
+    },
+    "plugin-lz-n": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788667870,
+        "narHash": "sha256-wC25J7KY7P8Ij9I16zRLxodIJYhEUQzhpO9j4aLY3+s=",
+        "owner": "lumen-oss",
+        "repo": "lz.n",
+        "rev": "51f6451e2d9d0367cfb5e5cd136e1b62f7cace23",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lumen-oss",
+        "repo": "lz.n",
+        "type": "github"
+      }
+    },
+    "plugin-neotest": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786894942,
+        "narHash": "sha256-BiU0OEN8kTbPbLr0f1ueHXFWwQN8djXlqqInFlV01rM=",
+        "owner": "nvim-neotest",
+        "repo": "neotest",
+        "rev": "27bf921498043f7ecd821d6db68d05de244bbd02",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nvim-neotest",
+        "repo": "neotest",
+        "type": "github"
+      }
+    },
+    "plugin-oil": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780420891,
+        "narHash": "sha256-Q8t2GYOEBWcR19Ht2ZCx5FEusscY76LhXVae4ZW/3j0=",
+        "owner": "stevearc",
+        "repo": "oil.nvim",
+        "rev": "b73018b75affd13fa38e2fc94ef753b465f770d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stevearc",
+        "repo": "oil.nvim",
+        "type": "github"
+      }
+    },
     "quickshell": {
       "inputs": {
         "nixpkgs": [
@@ -154,8 +303,17 @@
       "inputs": {
         "aurora-shell": "aurora-shell",
         "home-manager": "home-manager",
+        "nix-wrapper-modules": "nix-wrapper-modules",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
+        "plugin-blink-cmp": "plugin-blink-cmp",
+        "plugin-blink-lib": "plugin-blink-lib",
+        "plugin-blink-pairs": "plugin-blink-pairs",
+        "plugin-gitsigns": "plugin-gitsigns",
+        "plugin-grug-far": "plugin-grug-far",
+        "plugin-lz-n": "plugin-lz-n",
+        "plugin-neotest": "plugin-neotest",
+        "plugin-oil": "plugin-oil",
         "t2fanrd": "t2fanrd"
       }
     },

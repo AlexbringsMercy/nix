@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -13,4 +13,8 @@
 
   networking.hostName = "macbook";
   system.stateVersion = "26.11";
+
+  # Keep the integrated Home Manager graph able to build the editor wrapper
+  # from the same pinned flake inputs as standalone Home Manager.
+  home-manager.extraSpecialArgs = { inherit inputs; };
 }

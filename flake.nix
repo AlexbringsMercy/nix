@@ -20,6 +20,23 @@
       url = "path:./modules/home/aurora-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Normal Lua editor configuration, packaged through a portable wrapper.
+    nix-wrapper-modules = {
+      url = "github:nix-community/nix-wrapper-modules";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Upstream pins for plugins unavailable in this nixpkgs snapshot. Neovim
+    # never downloads plugin state at runtime.
+    plugin-blink-cmp = { url = "github:saghen/blink.cmp/v1.10.2"; flake = false; };
+    plugin-blink-lib = { url = "github:saghen/blink.lib"; flake = false; };
+    plugin-blink-pairs = { url = "github:saghen/blink.pairs"; flake = false; };
+    plugin-lz-n = { url = "github:lumen-oss/lz.n"; flake = false; };
+    plugin-gitsigns = { url = "github:lewis6991/gitsigns.nvim"; flake = false; };
+    plugin-oil = { url = "github:stevearc/oil.nvim"; flake = false; };
+    plugin-grug-far = { url = "github:MagicDuck/grug-far.nvim"; flake = false; };
+    plugin-neotest = { url = "github:nvim-neotest/neotest"; flake = false; };
   };
 
   outputs =
@@ -81,11 +98,19 @@
         # `nix flake check` fail before the integrated NixOS graph is reached.
         pkgs = homePkgs;
         modules = [ inputs.aurora-shell.homeManagerModules.default ./home/alex ]; # Aurora: keep standalone Home Manager evaluation aware of the shell options.
+        extraSpecialArgs = { inherit inputs; };
       };
 
       packages.${system} = {
         home-activation = self.homeConfigurations.alex.activationPackage;
         aurora-shell = inputs.aurora-shell.packages.${system}.caelestia-shell;
+        nvim = inputs.nix-wrapper-modules.lib.evalPackage [
+          {
+            pkgs = homePkgs;
+            _module.args.inputs = inputs;
+          }
+          ./modules/home/neovim-wrapper.nix
+        ];
       };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;

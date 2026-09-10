@@ -13,6 +13,7 @@
     # Aurora: wallpaper rendering retires now; the surviving theming backends remain imported above.
     ../../modules/home/desktop-apps.nix
     ../../modules/home/fish.nix
+    ../../modules/home/neovim.nix
     ../../modules/home/lock
   ];
 

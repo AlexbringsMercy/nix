@@ -107,6 +107,7 @@
     noto-fonts-color-emoji
     fira-code
     nerd-fonts.fira-code
+    nerd-fonts.iosevka-term
   ];
 
   environment.systemPackages = with pkgs; [
