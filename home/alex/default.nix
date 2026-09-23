@@ -29,6 +29,12 @@
     sessionPath = [
       "$HOME/.local/bin"
       "$HOME/.npm-global/bin"
+      # Aurora: the worker-control lane. `worker-hub`, `muse-run` and every workerctl
+      # entrypoint live here. Before this was declared, only three hand-made symlinks in
+      # ~/.local/bin (muse-hub, muse-run, muse-toks) made any of it reachable, so a newly
+      # added command — `worker-hub` — was invisible in Alex's shell while agents that
+      # called it by absolute path reported it working. Declare the lane, not the symlinks.
+      "$HOME/workbench/agents/bin"
     ];
   };
 
