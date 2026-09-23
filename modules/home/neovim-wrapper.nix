@@ -3,13 +3,33 @@
   config,
   wlib,
   pkgs,
+  lib,
   ...
 }:
 let
+  blinkPairsNative = pkgs.rustPlatform.buildRustPackage {
+    pname = "blink-pairs-native";
+    version = "0.6.0";
+    src = inputs.plugin-blink-pairs;
+    cargoHash = "sha256-XLlluprxhVueHhkIufJa7fJXvFxpJJzh89+yL9PZ4GI=";
+    doCheck = false;
+    installPhase = ''
+      mkdir -p "$out/lib"
+      library=$(find target -type f -name libblink_pairs_parser.so -print -quit)
+      test -n "$library"
+      cp "$library" "$out/lib/"
+    '';
+  };
+
   upstream = {
     blink-cmp = config.nvim-lib.mkPlugin "blink.cmp" inputs.plugin-blink-cmp;
     blink-lib = config.nvim-lib.mkPlugin "blink.lib" inputs.plugin-blink-lib;
-    blink-pairs = config.nvim-lib.mkPlugin "blink.pairs" inputs.plugin-blink-pairs;
+    blink-pairs = (config.nvim-lib.mkPlugin "blink.pairs" inputs.plugin-blink-pairs).overrideAttrs (old: {
+      postInstall = (old.postInstall or "") + ''
+        mkdir -p "$out/lib"
+        cp ${blinkPairsNative}/lib/libblink_pairs_parser.so "$out/lib/"
+      '';
+    });
     lz-n = config.nvim-lib.mkPlugin "lz.n" inputs.plugin-lz-n;
     gitsigns = config.nvim-lib.mkPlugin "gitsigns.nvim" inputs.plugin-gitsigns;
     oil = config.nvim-lib.mkPlugin "oil.nvim" inputs.plugin-oil;
